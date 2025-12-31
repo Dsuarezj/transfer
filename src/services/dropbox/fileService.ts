@@ -57,10 +57,8 @@ class FileService {
     }
   }
 
-  async createSharedLink(path: string): Promise<string> {
-    const dbx = await this.getClient();
-    const response = await dbx.sharingCreateSharedLinkWithSettings({ path: this.buildPath(path) });
-    return response.result.url.replace('?dl=0', '?raw=1');
+  getFullPath(path: string): string {
+    return this.buildPath(path);
   }
 }
 

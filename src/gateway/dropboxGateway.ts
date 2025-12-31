@@ -115,14 +115,26 @@ class DropboxGateway {
     };
   }
 
-  async ensureAppFolder(accessToken: string): Promise<void> {
+  async ensureAppFolders(accessToken: string): Promise<void> {
+    const folders = [
+      DROPBOX_APP_FOLDER_PATH,
+      `${DROPBOX_APP_FOLDER_PATH}/capturas`,
+      `${DROPBOX_APP_FOLDER_PATH}/reportes`,
+    ];
+
+    for (const folder of folders) {
+      await this.createFolderIfNotExists(accessToken, folder);
+    }
+  }
+
+  private async createFolderIfNotExists(accessToken: string, path: string): Promise<void> {
     const metaResponse = await fetch('https://api.dropboxapi.com/2/files/get_metadata', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ path: DROPBOX_APP_FOLDER_PATH }),
+      body: JSON.stringify({ path }),
     });
 
     if (metaResponse.ok) return;
@@ -134,7 +146,7 @@ class DropboxGateway {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ path: DROPBOX_APP_FOLDER_PATH, autorename: false }),
+        body: JSON.stringify({ path, autorename: false }),
       });
     }
   }

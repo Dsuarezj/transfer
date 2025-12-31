@@ -3,14 +3,16 @@ import { fileService } from './dropbox/fileService';
 import { Invoice } from '../types/dropbox';
 
 class InvoiceService {
-  private readonly csvPath = '/facturas.csv';
+  private readonly csvPath = '/reportes/resumen.csv';
 
   async uploadPhoto(photoBlob: Blob, invoiceNumber: string): Promise<string> {
-    const fileName = `transferencia_${invoiceNumber}_${Date.now()}.jpg`;
-    const path = `/${fileName}`;
+    const now = new Date();
+    const timestamp = format(now, 'yyyyMMdd_HHmmss');
+    const fileName = `${invoiceNumber}_${timestamp}.jpg`;
+    const path = `/capturas/${fileName}`;
 
     await fileService.save(path, photoBlob);
-    return await fileService.createSharedLink(path);
+    return fileService.getFullPath(path);
   }
 
   async add(invoiceNumber: string, imageUrl: string, transferNumber?: string): Promise<void> {
@@ -24,7 +26,7 @@ class InvoiceService {
       existingContent = await fileService.get(this.csvPath);
     } catch (error: any) {
       if (error.message?.includes('not found')) {
-        existingContent = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Link_Imagen\n';
+        existingContent = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n';
       } else {
         throw error;
       }

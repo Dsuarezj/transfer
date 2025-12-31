@@ -69,10 +69,10 @@ export default function UploadTransferPage() {
   };
 
   const handleSubmit = async () => {
-    if (!invoiceNumber.trim() || !photoBlob) {
+    if (!photoBlob) {
       toast({
         title: 'Error',
-        description: 'Por favor completa el número de factura',
+        description: 'No hay foto capturada',
         status: 'error',
         duration: 3000,
       });
@@ -80,10 +80,11 @@ export default function UploadTransferPage() {
     }
 
     setIsUploading(true);
+    const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
-      const imageUrl = await invoiceService.uploadPhoto(photoBlob, invoiceNumber);
-      await invoiceService.add(invoiceNumber, imageUrl, transferNumber || undefined);
+      const imageUrl = await invoiceService.uploadPhoto(photoBlob, finalInvoiceNumber);
+      await invoiceService.add(finalInvoiceNumber, imageUrl, transferNumber || undefined);
 
       setShowSuccess(true);
     } catch (error) {
@@ -165,12 +166,12 @@ export default function UploadTransferPage() {
 
             <Box bg="white" p={6} borderRadius="20px" boxShadow="card">
               <VStack spacing={4}>
-                <FormControl isRequired>
+                <FormControl>
                   <FormLabel color="neutral.700">Número de Factura</FormLabel>
                   <Input
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
-                    placeholder="Ej: F001-123456"
+                    placeholder="Opcional - Se generará automáticamente"
                     size="lg"
                     borderRadius="12px"
                   />

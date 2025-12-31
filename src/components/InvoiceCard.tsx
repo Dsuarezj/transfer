@@ -1,4 +1,4 @@
-import { Box, VStack, HStack, Text, Badge, Link } from '@chakra-ui/react';
+import { Box, VStack, HStack, Text, Badge } from '@chakra-ui/react';
 import { Invoice } from '../types/dropbox';
 
 interface InvoiceCardProps {
@@ -64,16 +64,9 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
           )}
         </VStack>
 
-        <Link
-          href={invoice.imageUrl}
-          isExternal
-          color="primary.500"
-          fontSize="sm"
-          fontWeight="medium"
-          _hover={{ textDecoration: 'underline' }}
-        >
-          Ver comprobante →
-        </Link>
+        <Text fontSize="xs" color="neutral.400" isTruncated>
+          📁 {invoice.imageUrl}
+        </Text>
       </VStack>
     </Box>
   );
