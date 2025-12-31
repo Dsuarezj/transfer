@@ -61,6 +61,9 @@ class AuthService {
     dropboxGateway.saveToken(tokenData);
     await dropboxGateway.ensureAppFolders(tokenData.access_token);
     localStorage.removeItem('dropbox_code_verifier');
+
+    window.dispatchEvent(new Event('dropbox-auth-change'));
+
     return true;
   }
 
@@ -70,6 +73,7 @@ class AuthService {
 
   logout(): void {
     dropboxGateway.clearToken();
+    window.dispatchEvent(new Event('dropbox-auth-change'));
     window.location.href = '/';
   }
 }
