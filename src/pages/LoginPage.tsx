@@ -5,10 +5,18 @@ export default function LoginPage() {
   const { login } = useDropboxAuth();
 
   return (
-    <Box minH="100vh" bg="neutral.50" display="flex" alignItems="center">
-      <Container maxW="md">
-        <VStack spacing={8} align="stretch">
-          <VStack spacing={3}>
+    <Box
+      h="100%"
+      w="100%"
+      bg="neutral.50"
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      overflow="hidden"
+    >
+      <Container maxW="md" px={6}>
+        <VStack spacing={6} align="stretch">
+          <VStack spacing={2}>
             <Heading
               as="h1"
               size="2xl"

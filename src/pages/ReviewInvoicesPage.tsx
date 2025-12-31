@@ -65,8 +65,8 @@ export default function ReviewInvoicesPage() {
   };
 
   return (
-    <Box minH="100vh" bg="neutral.50" pb={8}>
-      <Box bg="white" boxShadow="sm" py={4} mb={6}>
+    <Box h="100%" w="100%" bg="neutral.50" display="flex" flexDirection="column" overflow="hidden">
+      <Box bg="white" boxShadow="sm" py={4} flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="primary.600">
             Facturas
@@ -81,8 +81,9 @@ export default function ReviewInvoicesPage() {
         </Container>
       </Box>
 
-      <Container maxW="md">
-        <VStack spacing={6} align="stretch">
+      <Box flex="1" overflow="auto">
+        <Container maxW="md" py={6}>
+          <VStack spacing={6} align="stretch">
           <InputGroup>
             <InputLeftElement pointerEvents="none" color="neutral.400">
               🔍
@@ -137,8 +138,9 @@ export default function ReviewInvoicesPage() {
               </SimpleGrid>
             </>
           )}
-        </VStack>
-      </Container>
+          </VStack>
+        </Container>
+      </Box>
     </Box>
   );
 }

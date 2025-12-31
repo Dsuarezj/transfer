@@ -12,11 +12,13 @@ function App() {
   if (isLoading) {
     return (
       <Box
-        minH="100vh"
+        h="100%"
+        w="100%"
         display="flex"
         alignItems="center"
         justifyContent="center"
         bg="neutral.50"
+        overflow="hidden"
       >
         Cargando...
       </Box>

@@ -8,8 +8,15 @@ export default function HomePage() {
   const { logout } = useDropboxAuth();
 
   return (
-    <Box minH="100vh" bg="neutral.50" pb={8}>
-      <Box bg="white" boxShadow="sm" py={4} mb={6}>
+    <Box
+      h="100%"
+      w="100%"
+      bg="neutral.50"
+      display="flex"
+      flexDirection="column"
+      overflow="hidden"
+    >
+      <Box bg="white" boxShadow="sm" py={4} flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="primary.600">
             Transferencias
@@ -24,8 +31,8 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Container maxW="md">
-        <VStack spacing={6}>
+      <Container maxW="md" flex="1" display="flex" alignItems="center" py={6}>
+        <VStack spacing={6} w="full">
           <Heading size="lg" color="neutral.700" textAlign="center">
             ¿Qué deseas hacer?
           </Heading>

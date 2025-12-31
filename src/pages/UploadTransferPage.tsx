@@ -119,8 +119,8 @@ export default function UploadTransferPage() {
   };
 
   return (
-    <Box minH="100vh" bg="neutral.900">
-      <Box bg="primary.600" py={4} boxShadow="md">
+    <Box h="100%" w="100%" bg="neutral.900" display="flex" flexDirection="column" overflow="hidden">
+      <Box bg="primary.600" py={4} boxShadow="md" flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">
             Nueva Transferencia
@@ -138,17 +138,18 @@ export default function UploadTransferPage() {
         </Container>
       </Box>
 
-      {step === 'camera' && (
-        <CameraView
-          camera={camera}
-          onCapture={handleCapture}
-          onCancel={handleCancel}
-        />
-      )}
+      <Box flex="1" overflow="auto">
+        {step === 'camera' && (
+          <CameraView
+            camera={camera}
+            onCapture={handleCapture}
+            onCancel={handleCancel}
+          />
+        )}
 
-      {step === 'form' && (
-        <Container maxW="md" py={6}>
-          <VStack spacing={6} align="stretch">
+        {step === 'form' && (
+          <Container maxW="md" py={6}>
+            <VStack spacing={6} align="stretch">
             {camera.capturedImage && (
               <Box
                 borderRadius="16px"
@@ -218,7 +219,8 @@ export default function UploadTransferPage() {
             </Box>
           </VStack>
         </Container>
-      )}
+        )}
+      </Box>
 
       <Modal isOpen={showSuccess} onClose={handleSuccessClose} isCentered>
         <ModalOverlay />
