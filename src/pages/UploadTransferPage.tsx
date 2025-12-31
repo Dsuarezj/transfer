@@ -120,8 +120,8 @@ export default function UploadTransferPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bg="neutral.900" display="flex" flexDirection="column" overflow="hidden">
-      <Box bg="primary.600" py={4} boxShadow="md" flexShrink={0}>
+    <Box h="100%" w="100%" bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" display="flex" flexDirection="column" overflow="hidden">
+      <Box bg="purple.700" py={4} boxShadow="md" flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">
             Nueva Transferencia
@@ -164,24 +164,31 @@ export default function UploadTransferPage() {
               </Box>
             )}
 
-            <Box bg="white" p={6} borderRadius="20px" boxShadow="card">
+            <Box bg="white" p={6} borderRadius="24px" boxShadow="0 20px 60px rgba(0,0,0,0.3)">
               <VStack spacing={4}>
                 <FormControl>
-                  <FormLabel color="neutral.700">Número de Factura</FormLabel>
+                  <FormLabel color="neutral.700" fontWeight="semibold">Número de Factura</FormLabel>
                   <Input
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
                     placeholder="Opcional - Se generará automáticamente"
                     size="lg"
                     borderRadius="12px"
+                    bg="purple.50"
+                    border="none"
+                    _focus={{
+                      bg: 'white',
+                      borderColor: 'purple.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)',
+                    }}
                   />
                 </FormControl>
 
                 <FormControl>
-                  <FormLabel color="neutral.700">
+                  <FormLabel color="neutral.700" fontWeight="semibold">
                     Número de Transferencia
                     {isProcessingOCR && (
-                      <Text as="span" fontSize="sm" color="primary.500" ml={2}>
+                      <Text as="span" fontSize="sm" color="purple.500" ml={2}>
                         (Detectando...)
                       </Text>
                     )}
@@ -192,6 +199,13 @@ export default function UploadTransferPage() {
                     placeholder="Opcional - Se detectará automáticamente"
                     size="lg"
                     borderRadius="12px"
+                    bg="purple.50"
+                    border="none"
+                    _focus={{
+                      bg: 'white',
+                      borderColor: 'purple.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)',
+                    }}
                   />
                 </FormControl>
 
@@ -202,6 +216,11 @@ export default function UploadTransferPage() {
                     onClick={handleSubmit}
                     isLoading={isUploading}
                     loadingText="Guardando..."
+                    bg="purple.600"
+                    color="white"
+                    _hover={{ bg: 'purple.700' }}
+                    _active={{ bg: 'purple.800' }}
+                    boxShadow="0 4px 14px rgba(103, 58, 183, 0.4)"
                   >
                     Guardar Transferencia
                   </Button>
@@ -211,6 +230,9 @@ export default function UploadTransferPage() {
                     size="lg"
                     variant="outline"
                     onClick={handleRetake}
+                    borderColor="purple.600"
+                    color="purple.600"
+                    _hover={{ bg: 'purple.50' }}
                   >
                     Tomar otra foto
                   </Button>
@@ -223,9 +245,12 @@ export default function UploadTransferPage() {
       </Box>
 
       <Modal isOpen={showSuccess} onClose={handleSuccessClose} isCentered>
-        <ModalOverlay />
-        <ModalContent borderRadius="20px" mx={4}>
-          <ModalHeader color="success.600" fontSize="2xl" textAlign="center" pt={8}>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="24px" mx={4} overflow="hidden">
+          <Box bg="purple.50" textAlign="center" pt={8}>
+            <Text fontSize="6xl">✅</Text>
+          </Box>
+          <ModalHeader color="purple.700" fontSize="2xl" textAlign="center" pt={4}>
             ¡Éxito!
           </ModalHeader>
           <ModalBody textAlign="center" pb={6}>
@@ -234,7 +259,15 @@ export default function UploadTransferPage() {
             </Text>
           </ModalBody>
           <ModalFooter justifyContent="center" pb={8}>
-            <Button size="lg" onClick={handleSuccessClose} px={12}>
+            <Button
+              size="lg"
+              onClick={handleSuccessClose}
+              px={12}
+              bg="purple.600"
+              color="white"
+              _hover={{ bg: 'purple.700' }}
+              _active={{ bg: 'purple.800' }}
+            >
               Continuar
             </Button>
           </ModalFooter>

@@ -10,54 +10,67 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
     <Box
       bg="white"
       p={5}
-      borderRadius="16px"
-      boxShadow="card"
+      borderRadius="20px"
+      boxShadow="0 10px 40px rgba(0,0,0,0.15)"
       _hover={{
-        boxShadow: 'cardHover',
+        boxShadow: '0 15px 50px rgba(0,0,0,0.25)',
+        transform: 'translateY(-2px)',
       }}
       transition="all 0.2s"
+      position="relative"
+      overflow="hidden"
     >
-      <VStack align="stretch" spacing={3}>
-        <HStack justify="space-between">
-          <Text fontWeight="bold" fontSize="lg" color="neutral.800">
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        w="4px"
+        h="100%"
+        bg="purple.500"
+      />
+      <VStack align="stretch" spacing={3} pl={2}>
+        <HStack justify="space-between" flexWrap="wrap" gap={2}>
+          <Text fontWeight="bold" fontSize="lg" color="purple.700">
             {invoice.invoiceNumber}
           </Text>
           <Badge
-            colorScheme="green"
+            bg="purple.100"
+            color="purple.700"
             px={3}
             py={1}
             borderRadius="full"
             fontSize="xs"
+            fontWeight="semibold"
           >
-            Registrada
+            ✓ Registrada
           </Badge>
         </HStack>
 
-        <VStack align="stretch" spacing={1}>
+        <VStack align="stretch" spacing={1} bg="purple.50" p={3} borderRadius="12px">
           <HStack>
-            <Text fontSize="sm" color="neutral.500" minW="80px">
-              Fecha:
+            <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
+              📅 Fecha:
             </Text>
-            <Text fontSize="sm" color="neutral.700" fontWeight="medium">
+            <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
               {invoice.date}
             </Text>
           </HStack>
 
           <HStack>
-            <Text fontSize="sm" color="neutral.500" minW="80px">
-              Hora:
+            <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
+              🕐 Hora:
             </Text>
-            <Text fontSize="sm" color="neutral.700" fontWeight="medium">
+            <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
               {invoice.time}
             </Text>
           </HStack>
 
           {invoice.transferNumber && (
             <HStack>
-              <Text fontSize="sm" color="neutral.500" minW="80px">
-                N° Transf:
+              <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
+                🔢 N° Transf:
               </Text>
-              <Text fontSize="sm" color="neutral.700" fontWeight="medium">
+              <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
                 {invoice.transferNumber}
               </Text>
             </HStack>

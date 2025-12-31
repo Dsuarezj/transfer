@@ -66,15 +66,28 @@ export default function ReviewInvoicesPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bg="neutral.50" display="flex" flexDirection="column" overflow="hidden">
-      <Box bg="white" boxShadow="sm" py={4} flexShrink={0}>
+    <Box h="100%" w="100%" bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" display="flex" flexDirection="column" overflow="hidden" position="relative">
+      <Box
+        position="absolute"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        bg="radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)"
+        pointerEvents="none"
+      />
+
+      <Box bg="purple.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="primary.600">
+          <Heading size="md" color="white">
             Facturas
           </Heading>
           <Button
             size="sm"
             variant="outline"
+            color="white"
+            borderColor="white"
+            _hover={{ bg: 'whiteAlpha.200' }}
             onClick={() => navigate('/')}
           >
             Volver
@@ -82,7 +95,7 @@ export default function ReviewInvoicesPage() {
         </Container>
       </Box>
 
-      <Box flex="1" overflow="auto">
+      <Box flex="1" overflow="auto" position="relative" zIndex={1}>
         <Container maxW="md" py={6}>
           <VStack spacing={6} align="stretch">
           <InputGroup>
@@ -95,23 +108,25 @@ export default function ReviewInvoicesPage() {
               placeholder="Buscar por factura, transferencia o fecha..."
               size="lg"
               bg="white"
-              borderRadius="12px"
+              borderRadius="16px"
+              border="none"
+              boxShadow="0 4px 20px rgba(0,0,0,0.1)"
               _focus={{
-                borderColor: 'primary.500',
-                boxShadow: '0 0 0 1px var(--chakra-colors-primary-500)',
+                borderColor: 'purple.500',
+                boxShadow: '0 0 0 2px var(--chakra-colors-purple-500)',
               }}
             />
           </InputGroup>
 
           {isLoading && (
             <Center py={12}>
-              <Spinner size="xl" color="primary.500" thickness="4px" />
+              <Spinner size="xl" color="white" thickness="4px" />
             </Center>
           )}
 
           {error && (
-            <Box bg="danger.50" p={4} borderRadius="12px">
-              <Text color="danger.700">{error}</Text>
+            <Box bg="red.500" color="white" p={4} borderRadius="16px" boxShadow="0 4px 20px rgba(0,0,0,0.2)">
+              <Text>{error}</Text>
             </Box>
           )}
 
@@ -128,9 +143,11 @@ export default function ReviewInvoicesPage() {
 
           {!isLoading && filteredInvoices.length > 0 && (
             <>
-              <Text color="neutral.600" fontSize="sm">
-                {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'}
-              </Text>
+              <Box bg="whiteAlpha.200" px={4} py={2} borderRadius="full" alignSelf="flex-start">
+                <Text color="white" fontSize="sm" fontWeight="semibold">
+                  {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'}
+                </Text>
+              </Box>
 
               <SimpleGrid columns={1} spacing={4}>
                 {filteredInvoices.map((invoice, index) => (

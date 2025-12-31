@@ -40,8 +40,8 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
 
       {camera.error && (
         <Container maxW="md" pt={8}>
-          <Box bg="danger.500" color="white" p={4} borderRadius="12px">
-            <Text>{camera.error}</Text>
+          <Box bg="red.500" color="white" p={4} borderRadius="16px" boxShadow="0 4px 20px rgba(0, 0, 0, 0.3)">
+            <Text fontWeight="semibold">{camera.error}</Text>
           </Box>
         </Container>
       )}
@@ -55,23 +55,28 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
       >
         <Container maxW="md">
           <VStack spacing={4}>
-            <Text color="white" fontSize="sm" textAlign="center" px={4}>
-              Centra el comprobante de transferencia en la cámara
-            </Text>
+            <Box bg="blackAlpha.600" backdropFilter="blur(8px)" px={4} py={2} borderRadius="full">
+              <Text color="white" fontSize="sm" textAlign="center" fontWeight="medium">
+                📸 Centra el comprobante de transferencia
+              </Text>
+            </Box>
 
             {camera.isActive && (
               <Button
                 size="lg"
                 w="full"
                 maxW="300px"
-                bg="white"
-                color="primary.600"
-                _hover={{ bg: 'gray.100' }}
-                _active={{ bg: 'gray.200' }}
+                bg="purple.600"
+                color="white"
+                _hover={{ bg: 'purple.700' }}
+                _active={{ bg: 'purple.800' }}
                 onClick={onCapture}
-                boxShadow="0 4px 20px rgba(0, 0, 0, 0.3)"
+                boxShadow="0 8px 30px rgba(103, 58, 183, 0.5)"
+                h="56px"
+                fontSize="lg"
+                fontWeight="semibold"
               >
-                Capturar Foto
+                📷 Capturar Foto
               </Button>
             )}
           </VStack>
