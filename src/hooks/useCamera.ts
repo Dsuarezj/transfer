@@ -10,7 +10,12 @@ export function useCamera() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 3840, min: 1920 },
+          height: { ideal: 2160, min: 1080 },
+          aspectRatio: { ideal: 16/9 }
+        },
         audio: false,
       });
 
@@ -58,7 +63,7 @@ export function useCamera() {
         } else {
           resolve(null);
         }
-      }, 'image/jpeg', 0.9);
+      }, 'image/jpeg', 0.95);
     }) as any;
   };
 
