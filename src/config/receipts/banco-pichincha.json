@@ -1,0 +1,23 @@
+{
+  "id": "banco-pichincha",
+  "name": "Banco Pichincha",
+  "keywords": ["pichincha", "banco pichincha"],
+  "patterns": [
+    {
+      "id": "comprobante",
+      "priority": 1,
+      "contextKeywords": ["comprobante", "no.", "numero"],
+      "numberPattern": "\\d{5,8}",
+      "proximity": 200,
+      "position": "after",
+      "separators": [":", "-", "."],
+      "examples": ["17674", "123456"]
+    }
+  ],
+  "preprocessing": {
+    "contrast": 1.4,
+    "brightness": 1.2,
+    "sharpen": true,
+    "threshold": false
+  }
+}

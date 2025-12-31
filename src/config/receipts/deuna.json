@@ -1,0 +1,23 @@
+{
+  "id": "deuna",
+  "name": "Deuna",
+  "keywords": ["deuna", "dlocal"],
+  "patterns": [
+    {
+      "id": "transaction",
+      "priority": 1,
+      "contextKeywords": ["transaccion", "transacción", "nro", "numero"],
+      "numberPattern": "\\d{2}-\\d{8}",
+      "proximity": 200,
+      "position": "after",
+      "separators": [":", "-"],
+      "examples": ["01-00000001", "02-12345678"]
+    }
+  ],
+  "preprocessing": {
+    "contrast": 1.3,
+    "brightness": 1.1,
+    "sharpen": true,
+    "threshold": false
+  }
+}
