@@ -47,8 +47,9 @@ export async function extractTransferNumber(imageBlob: Blob): Promise<string | n
 
     const text = result.data.text;
     const fallbackPatterns = [
-      /comprobante[:\s]+([A-Z0-9]{7,10})/i,
-      /nro[.\s:]+comprobante[:\s]+([A-Z0-9]{7,10})/i,
+      /(?:comprobante|voucher)[:\s]+([A-Z0-9]{7,10})/i,
+      /nro[.\s:]+(?:comprobante|voucher)[:\s]+([A-Z0-9]{7,10})/i,
+      /voucher\s+no[:\s.]+([A-Z0-9]{7,10})/i,
       /([A-Z]{2,4}\d{2}[A-Z0-9]{4,6})/,
       /(\d{7,8})/
     ];

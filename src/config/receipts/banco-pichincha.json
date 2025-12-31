@@ -6,12 +6,12 @@
     {
       "id": "comprobante-numerico",
       "priority": 1,
-      "contextKeywords": ["comprobante", "transferencia"],
+      "contextKeywords": ["comprobante", "transferencia", "voucher"],
       "numberPattern": "\\d{7,8}",
       "proximity": 300,
       "position": "any",
       "separators": [":", "-", ".", " "],
-      "examples": ["61997046", "17674"]
+      "examples": ["61997046", "61881151", "17674"]
     }
   ],
   "preprocessing": {

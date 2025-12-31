@@ -6,12 +6,12 @@
     {
       "id": "comprobante-alfanumerico",
       "priority": 1,
-      "contextKeywords": ["nro", "numero", "comprobante"],
+      "contextKeywords": ["nro", "numero", "comprobante", "voucher"],
       "numberPattern": "[A-Z0-9]{9,10}",
       "proximity": 300,
       "position": "any",
       "separators": [":", "-", ".", " "],
-      "examples": ["2KL01WYDP", "FHK01WYFP", "0FUD1WYTW", "BG201WYV2"]
+      "examples": ["2KL01WYDP", "FHK01WYFP", "0FUD1WYTW", "BG201WYV2", "F4K01WZ34"]
     }
   ],
   "preprocessing": {
