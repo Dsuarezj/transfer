@@ -4,6 +4,12 @@ import { templateService } from '../services/templateService';
 import { enhanceImage, cropToRegion } from './imagePreprocessing';
 import { BankTemplate, OCRResult } from '../types/ocr';
 
+const ENABLE_OCR_LOGS = true;
+
+function log(...args: unknown[]) {
+  if (ENABLE_OCR_LOGS) console.log('[OCR]', ...args);
+}
+
 export class OCREngine {
   constructor() {
   }
@@ -12,24 +18,30 @@ export class OCREngine {
     const startTime = Date.now();
 
     try {
+      log('Iniciando OCR: preprocesamiento');
       // 1) Pre-procesamiento base
       const enhanced = await enhanceImage(imageBlob);
 
+      log('OCR rápido para detectar banco');
       // 2) OCR rápido para identificar banco
       const quickText = await this.quickOCR(enhanced);
       const bankId = templateService.detectBank(quickText);
       const template = templateService.getTemplate(bankId || 'generic');
 
+      log('Detección de región con modelo (custom o COCO fallback)');
       // 3) Detección de región con TensorFlow (heurística de posición)
       const region = await regionDetectorSingleton.detectNumberRegion(enhanced);
 
+      log('Recorte y ajustes específicos del banco');
       // 4) Recorte y ajustes específicos del banco
       const cropped = region ? await cropToRegion(enhanced, region) : enhanced;
       const processed = await this.applyBankPreprocessing(cropped, template);
 
+      log('OCR detallado multi-pasada');
       // 5) OCR detallado con múltiples pasadas
       const fullText = await this.detailedOCR(processed);
 
+      log('Pattern matching');
       // 6) Pattern matching ordenado por prioridad
       const number = this.matchPatterns(fullText, bankId || 'generic');
 
@@ -38,6 +50,8 @@ export class OCREngine {
 
       // 8) Actualizar estadísticas
       templateService.updateStats(bankId || 'generic', number !== null);
+
+      log('Resultado', { number, confidence, bankId, region });
 
       return {
         number,
@@ -48,7 +62,7 @@ export class OCREngine {
         processingTime: Date.now() - startTime,
       };
     } catch (error) {
-      console.error('OCR Error:', error);
+      console.error('[OCR] Error:', error);
       return {
         number: null,
         confidence: 0,

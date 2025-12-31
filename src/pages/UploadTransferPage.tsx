@@ -53,6 +53,7 @@ export default function UploadTransferPage() {
         setOcrResult(result);
 
         if (result.number) {
+          console.log('[Upload] OCR detectó número', result.number, 'confianza', result.confidence);
           setTransferNumber(result.number);
 
           const isDuplicate = await invoiceService.checkDuplicate(result.number);
@@ -72,9 +73,11 @@ export default function UploadTransferPage() {
               duration: 3000,
             });
           }
+        } else {
+          console.log('[Upload] OCR no encontró número. Confianza', result.confidence, 'Banco detectado', result.bankDetected);
         }
       } catch (error) {
-        console.error('OCR error:', error);
+        console.error('[Upload] OCR error:', error);
       } finally {
         setIsProcessingOCR(false);
       }
