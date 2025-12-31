@@ -4,24 +4,120 @@
     {
       "id": "banco_pichincha",
       "name": "Banco Pichincha",
-      "keywords": ["PICHINCHA", "Banco Pichincha"],
+      "keywords": ["PICHINCHA", "Banco Pichincha", "BPICHINCHA"],
       "patterns": [
         {
-          "regex": "Comprobante[:\\s]+(\\d{5,})",
+          "regex": "(?:Nro\\.?|N[úu]mero|#)\\s*(?:de\\s+)?comprobante[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 15,
+          "description": "Nro. de comprobante: ABC123",
+          "successCount": 0
+        },
+        {
+          "regex": "Comprobante[:\\s]+([A-Z0-9]{5,20})",
           "priority": 10,
-          "description": "Comprobante: 12345",
+          "description": "Comprobante: ABC123",
           "successCount": 0
         },
         {
-          "regex": "N[úu]mero[:\\s]+(\\d{5,})",
+          "regex": "N[úu]mero[:\\s]+([A-Z0-9]{5,})",
           "priority": 9,
-          "description": "Número: 12345",
+          "description": "Número: ABC123",
           "successCount": 0
         },
         {
-          "regex": "\\b(\\d{5,})\\b",
-          "priority": 5,
-          "description": "Cualquier número 5+ dígitos",
+          "regex": "(?:CNL|TRF|REF)([A-Z0-9]{5,15})",
+          "priority": 8,
+          "description": "Códigos CNL/TRF/REF",
+          "successCount": 0
+        }
+      ],
+      "preprocessing": {
+        "contrast": 1.2,
+        "brightness": 10,
+        "grayscale": true
+      },
+      "examples": [],
+      "stats": {
+        "totalAttempts": 0,
+        "successfulDetections": 0,
+        "lastUpdated": "2025-12-31T00:00:00Z"
+      }
+    },
+    {
+      "id": "banco_guayaquil",
+      "name": "Banco Guayaquil",
+      "keywords": ["GUAYAQUIL", "Banco Guayaquil", "B. GUAYAQUIL"],
+      "patterns": [
+        {
+          "regex": "(?:Nro\\.?|N[úu]mero)\\s*(?:de\\s+)?comprobante[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 15,
+          "description": "Nro. de comprobante",
+          "successCount": 0
+        },
+        {
+          "regex": "(?:Referencia|Ref)[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 10,
+          "description": "Referencia",
+          "successCount": 0
+        }
+      ],
+      "preprocessing": {
+        "contrast": 1.3,
+        "brightness": 15,
+        "grayscale": true
+      },
+      "examples": [],
+      "stats": {
+        "totalAttempts": 0,
+        "successfulDetections": 0,
+        "lastUpdated": "2025-12-31T00:00:00Z"
+      }
+    },
+    {
+      "id": "banco_pacifico",
+      "name": "Banco del Pacífico",
+      "keywords": ["PACIFICO", "PACÍFICO", "Banco del Pacífico", "B. PACIFICO"],
+      "patterns": [
+        {
+          "regex": "(?:Nro\\.?|N[úu]mero)\\s*(?:de\\s+)?(?:comprobante|transacci[óo]n)[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 15,
+          "description": "Nro. de comprobante/transacción",
+          "successCount": 0
+        },
+        {
+          "regex": "Operaci[óo]n[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 10,
+          "description": "Operación",
+          "successCount": 0
+        }
+      ],
+      "preprocessing": {
+        "contrast": 1.2,
+        "brightness": 10,
+        "grayscale": true
+      },
+      "examples": [],
+      "stats": {
+        "totalAttempts": 0,
+        "successfulDetections": 0,
+        "lastUpdated": "2025-12-31T00:00:00Z"
+      }
+    },
+    {
+      "id": "produbanco",
+      "name": "Produbanco",
+      "keywords": ["PRODUBANCO", "Produbanco"],
+      "patterns": [
+        {
+          "regex": "(?:Nro\\.?|N[úu]mero)\\s*(?:de\\s+)?comprobante[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 15,
+          "description": "Nro. de comprobante",
+          "successCount": 0
+        },
+        {
+          "regex": "Secuencia[:\\s]+([0-9]{5,20})",
+          "priority": 10,
+          "description": "Secuencia",
           "successCount": 0
         }
       ],
@@ -43,9 +139,33 @@
       "keywords": [],
       "patterns": [
         {
-          "regex": "(?:Comprobante|N[úu]mero|Operaci[óo]n)[:\\s-]+(\\d{4,})",
+          "regex": "(?:Nro\\.?|N[úu]mero|#)\\s*(?:de\\s+)?comprobante[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 20,
+          "description": "Nro. de comprobante genérico",
+          "successCount": 0
+        },
+        {
+          "regex": "(?:Comprobante|Transacci[óo]n|Operaci[óo]n|Referencia)[:\\s]+([A-Z0-9]{5,20})",
+          "priority": 15,
+          "description": "Palabras clave comunes",
+          "successCount": 0
+        },
+        {
+          "regex": "(?:CNL|TRF|REF|OP|TX)([A-Z0-9]{5,15})",
+          "priority": 12,
+          "description": "Prefijos comunes de código",
+          "successCount": 0
+        },
+        {
+          "regex": "([A-Z]{2,3}[0-9A-Z]{5,15})",
           "priority": 8,
-          "description": "Keywords comunes + número",
+          "description": "Código alfanumérico con prefijo",
+          "successCount": 0
+        },
+        {
+          "regex": "\\b(\\d{8,20})\\b",
+          "priority": 5,
+          "description": "Número largo (8+ dígitos)",
           "successCount": 0
         }
       ],
@@ -63,4 +183,3 @@
     }
   ]
 }
-

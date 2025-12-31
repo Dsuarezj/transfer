@@ -1,16 +1,18 @@
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import * as tf from '@tensorflow/tfjs'; // ensure backend is registered
+import * as tf from '@tensorflow/tfjs';
 import { BoundingBox } from '../types/ocr';
 import { blobToImage } from '../utils/imagePreprocessing';
 
 const MODEL_VERSION_URL = '/models/v1/model-version.json';
 const MODEL_URL = '/models/v1/model.json';
-const MODEL_CACHE_KEY = 'model_cache';
-const MODEL_VERSION_KEY = 'model_version';
+const MODEL_CACHE_KEY = 'custom_model_cache';
+const MODEL_VERSION_KEY = 'custom_model_version';
+
+const INPUT_SIZE = 320; // Tamaño de entrada del modelo custom
 
 type DetectionModel =
   | { kind: 'coco'; model: cocoSsd.ObjectDetection }
-  | { kind: 'graph'; model: tf.GraphModel };
+  | { kind: 'layers'; model: tf.LayersModel };
 
 export class RegionDetector {
   private static detectionModel: DetectionModel | null = null;
@@ -20,20 +22,25 @@ export class RegionDetector {
   }
 
   private async loadCoco(): Promise<DetectionModel> {
+    console.log('[RegionDetector] Cargando COCO-SSD (fallback)...');
     const model = await cocoSsd.load();
+    console.log('[RegionDetector] COCO-SSD cargado.');
     return { kind: 'coco', model };
   }
 
-  private async loadCachedGraph(): Promise<tf.GraphModel | null> {
+  private async loadCachedLayers(): Promise<tf.LayersModel | null> {
     if (!this.isBrowser()) return null;
     try {
-      return await tf.loadGraphModel(`indexeddb://${MODEL_CACHE_KEY}`);
+      console.log('[RegionDetector] Intentando cargar modelo desde IndexedDB...');
+      const model = await tf.loadLayersModel(`indexeddb://${MODEL_CACHE_KEY}`);
+      console.log('[RegionDetector] Modelo cargado desde IndexedDB.');
+      return model;
     } catch {
       return null;
     }
   }
 
-  private async loadRemoteGraph(): Promise<tf.GraphModel | null> {
+  private async loadRemoteLayers(): Promise<tf.LayersModel | null> {
     if (!this.isBrowser()) return null;
 
     // Obtener versión remota
@@ -42,26 +49,35 @@ export class RegionDetector {
       const resp = await fetch(MODEL_VERSION_URL, { cache: 'no-cache' });
       const json = await resp.json();
       remoteVersion = json?.version ?? null;
+      console.log(`[RegionDetector] Versión remota del modelo: ${remoteVersion}`);
     } catch {
-      return null; // sin versión, no intentamos
+      console.log('[RegionDetector] No se pudo obtener versión del modelo.');
+      return null;
     }
 
     const localVersion = localStorage.getItem(MODEL_VERSION_KEY);
-    // Si la versión remota coincide y tenemos cache, intentamos cache primero
+    
+    // Si la versión coincide, usar cache
     if (remoteVersion === localVersion) {
-      const cached = await this.loadCachedGraph();
+      const cached = await this.loadCachedLayers();
       if (cached) return cached;
     }
 
-    // Intentar descargar y cachear
+    // Descargar modelo
     try {
-      const model = await tf.loadGraphModel(MODEL_URL);
+      console.log(`[RegionDetector] Descargando modelo custom v${remoteVersion}...`);
+      const model = await tf.loadLayersModel(MODEL_URL);
+      
+      // Cachear en IndexedDB
       if (remoteVersion) {
         await model.save(`indexeddb://${MODEL_CACHE_KEY}`);
         localStorage.setItem(MODEL_VERSION_KEY, remoteVersion);
+        console.log('[RegionDetector] Modelo cacheado en IndexedDB.');
       }
+      
       return model;
-    } catch {
+    } catch (err) {
+      console.warn('[RegionDetector] Error descargando modelo:', err);
       return null;
     }
   }
@@ -69,19 +85,21 @@ export class RegionDetector {
   private async ensureModel(): Promise<void> {
     if (RegionDetector.detectionModel) return;
 
-    // 1) Intentar modelo custom (graph) si existe
-    const graph = await this.loadRemoteGraph();
-    if (graph) {
-      RegionDetector.detectionModel = { kind: 'graph', model: graph };
+    // 1) Intentar modelo custom (layers)
+    const layers = await this.loadRemoteLayers();
+    if (layers) {
+      RegionDetector.detectionModel = { kind: 'layers', model: layers };
+      console.log('[RegionDetector] ✓ Usando modelo custom entrenado.');
       return;
     }
 
     // 2) Fallback a COCO-SSD
     RegionDetector.detectionModel = await this.loadCoco();
+    console.log('[RegionDetector] Usando COCO-SSD como fallback.');
   }
 
   /**
-   * Pre-carga el modelo (custom o fallback) para evitar latencia en la primera detección.
+   * Pre-carga el modelo para evitar latencia en la primera detección.
    */
   async preload(): Promise<void> {
     await this.ensureModel();
@@ -92,55 +110,62 @@ export class RegionDetector {
     if (!RegionDetector.detectionModel) return null;
 
     const img = await blobToImage(imageBlob);
-    let predictions: { bbox: [number, number, number, number]; score?: number }[] = [];
 
-    if (RegionDetector.detectionModel.kind === 'coco') {
-      const result = await RegionDetector.detectionModel.model.detect(img);
-      predictions = result.map((p: cocoSsd.DetectedObject) => ({
-        bbox: p.bbox as [number, number, number, number],
-        score: p.score,
-      }));
-    } else {
-      // GraphModel: se asume salida estilo TF Object Detection API: detection_boxes, detection_scores
+    if (RegionDetector.detectionModel.kind === 'layers') {
+      // Modelo custom: predice bbox normalizado [ymin, xmin, ymax, xmax]
       try {
-        const tfImg = tf.browser.fromPixels(img).toFloat().expandDims(0);
-        const outputs = (await RegionDetector.detectionModel.model.executeAsync(tfImg)) as tf.Tensor | tf.Tensor[];
-        tfImg.dispose();
+        const tensor = tf.browser.fromPixels(img)
+          .toFloat()
+          .div(255.0)  // Normalizar a [0, 1]
+          .resizeBilinear([INPUT_SIZE, INPUT_SIZE])
+          .expandDims(0);
 
-        if (Array.isArray(outputs) && outputs.length >= 2) {
-          const [boxesT, scoresT] = outputs;
-          const boxes = boxesT.arraySync() as number[][][];
-          const scores = scoresT.arraySync() as number[][];
-          const boxesArr = boxes[0] || [];
-          const scoresArr = scores[0] || [];
+        const prediction = RegionDetector.detectionModel.model.predict(tensor) as tf.Tensor;
+        const bboxNorm = await prediction.array() as number[][];
+        
+        tensor.dispose();
+        prediction.dispose();
 
-          predictions = boxesArr
-            .map((b, i) => {
-              const score = scoresArr[i] ?? 0;
-              // b = [ymin, xmin, ymax, xmax] normalizado
-              const yMin = b[0] * img.height;
-              const xMin = b[1] * img.width;
-              const yMax = b[2] * img.height;
-              const xMax = b[3] * img.width;
-              return {
-                bbox: [xMin, yMin, xMax - xMin, yMax - yMin] as [number, number, number, number],
-                score,
-              };
-            })
-            .filter((p) => (p.score ?? 0) > 0.3);
-        }
+        // bboxNorm[0] = [ymin, xmin, ymax, xmax] normalizado
+        const [ymin, xmin, ymax, xmax] = bboxNorm[0];
+        
+        const bbox: BoundingBox = {
+          x: Math.max(0, xmin * img.width),
+          y: Math.max(0, ymin * img.height),
+          width: Math.min(img.width, (xmax - xmin) * img.width),
+          height: Math.min(img.height, (ymax - ymin) * img.height),
+        };
 
-        // Liberar tensores
-        if (Array.isArray(outputs)) outputs.forEach((t) => t.dispose());
-        else outputs.dispose();
+        console.log('[RegionDetector] Región detectada:', bbox);
+        return bbox;
+        
       } catch (err) {
-        console.warn('Fallo al ejecutar modelo custom, usando fallback heurístico', err);
-        predictions = [];
+        console.warn('[RegionDetector] Error ejecutando modelo custom:', err);
+        // Fallback a región superior
+        return this.getDefaultRegion(img.width, img.height);
       }
     }
 
-    const bestRegion = this.findBestTextRegion(predictions, img.width, img.height);
-    return bestRegion;
+    // COCO-SSD
+    const predictions = await RegionDetector.detectionModel.model.detect(img);
+    return this.findBestTextRegion(
+      predictions.map(p => ({
+        bbox: p.bbox as [number, number, number, number],
+        score: p.score,
+      })),
+      img.width,
+      img.height
+    );
+  }
+
+  private getDefaultRegion(width: number, height: number): BoundingBox {
+    // Por defecto, tercio superior de la imagen
+    return {
+      x: 0,
+      y: 0,
+      width: width,
+      height: Math.round(height / 3),
+    };
   }
 
   private findBestTextRegion(
@@ -149,28 +174,20 @@ export class RegionDetector {
     imageHeight: number
   ): BoundingBox | null {
     if (!predictions.length) {
-      return {
-        x: 0,
-        y: 0,
-        width: imageWidth,
-        height: Math.round(imageHeight / 3),
-      };
+      return this.getDefaultRegion(imageWidth, imageHeight);
     }
 
+    // Priorizar detecciones en el tercio superior
     const topThird = predictions.filter((p) => {
       const centerY = p.bbox[1] + p.bbox[3] / 2;
       return centerY < imageHeight / 3;
     });
 
-    const candidate = (topThird.length ? topThird : predictions).sort((a, b) => (b.score || 0) - (a.score || 0))[0];
+    const candidate = (topThird.length ? topThird : predictions)
+      .sort((a, b) => (b.score || 0) - (a.score || 0))[0];
 
     if (!candidate) {
-      return {
-        x: 0,
-        y: 0,
-        width: imageWidth,
-        height: Math.round(imageHeight / 3),
-      };
+      return this.getDefaultRegion(imageWidth, imageHeight);
     }
 
     return {
@@ -183,4 +200,3 @@ export class RegionDetector {
 }
 
 export const regionDetectorSingleton = new RegionDetector();
-

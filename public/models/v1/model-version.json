@@ -1,7 +1,15 @@
 {
   "version": "1.0",
-  "type": "custom-detector",
-  "url": "model.json",
-  "updated": "2025-12-31"
+  "type": "layers-model",
+  "framework": "tensorflow.js",
+  "inputShape": [
+    320,
+    320,
+    3
+  ],
+  "outputShape": [
+    4
+  ],
+  "updated": "2025-12-31",
+  "description": "Detector de regi\u00f3n para n\u00fameros de transferencia"
 }
-

@@ -1,5 +1,13 @@
-tensorflow==2.17.0
-tensorflowjs==4.21.0
-numpy>=1.26.0
-Pillow>=10.3.0
+# Dependencias para entrenamiento y conversión
+# Probado con Python 3.9.6 en macOS ARM64
 
+# Core
+numpy>=1.26.0,<2.0.0
+Pillow>=11.0.0
+
+# TensorFlow 2.15 (compatible con Keras 2.15)
+# En macOS instala automáticamente tensorflow-macos
+tensorflow==2.15.0
+
+# Nota: La conversión a TensorFlow.js se hace manualmente
+# sin necesidad de la librería tensorflowjs

@@ -1,0 +1,757 @@
+{
+  "info": {
+    "description": "Transfer numbers dataset"
+  },
+  "licenses": [],
+  "categories": [
+    {
+      "id": 1,
+      "name": "transfer_number"
+    }
+  ],
+  "images": [
+    {
+      "id": 1,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.00.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 2,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.01.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 3,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.02.jpeg",
+      "width": 1600,
+      "height": 901
+    },
+    {
+      "id": 4,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.03 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 5,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.03.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 6,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.04 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 7,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.04.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 8,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.05 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 9,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.05.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 10,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.06 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 11,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.06.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 12,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.07.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 13,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.08 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 14,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.08.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 15,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.09 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 16,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.09 (2).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 17,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.09.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 18,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.10 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 19,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.10 (2).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 20,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.10.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 21,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.11 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 22,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.11.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 23,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.12.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 24,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.13.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 25,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.14 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 26,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.14.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 27,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.15 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 28,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.15 (2).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 29,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.15.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 30,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.16 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 31,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.16.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 32,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.17.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 33,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.20.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 34,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.21.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 35,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.23.24.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 36,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.24.22 (3).jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 37,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.24.22.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 38,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.24.25.jpeg",
+      "width": 901,
+      "height": 1600
+    },
+    {
+      "id": 39,
+      "file_name": "WhatsApp Image 2025-12-31 at 08.24.30 (1).jpeg",
+      "width": 901,
+      "height": 1600
+    }
+  ],
+  "annotations": [
+    {
+      "id": 1,
+      "image_id": 1,
+      "category_id": 1,
+      "bbox": [
+        330,
+        1116,
+        171,
+        45
+      ],
+      "area": 7695,
+      "iscrowd": 0
+    },
+    {
+      "id": 2,
+      "image_id": 2,
+      "category_id": 1,
+      "bbox": [
+        368,
+        1182,
+        166,
+        61
+      ],
+      "area": 10126,
+      "iscrowd": 0
+    },
+    {
+      "id": 3,
+      "image_id": 3,
+      "category_id": 1,
+      "bbox": [
+        1239,
+        260,
+        75,
+        222
+      ],
+      "area": 16650,
+      "iscrowd": 0
+    },
+    {
+      "id": 4,
+      "image_id": 4,
+      "category_id": 1,
+      "bbox": [
+        359,
+        1207,
+        205,
+        46
+      ],
+      "area": 9430,
+      "iscrowd": 0
+    },
+    {
+      "id": 5,
+      "image_id": 5,
+      "category_id": 1,
+      "bbox": [
+        374,
+        1060,
+        160,
+        46
+      ],
+      "area": 7360,
+      "iscrowd": 0
+    },
+    {
+      "id": 6,
+      "image_id": 6,
+      "category_id": 1,
+      "bbox": [
+        362,
+        1173,
+        181,
+        61
+      ],
+      "area": 11041,
+      "iscrowd": 0
+    },
+    {
+      "id": 7,
+      "image_id": 7,
+      "category_id": 1,
+      "bbox": [
+        316,
+        1256,
+        168,
+        45
+      ],
+      "area": 7560,
+      "iscrowd": 0
+    },
+    {
+      "id": 8,
+      "image_id": 8,
+      "category_id": 1,
+      "bbox": [
+        387,
+        1144,
+        184,
+        51
+      ],
+      "area": 9384,
+      "iscrowd": 0
+    },
+    {
+      "id": 9,
+      "image_id": 9,
+      "category_id": 1,
+      "bbox": [
+        442,
+        1069,
+        205,
+        58
+      ],
+      "area": 11890,
+      "iscrowd": 0
+    },
+    {
+      "id": 10,
+      "image_id": 10,
+      "category_id": 1,
+      "bbox": [
+        357,
+        1325,
+        153,
+        55
+      ],
+      "area": 8415,
+      "iscrowd": 0
+    },
+    {
+      "id": 11,
+      "image_id": 11,
+      "category_id": 1,
+      "bbox": [
+        428,
+        1232,
+        176,
+        61
+      ],
+      "area": 10736,
+      "iscrowd": 0
+    },
+    {
+      "id": 12,
+      "image_id": 12,
+      "category_id": 1,
+      "bbox": [
+        432,
+        1246,
+        158,
+        54
+      ],
+      "area": 8532,
+      "iscrowd": 0
+    },
+    {
+      "id": 13,
+      "image_id": 13,
+      "category_id": 1,
+      "bbox": [
+        423,
+        1131,
+        153,
+        49
+      ],
+      "area": 7497,
+      "iscrowd": 0
+    },
+    {
+      "id": 14,
+      "image_id": 14,
+      "category_id": 1,
+      "bbox": [
+        447,
+        1182,
+        161,
+        45
+      ],
+      "area": 7245,
+      "iscrowd": 0
+    },
+    {
+      "id": 15,
+      "image_id": 15,
+      "category_id": 1,
+      "bbox": [
+        448,
+        1263,
+        161,
+        58
+      ],
+      "area": 9338,
+      "iscrowd": 0
+    },
+    {
+      "id": 16,
+      "image_id": 16,
+      "category_id": 1,
+      "bbox": [
+        358,
+        1083,
+        158,
+        55
+      ],
+      "area": 8690,
+      "iscrowd": 0
+    },
+    {
+      "id": 17,
+      "image_id": 17,
+      "category_id": 1,
+      "bbox": [
+        416,
+        1239,
+        145,
+        47
+      ],
+      "area": 6815,
+      "iscrowd": 0
+    },
+    {
+      "id": 18,
+      "image_id": 18,
+      "category_id": 1,
+      "bbox": [
+        361,
+        1139,
+        170,
+        50
+      ],
+      "area": 8500,
+      "iscrowd": 0
+    },
+    {
+      "id": 19,
+      "image_id": 19,
+      "category_id": 1,
+      "bbox": [
+        325,
+        1234,
+        173,
+        48
+      ],
+      "area": 8304,
+      "iscrowd": 0
+    },
+    {
+      "id": 20,
+      "image_id": 20,
+      "category_id": 1,
+      "bbox": [
+        354,
+        1154,
+        149,
+        51
+      ],
+      "area": 7599,
+      "iscrowd": 0
+    },
+    {
+      "id": 21,
+      "image_id": 21,
+      "category_id": 1,
+      "bbox": [
+        268,
+        1211,
+        189,
+        52
+      ],
+      "area": 9828,
+      "iscrowd": 0
+    },
+    {
+      "id": 22,
+      "image_id": 22,
+      "category_id": 1,
+      "bbox": [
+        390,
+        1335,
+        192,
+        60
+      ],
+      "area": 11520,
+      "iscrowd": 0
+    },
+    {
+      "id": 23,
+      "image_id": 23,
+      "category_id": 1,
+      "bbox": [
+        262,
+        1194,
+        165,
+        45
+      ],
+      "area": 7425,
+      "iscrowd": 0
+    },
+    {
+      "id": 24,
+      "image_id": 24,
+      "category_id": 1,
+      "bbox": [
+        321,
+        1198,
+        168,
+        46
+      ],
+      "area": 7728,
+      "iscrowd": 0
+    },
+    {
+      "id": 25,
+      "image_id": 25,
+      "category_id": 1,
+      "bbox": [
+        395,
+        1074,
+        205,
+        47
+      ],
+      "area": 9635,
+      "iscrowd": 0
+    },
+    {
+      "id": 26,
+      "image_id": 26,
+      "category_id": 1,
+      "bbox": [
+        367,
+        1038,
+        205,
+        48
+      ],
+      "area": 9840,
+      "iscrowd": 0
+    },
+    {
+      "id": 27,
+      "image_id": 27,
+      "category_id": 1,
+      "bbox": [
+        400,
+        1103,
+        179,
+        39
+      ],
+      "area": 6981,
+      "iscrowd": 0
+    },
+    {
+      "id": 28,
+      "image_id": 28,
+      "category_id": 1,
+      "bbox": [
+        388,
+        1214,
+        164,
+        55
+      ],
+      "area": 9020,
+      "iscrowd": 0
+    },
+    {
+      "id": 29,
+      "image_id": 29,
+      "category_id": 1,
+      "bbox": [
+        337,
+        1389,
+        197,
+        59
+      ],
+      "area": 11623,
+      "iscrowd": 0
+    },
+    {
+      "id": 30,
+      "image_id": 30,
+      "category_id": 1,
+      "bbox": [
+        364,
+        1293,
+        162,
+        52
+      ],
+      "area": 8424,
+      "iscrowd": 0
+    },
+    {
+      "id": 31,
+      "image_id": 31,
+      "category_id": 1,
+      "bbox": [
+        352,
+        1201,
+        155,
+        51
+      ],
+      "area": 7905,
+      "iscrowd": 0
+    },
+    {
+      "id": 32,
+      "image_id": 32,
+      "category_id": 1,
+      "bbox": [
+        225,
+        1073,
+        168,
+        45
+      ],
+      "area": 7560,
+      "iscrowd": 0
+    },
+    {
+      "id": 33,
+      "image_id": 33,
+      "category_id": 1,
+      "bbox": [
+        402,
+        1107,
+        165,
+        50
+      ],
+      "area": 8250,
+      "iscrowd": 0
+    },
+    {
+      "id": 34,
+      "image_id": 34,
+      "category_id": 1,
+      "bbox": [
+        623,
+        1376,
+        141,
+        82
+      ],
+      "area": 11562,
+      "iscrowd": 0
+    },
+    {
+      "id": 35,
+      "image_id": 35,
+      "category_id": 1,
+      "bbox": [
+        348,
+        1122,
+        168,
+        48
+      ],
+      "area": 8064,
+      "iscrowd": 0
+    },
+    {
+      "id": 36,
+      "image_id": 36,
+      "category_id": 1,
+      "bbox": [
+        436,
+        502,
+        118,
+        47
+      ],
+      "area": 5546,
+      "iscrowd": 0
+    },
+    {
+      "id": 37,
+      "image_id": 37,
+      "category_id": 1,
+      "bbox": [
+        381,
+        447,
+        112,
+        45
+      ],
+      "area": 5040,
+      "iscrowd": 0
+    },
+    {
+      "id": 38,
+      "image_id": 38,
+      "category_id": 1,
+      "bbox": [
+        445,
+        489,
+        98,
+        36
+      ],
+      "area": 3528,
+      "iscrowd": 0
+    },
+    {
+      "id": 39,
+      "image_id": 39,
+      "category_id": 1,
+      "bbox": [
+        462,
+        237,
+        55,
+        55
+      ],
+      "area": 3025,
+      "iscrowd": 0
+    }
+  ]
+}
