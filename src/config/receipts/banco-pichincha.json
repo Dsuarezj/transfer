@@ -1,0 +1,23 @@
+{
+  "id": "banco-pichincha",
+  "name": "Banco Pichincha",
+  "keywords": ["pichincha", "banco pichincha"],
+  "patterns": [
+    {
+      "id": "comprobante-numerico",
+      "priority": 1,
+      "contextKeywords": ["comprobante", "transferencia", "voucher"],
+      "numberPattern": "\\d{7,8}",
+      "proximity": 300,
+      "position": "any",
+      "separators": [":", "-", ".", " "],
+      "examples": ["61997046", "61881151", "17674"]
+    }
+  ],
+  "preprocessing": {
+    "contrast": 1.6,
+    "brightness": 1.4,
+    "sharpen": true,
+    "threshold": false
+  }
+}
