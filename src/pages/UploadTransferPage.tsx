@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
-import { dropboxService } from '../services/dropbox.service';
+import { invoiceService } from '../services/invoiceService';
 import CameraView from '../components/CameraView';
 import { extractTransferNumber } from '../utils/ocr';
 
@@ -49,7 +49,7 @@ export default function UploadTransferPage() {
         if (detectedNumber) {
           setTransferNumber(detectedNumber);
 
-          const isDuplicate = await dropboxService.checkDuplicateTransfer(detectedNumber);
+          const isDuplicate = await invoiceService.checkDuplicate(detectedNumber);
           if (isDuplicate) {
             toast({
               title: 'Transferencia duplicada',
@@ -61,7 +61,7 @@ export default function UploadTransferPage() {
           }
         }
       } catch (error) {
-        console.log('OCR not available or error:', error);
+        console.error('OCR error:', error);
       } finally {
         setIsProcessingOCR(false);
       }
@@ -82,8 +82,8 @@ export default function UploadTransferPage() {
     setIsUploading(true);
 
     try {
-      const imageUrl = await dropboxService.uploadPhoto(photoBlob, invoiceNumber);
-      await dropboxService.updateCSV(invoiceNumber, imageUrl, transferNumber || undefined);
+      const imageUrl = await invoiceService.uploadPhoto(photoBlob, invoiceNumber);
+      await invoiceService.add(invoiceNumber, imageUrl, transferNumber || undefined);
 
       setShowSuccess(true);
     } catch (error) {
@@ -143,7 +143,6 @@ export default function UploadTransferPage() {
           <CameraView
             camera={camera}
             onCapture={handleCapture}
-            onCancel={handleCancel}
           />
         )}
 

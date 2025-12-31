@@ -9,7 +9,6 @@ interface CameraViewProps {
     startCamera: () => void;
   };
   onCapture: () => void;
-  onCancel?: () => void;
 }
 
 export default function CameraView({ camera, onCapture }: CameraViewProps) {

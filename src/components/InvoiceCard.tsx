@@ -1,5 +1,5 @@
 import { Box, VStack, HStack, Text, Badge, Link } from '@chakra-ui/react';
-import { Invoice } from '../services/dropbox.service';
+import { Invoice } from '../types/dropbox';
 
 interface InvoiceCardProps {
   invoice: Invoice;

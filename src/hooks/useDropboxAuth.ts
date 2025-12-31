@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { dropboxService } from '../services/dropbox.service';
+import { authService } from '../services/dropbox/authService';
 
 export function useDropboxAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -8,10 +8,10 @@ export function useDropboxAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       if (window.location.search.includes('code=')) {
-        const success = await dropboxService.handleRedirect();
+        const success = await authService.handleRedirect();
         setIsAuthenticated(success);
       } else {
-        setIsAuthenticated(dropboxService.isAuthenticated());
+        setIsAuthenticated(authService.isAuthenticated());
       }
       setIsLoading(false);
     };
@@ -20,13 +20,12 @@ export function useDropboxAuth() {
   }, []);
 
   const login = async () => {
-    const url = await dropboxService.getAuthUrl();
+    const url = await authService.getAuthUrl();
     window.location.href = url;
   };
 
   const logout = () => {
-    dropboxService.logout();
-    setIsAuthenticated(false);
+    authService.logout();
   };
 
   return { isAuthenticated, isLoading, login, logout };

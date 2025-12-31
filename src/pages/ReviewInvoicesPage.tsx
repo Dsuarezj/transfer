@@ -14,7 +14,8 @@ import {
   InputLeftElement,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { dropboxService, Invoice } from '../services/dropbox.service';
+import { invoiceService } from '../services/invoiceService';
+import { Invoice } from '../types/dropbox';
 import InvoiceCard from '../components/InvoiceCard';
 
 export default function ReviewInvoicesPage() {
@@ -36,7 +37,7 @@ export default function ReviewInvoicesPage() {
   const loadInvoices = async () => {
     try {
       setIsLoading(true);
-      const data = await dropboxService.getInvoices();
+      const data = await invoiceService.getAll();
       setInvoices(data);
       setFilteredInvoices(data);
       setError(null);

@@ -1,8 +1,11 @@
 import { Box, Button, Container, Heading, Text, VStack } from '@chakra-ui/react';
-import { useDropboxAuth } from '../hooks/useDropboxAuth';
+import { authService } from '../services/dropbox/authService';
 
 export default function LoginPage() {
-  const { login } = useDropboxAuth();
+  const login = async () => {
+    const url = await authService.getAuthUrl();
+    window.location.href = url;
+  };
 
   return (
     <Box
