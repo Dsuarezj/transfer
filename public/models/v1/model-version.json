@@ -1,0 +1,7 @@
+{
+  "version": "1.0",
+  "type": "custom-detector",
+  "url": "model.json",
+  "updated": "2025-12-31"
+}
+

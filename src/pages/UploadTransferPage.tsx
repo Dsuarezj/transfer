@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Box,
   Container,
@@ -21,12 +21,15 @@ import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { invoiceService } from '../services/invoiceService';
 import CameraView from '../components/CameraView';
-import { extractTransferNumber } from '../utils/ocr';
+import { OCREngine } from '../utils/ocr';
+import { localLearningService } from '../services/localLearningService';
+import { OCRResult } from '../types/ocr';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const camera = useCamera();
+  const ocrEngine = useMemo(() => new OCREngine(), []);
 
   const [step, setStep] = useState<'camera' | 'form'>('camera');
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -35,6 +38,7 @@ export default function UploadTransferPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isProcessingOCR, setIsProcessingOCR] = useState(false);
+  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
 
   const handleCapture = async () => {
     const blob = await camera.capturePhoto();
@@ -45,23 +49,35 @@ export default function UploadTransferPage() {
 
       setIsProcessingOCR(true);
       try {
-        const detectedNumber = await extractTransferNumber(blob);
-        if (detectedNumber) {
-          setTransferNumber(detectedNumber);
+        const result = await ocrEngine.extractTransferNumber(blob);
+        setOcrResult(result);
 
-          const isDuplicate = await invoiceService.checkDuplicate(detectedNumber);
+        if (result.number) {
+          console.log('[Upload] OCR detectó número', result.number, 'confianza', result.confidence);
+          setTransferNumber(result.number);
+
+          const isDuplicate = await invoiceService.checkDuplicate(result.number);
           if (isDuplicate) {
             toast({
               title: 'Transferencia duplicada',
-              description: `El número ${detectedNumber} ya está registrado`,
+              description: `El número ${result.number} ya está registrado`,
               status: 'warning',
               duration: 5000,
               isClosable: true,
             });
+          } else {
+            toast({
+              title: 'Número detectado',
+              description: `Confianza: ${result.confidence}%`,
+              status: 'info',
+              duration: 3000,
+            });
           }
+        } else {
+          console.log('[Upload] OCR no encontró número. Confianza', result.confidence, 'Banco detectado', result.bankDetected);
         }
       } catch (error) {
-        console.error('OCR error:', error);
+        console.error('[Upload] OCR error:', error);
       } finally {
         setIsProcessingOCR(false);
       }
@@ -83,8 +99,19 @@ export default function UploadTransferPage() {
     const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
+      const userNumber = transferNumber.trim();
+
+      // Aprendizaje local si el usuario corrige el número detectado
+      if (ocrResult?.number && userNumber && ocrResult.number !== userNumber) {
+        await localLearningService.learnFromCorrection({
+          ocrResult,
+          correctNumber: userNumber,
+          bankId: ocrResult.bankDetected || 'generic',
+        });
+      }
+
       const imageUrl = await invoiceService.uploadPhoto(photoBlob, finalInvoiceNumber);
-      await invoiceService.add(finalInvoiceNumber, imageUrl, transferNumber || undefined);
+      await invoiceService.add(finalInvoiceNumber, imageUrl, userNumber || undefined);
 
       setShowSuccess(true);
     } catch (error) {
