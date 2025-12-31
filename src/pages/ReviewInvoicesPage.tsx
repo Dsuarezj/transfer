@@ -66,28 +66,28 @@ export default function ReviewInvoicesPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bgGradient="linear(135deg, secondary.300, pastel.blue.400)" display="flex" flexDirection="column" overflow="hidden" position="relative">
+    <Box h="100%" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" overflow="hidden" position="relative">
       <Box
         position="absolute"
         top="0"
         left="0"
         right="0"
         bottom="0"
-        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
+        bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
       />
 
-      <Box bg="accent.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
+      <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="white">
+          <Heading size="md" color="neutral.50">
             Facturas
           </Heading>
           <Button
             size="sm"
             variant="outline"
-            color="white"
-            borderColor="white"
-            _hover={{ bg: 'whiteAlpha.200' }}
+            color="neutral.50"
+            borderColor="neutral.50"
+            _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
             onClick={() => navigate('/')}
           >
             Volver
@@ -120,12 +120,12 @@ export default function ReviewInvoicesPage() {
 
           {isLoading && (
             <Center py={12}>
-              <Spinner size="xl" color="white" thickness="4px" />
+              <Spinner size="xl" color="neutral.50" thickness="4px" />
             </Center>
           )}
 
           {error && (
-            <Box bg="danger.500" color="white" p={4} borderRadius="16px" boxShadow="card">
+            <Box bg="danger.500" color="neutral.50" p={4} borderRadius="16px" boxShadow="card">
               <Text>{error}</Text>
             </Box>
           )}
@@ -143,8 +143,8 @@ export default function ReviewInvoicesPage() {
 
           {!isLoading && filteredInvoices.length > 0 && (
             <>
-              <Box bg="whiteAlpha.200" px={4} py={2} borderRadius="full" alignSelf="flex-start">
-                <Text color="white" fontSize="sm" fontWeight="semibold">
+              <Box bg="rgba(255, 255, 255, 0.2)" px={4} py={2} borderRadius="full" alignSelf="flex-start">
+                <Text color="neutral.50" fontSize="sm" fontWeight="semibold">
                   {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'}
                 </Text>
               </Box>

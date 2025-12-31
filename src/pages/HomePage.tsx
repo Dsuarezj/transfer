@@ -11,7 +11,7 @@ export default function HomePage() {
     <Box
       h="100%"
       w="100%"
-      bgGradient="linear(135deg, secondary.300, pastel.blue.400)"
+      bgGradient="linear(135deg, accent.500, primary.500)"
       display="flex"
       flexDirection="column"
       overflow="hidden"
@@ -23,21 +23,21 @@ export default function HomePage() {
         left="0"
         right="0"
         bottom="0"
-        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
+        bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
       />
 
-      <Box bg="accent.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
+      <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="white">
+          <Heading size="md" color="neutral.50">
             Transferencias
           </Heading>
           <Button
             size="sm"
             variant="outline"
-            color="white"
-            borderColor="white"
-            _hover={{ bg: 'whiteAlpha.200' }}
+            color="neutral.50"
+            borderColor="neutral.50"
+            _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
             onClick={logout}
           >
             Salir
@@ -47,7 +47,7 @@ export default function HomePage() {
 
       <Container maxW="md" flex="1" display="flex" alignItems="center" py={6} position="relative" zIndex={1}>
         <VStack spacing={6} w="full">
-          <Heading size="lg" color="white" textAlign="center">
+          <Heading size="lg" color="neutral.50" textAlign="center">
             ¿Qué deseas hacer?
           </Heading>
 

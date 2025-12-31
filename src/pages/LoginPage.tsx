@@ -17,7 +17,7 @@ export default function LoginPage() {
     <Box
       h="100%"
       w="100%"
-      bgGradient="linear(135deg, secondary.300, pastel.blue.400)"
+      bgGradient="linear(135deg, accent.500, primary.500)"
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -30,7 +30,7 @@ export default function LoginPage() {
         left="0"
         right="0"
         bottom="0"
-        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
+        bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
       />
 
@@ -51,7 +51,7 @@ export default function LoginPage() {
             <Heading
               as="h1"
               size="2xl"
-              color="white"
+              color="neutral.50"
               textAlign="center"
               fontWeight="bold"
             >
@@ -59,7 +59,7 @@ export default function LoginPage() {
             </Heading>
 
             <Text
-              color="whiteAlpha.900"
+              color="neutral.50"
               textAlign="center"
               fontSize="lg"
               fontWeight="medium"
@@ -80,11 +80,11 @@ export default function LoginPage() {
                   <VStack
                     key={feature.title}
                     spacing={2}
-                    bg="pastel.blue.50"
+                    bg="accent.50"
                     p={4}
                     borderRadius="16px"
                     transition="all 0.2s"
-                    _hover={{ transform: 'translateY(-2px)', bg: 'pastel.blue.100' }}
+                    _hover={{ transform: 'translateY(-2px)', bg: 'accent.100' }}
                   >
                     <Text fontSize="2xl">{feature.emoji}</Text>
                     <Text
@@ -119,7 +119,7 @@ export default function LoginPage() {
                 w="full"
                 onClick={login}
                 bg="accent.500"
-                color="white"
+                color="neutral.50"
                 _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
                 _active={{ bg: 'accent.700' }}
                 h="56px"

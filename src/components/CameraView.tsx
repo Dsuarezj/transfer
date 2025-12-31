@@ -40,7 +40,7 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
 
       {camera.error && (
         <Container maxW="md" pt={8}>
-          <Box bg="danger.500" color="white" p={4} borderRadius="16px" boxShadow="card">
+          <Box bg="danger.500" color="neutral.50" p={4} borderRadius="16px" boxShadow="card">
             <Text fontWeight="semibold">{camera.error}</Text>
           </Box>
         </Container>
@@ -56,7 +56,7 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
         <Container maxW="md">
           <VStack spacing={4}>
             <Box bg="blackAlpha.600" backdropFilter="blur(8px)" px={4} py={2} borderRadius="full">
-              <Text color="white" fontSize="sm" textAlign="center" fontWeight="medium">
+              <Text color="neutral.50" fontSize="sm" textAlign="center" fontWeight="medium">
                 📸 Centra el comprobante de transferencia
               </Text>
             </Box>
@@ -67,7 +67,7 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
                 w="full"
                 maxW="300px"
                 bg="accent.500"
-                color="white"
+                color="neutral.50"
                 _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
                 _active={{ bg: 'accent.700' }}
                 onClick={onCapture}

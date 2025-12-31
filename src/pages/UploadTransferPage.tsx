@@ -120,18 +120,18 @@ export default function UploadTransferPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bgGradient="linear(135deg, secondary.300, pastel.blue.400)" display="flex" flexDirection="column" overflow="hidden">
-      <Box bg="accent.700" py={4} boxShadow="md" flexShrink={0}>
+    <Box h="100%" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" overflow="hidden">
+      <Box bg="primary.700" py={4} boxShadow="md" flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="white">
+          <Heading size="md" color="neutral.50">
             Nueva Transferencia
           </Heading>
           <Button
             size="sm"
             variant="outline"
-            color="white"
-            borderColor="white"
-            _hover={{ bg: 'whiteAlpha.200' }}
+            color="neutral.50"
+            borderColor="neutral.50"
+            _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
             onClick={handleCancel}
           >
             Cancelar
@@ -174,7 +174,7 @@ export default function UploadTransferPage() {
                     placeholder="Opcional - Se generará automáticamente"
                     size="lg"
                     borderRadius="12px"
-                    bg="pastel.blue.50"
+                    bg="accent.50"
                     border="none"
                     _focus={{
                       bg: 'white',
@@ -199,7 +199,7 @@ export default function UploadTransferPage() {
                     placeholder="Opcional - Se detectará automáticamente"
                     size="lg"
                     borderRadius="12px"
-                    bg="pastel.blue.50"
+                    bg="accent.50"
                     border="none"
                     _focus={{
                       bg: 'white',
@@ -217,7 +217,7 @@ export default function UploadTransferPage() {
                     isLoading={isUploading}
                     loadingText="Guardando..."
                     bg="accent.500"
-                    color="white"
+                    color="neutral.50"
                     _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
                     _active={{ bg: 'accent.700' }}
                     boxShadow="buttonHover"
@@ -247,10 +247,10 @@ export default function UploadTransferPage() {
       <Modal isOpen={showSuccess} onClose={handleSuccessClose} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="24px" mx={4} overflow="hidden">
-          <Box bg="pastel.blue.50" textAlign="center" pt={8}>
+          <Box bg="accent.50" textAlign="center" pt={8}>
             <Text fontSize="6xl">✅</Text>
           </Box>
-          <ModalHeader color="accent.700" fontSize="2xl" textAlign="center" pt={4}>
+          <ModalHeader color="primary.700" fontSize="2xl" textAlign="center" pt={4}>
             ¡Éxito!
           </ModalHeader>
           <ModalBody textAlign="center" pb={6}>
@@ -264,7 +264,7 @@ export default function UploadTransferPage() {
               onClick={handleSuccessClose}
               px={12}
               bg="accent.500"
-              color="white"
+              color="neutral.50"
               _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
               _active={{ bg: 'accent.700' }}
             >

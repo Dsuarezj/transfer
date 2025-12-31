@@ -30,12 +30,12 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       />
       <VStack align="stretch" spacing={3} pl={2}>
         <HStack justify="space-between" flexWrap="wrap" gap={2}>
-          <Text fontWeight="bold" fontSize="lg" color="accent.700">
+          <Text fontWeight="bold" fontSize="lg" color="primary.700">
             {invoice.invoiceNumber}
           </Text>
           <Badge
-            bg="pastel.blue.100"
-            color="accent.700"
+            bg="accent.100"
+            color="primary.700"
             px={3}
             py={1}
             borderRadius="full"
@@ -46,7 +46,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
           </Badge>
         </HStack>
 
-        <VStack align="stretch" spacing={1} bg="pastel.blue.50" p={3} borderRadius="12px">
+        <VStack align="stretch" spacing={1} bg="accent.50" p={3} borderRadius="12px">
           <HStack>
             <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
               📅 Fecha:
