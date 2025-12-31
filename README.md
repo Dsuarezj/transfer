@@ -1,6 +1,6 @@
-# Sistema Contable de Transferencias
+# Transferido
 
-Aplicación web PWA para registrar transferencias bancarias de forma descentralizada usando Dropbox como almacenamiento.
+Aplicación web PWA para registrar transferencias bancarias con total privacidad usando Dropbox como almacenamiento.
 
 ## Características
 
@@ -141,20 +141,22 @@ La aplicación funciona como PWA y puede ser instalada en dispositivos móviles:
 - Android: "Agregar a pantalla de inicio"
 - iOS: "Agregar a la pantalla de inicio"
 
-## Ventajas de usar Dropbox
+## Ventajas de Transferido
 
-- ✅ **Descentralizado**: Cada usuario controla sus datos
-- ✅ **Sin servidor**: No necesitas mantener infraestructura
-- ✅ **Escalable**: Dropbox maneja el almacenamiento
-- ✅ **Simple**: API fácil de usar
+- ✅ **Privacidad total**: Tus datos solo están en tu Dropbox, nadie más puede verlos
+- ✅ **Control completo**: Tú decides qué hacer con tus datos
+- ✅ **Sin servidor central**: No dependes de servicios de terceros
+- ✅ **Seguro**: Dropbox protege tus archivos
 - ✅ **Económico**: Sin costos de hosting de datos
+- ✅ **Simple**: Fácil de usar desde cualquier dispositivo
 
-## Consideraciones de Seguridad
+## Privacidad y Seguridad
 
-- Las credenciales se guardan solo en localStorage del navegador
-- Los datos se almacenan únicamente en el Dropbox del usuario
-- La app no tiene acceso a backend central
-- Las imágenes se guardan con enlaces privados de Dropbox
+- Tus credenciales se guardan solo en tu navegador
+- Todos los datos se almacenan únicamente en tu Dropbox personal
+- La app no envía información a ningún servidor externo
+- Solo tú tienes acceso a las imágenes y registros
+- Nadie más puede ver tus transferencias
 
 ## Mejoras Futuras
 

@@ -1,7 +1,7 @@
 {
-  "name": "Transferencias Contables",
-  "short_name": "Contable",
-  "description": "Sistema para registrar transferencias bancarias",
+  "name": "Transferido",
+  "short_name": "Transferido",
+  "description": "Registra transferencias bancarias con privacidad",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
