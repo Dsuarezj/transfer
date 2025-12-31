@@ -9,7 +9,7 @@ const MODEL_CACHE_KEY = 'model_cache';
 const MODEL_VERSION_KEY = 'model_version';
 
 type DetectionModel =
-  | { kind: 'coco'; model: cocoSsd.ObjectDetectionModel }
+  | { kind: 'coco'; model: cocoSsd.ObjectDetection }
   | { kind: 'graph'; model: tf.GraphModel };
 
 export class RegionDetector {
@@ -96,7 +96,10 @@ export class RegionDetector {
 
     if (RegionDetector.detectionModel.kind === 'coco') {
       const result = await RegionDetector.detectionModel.model.detect(img);
-      predictions = result.map((p) => ({ bbox: p.bbox as [number, number, number, number], score: p.score }));
+      predictions = result.map((p: cocoSsd.DetectedObject) => ({
+        bbox: p.bbox as [number, number, number, number],
+        score: p.score,
+      }));
     } else {
       // GraphModel: se asume salida estilo TF Object Detection API: detection_boxes, detection_scores
       try {
