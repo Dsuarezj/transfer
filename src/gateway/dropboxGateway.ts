@@ -3,7 +3,7 @@ import { TokenData } from '../types/dropbox';
 import { DROPBOX_APP_FOLDER_PATH } from '../constants/dropbox';
 
 const CLIENT_ID = import.meta.env.VITE_DROPBOX_CLIENT_ID || 'YOUR_DROPBOX_CLIENT_ID';
-const REDIRECT_URI = window.location.origin + '/login';
+const REDIRECT_URI = window.location.origin + '/callback';
 
 class DropboxGateway {
   private dbx: Dropbox | null = null;

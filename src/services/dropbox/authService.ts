@@ -61,7 +61,6 @@ class AuthService {
     dropboxGateway.saveToken(tokenData);
     await dropboxGateway.ensureAppFolders(tokenData.access_token);
     localStorage.removeItem('dropbox_code_verifier');
-    window.history.replaceState({}, document.title, '/');
     return true;
   }
 
