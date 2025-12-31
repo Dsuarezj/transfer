@@ -15,6 +15,10 @@ export class DropboxService {
   }
 
   async getAuthUrl(): Promise<string> {
+    const codeVerifier = this.generateCodeVerifier();
+    window.sessionStorage.setItem('codeVerifier', codeVerifier);
+    this.dbxAuth.setCodeVerifier(codeVerifier);
+
     const url = await this.dbxAuth.getAuthenticationUrl(
       REDIRECT_URI,
       undefined,
@@ -25,6 +29,20 @@ export class DropboxService {
       true
     );
     return String(url);
+  }
+
+  private generateCodeVerifier(): string {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    return this.base64URLEncode(array);
+  }
+
+  private base64URLEncode(buffer: Uint8Array): string {
+    const base64 = btoa(String.fromCharCode(...buffer));
+    return base64
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
   }
 
   async handleRedirect(): Promise<boolean> {
