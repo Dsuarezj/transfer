@@ -1,9 +1,11 @@
 import { ReceiptConfig } from '../../types/receipt';
+import bancoLoja from './banco-loja.json';
 import bancoPichincha from './banco-pichincha.json';
 import deuna from './deuna.json';
 import defaultConfig from './default.json';
 
 export const receiptConfigs: ReceiptConfig[] = [
+  bancoLoja as ReceiptConfig,
   bancoPichincha as ReceiptConfig,
   deuna as ReceiptConfig,
   defaultConfig as ReceiptConfig

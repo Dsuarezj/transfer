@@ -4,19 +4,19 @@
   "keywords": ["pichincha", "banco pichincha"],
   "patterns": [
     {
-      "id": "comprobante",
+      "id": "comprobante-numerico",
       "priority": 1,
-      "contextKeywords": ["comprobante", "no.", "numero"],
-      "numberPattern": "\\d{5,8}",
-      "proximity": 200,
-      "position": "after",
-      "separators": [":", "-", "."],
-      "examples": ["17674", "123456"]
+      "contextKeywords": ["comprobante", "transferencia"],
+      "numberPattern": "\\d{7,8}",
+      "proximity": 300,
+      "position": "any",
+      "separators": [":", "-", ".", " "],
+      "examples": ["61997046", "17674"]
     }
   ],
   "preprocessing": {
-    "contrast": 1.4,
-    "brightness": 1.2,
+    "contrast": 1.6,
+    "brightness": 1.4,
     "sharpen": true,
     "threshold": false
   }

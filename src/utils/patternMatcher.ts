@@ -28,11 +28,12 @@ export function findPatternMatches(
     return null;
   }
 
-  const regex = new RegExp(pattern.numberPattern, 'g');
+  const regex = new RegExp(pattern.numberPattern, 'gi');
   const candidates: Array<{ value: string; distance: number; word: WordPosition }> = [];
 
   for (const word of words) {
-    const matches = word.text.match(regex);
+    const cleanedText = word.text.replace(/[^\w]/g, '');
+    const matches = cleanedText.match(regex);
     if (matches) {
       for (const match of matches) {
         for (const keywordPos of keywordPositions) {

@@ -1,0 +1,23 @@
+{
+  "id": "banco-loja",
+  "name": "Banco de Loja",
+  "keywords": ["banco de loja", "loja"],
+  "patterns": [
+    {
+      "id": "comprobante-alfanumerico",
+      "priority": 1,
+      "contextKeywords": ["nro", "numero", "comprobante"],
+      "numberPattern": "[A-Z0-9]{9,10}",
+      "proximity": 300,
+      "position": "any",
+      "separators": [":", "-", ".", " "],
+      "examples": ["2KL01WYDP", "FHK01WYFP", "0FUD1WYTW", "BG201WYV2"]
+    }
+  ],
+  "preprocessing": {
+    "contrast": 1.5,
+    "brightness": 1.3,
+    "sharpen": true,
+    "threshold": false
+  }
+}
