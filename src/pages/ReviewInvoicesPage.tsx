@@ -66,18 +66,18 @@ export default function ReviewInvoicesPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" display="flex" flexDirection="column" overflow="hidden" position="relative">
+    <Box h="100%" w="100%" bgGradient="linear(135deg, secondary.300, pastel.blue.400)" display="flex" flexDirection="column" overflow="hidden" position="relative">
       <Box
         position="absolute"
         top="0"
         left="0"
         right="0"
         bottom="0"
-        bg="radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)"
+        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
         pointerEvents="none"
       />
 
-      <Box bg="purple.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
+      <Box bg="accent.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">
             Facturas
@@ -110,10 +110,10 @@ export default function ReviewInvoicesPage() {
               bg="white"
               borderRadius="16px"
               border="none"
-              boxShadow="0 4px 20px rgba(0,0,0,0.1)"
+              boxShadow="card"
               _focus={{
-                borderColor: 'purple.500',
-                boxShadow: '0 0 0 2px var(--chakra-colors-purple-500)',
+                borderColor: 'accent.500',
+                boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
               }}
             />
           </InputGroup>
@@ -125,7 +125,7 @@ export default function ReviewInvoicesPage() {
           )}
 
           {error && (
-            <Box bg="red.500" color="white" p={4} borderRadius="16px" boxShadow="0 4px 20px rgba(0,0,0,0.2)">
+            <Box bg="danger.500" color="white" p={4} borderRadius="16px" boxShadow="card">
               <Text>{error}</Text>
             </Box>
           )}

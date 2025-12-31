@@ -17,7 +17,7 @@ export default function LoginPage() {
     <Box
       h="100%"
       w="100%"
-      bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      bgGradient="linear(135deg, secondary.300, pastel.blue.400)"
       display="flex"
       alignItems="center"
       justifyContent="center"
@@ -30,7 +30,7 @@ export default function LoginPage() {
         left="0"
         right="0"
         bottom="0"
-        bg="radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)"
+        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
         pointerEvents="none"
       />
 
@@ -41,9 +41,9 @@ export default function LoginPage() {
               bg="white"
               borderRadius="24px"
               p={4}
-              boxShadow="0 10px 40px rgba(0,0,0,0.2)"
+              boxShadow="medium"
             >
-              <Text fontSize="6xl" fontWeight="bold" color="purple.600">
+              <Text fontSize="6xl" fontWeight="bold" color="accent.500">
                 📤
               </Text>
             </Box>
@@ -72,7 +72,7 @@ export default function LoginPage() {
             bg="white"
             p={8}
             borderRadius="24px"
-            boxShadow="0 20px 60px rgba(0,0,0,0.3)"
+            boxShadow="cardHover"
           >
             <VStack spacing={6}>
               <SimpleGrid columns={3} spacing={3} w="full">
@@ -80,17 +80,17 @@ export default function LoginPage() {
                   <VStack
                     key={feature.title}
                     spacing={2}
-                    bg="purple.50"
+                    bg="pastel.blue.50"
                     p={4}
                     borderRadius="16px"
                     transition="all 0.2s"
-                    _hover={{ transform: 'translateY(-2px)', bg: 'purple.100' }}
+                    _hover={{ transform: 'translateY(-2px)', bg: 'pastel.blue.100' }}
                   >
                     <Text fontSize="2xl">{feature.emoji}</Text>
                     <Text
                       fontSize="sm"
                       fontWeight="bold"
-                      color="purple.700"
+                      color="accent.700"
                       textAlign="center"
                     >
                       {feature.title}
@@ -118,14 +118,14 @@ export default function LoginPage() {
                 size="lg"
                 w="full"
                 onClick={login}
-                bg="purple.600"
+                bg="accent.500"
                 color="white"
-                _hover={{ bg: 'purple.700' }}
-                _active={{ bg: 'purple.800' }}
+                _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
+                _active={{ bg: 'accent.700' }}
                 h="56px"
                 fontSize="lg"
                 fontWeight="semibold"
-                boxShadow="0 4px 14px rgba(103, 58, 183, 0.4)"
+                boxShadow="buttonHover"
               >
                 Conectar con Dropbox
               </Button>

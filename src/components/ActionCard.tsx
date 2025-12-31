@@ -15,9 +15,9 @@ export default function ActionCard({ title, description, icon, onClick }: Action
       bg="white"
       p={6}
       borderRadius="24px"
-      boxShadow="0 10px 40px rgba(0,0,0,0.2)"
+      boxShadow="medium"
       _hover={{
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        boxShadow: 'cardHover',
         transform: 'translateY(-4px)',
       }}
       _active={{
@@ -35,21 +35,21 @@ export default function ActionCard({ title, description, icon, onClick }: Action
         right="0"
         w="100px"
         h="100px"
-        bg="purple.50"
+        bg="pastel.blue.50"
         borderRadius="full"
         transform="translate(30%, -30%)"
       />
       <VStack align="start" spacing={3} position="relative" zIndex={1}>
         <Box
           fontSize="3xl"
-          bg="purple.50"
+          bg="pastel.blue.50"
           p={3}
           borderRadius="16px"
           transition="all 0.2s"
         >
           {icon}
         </Box>
-        <Heading size="md" color="purple.700">
+        <Heading size="md" color="accent.700">
           {title}
         </Heading>
         <Text color="neutral.600" fontSize="sm">

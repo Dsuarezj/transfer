@@ -11,9 +11,9 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       bg="white"
       p={5}
       borderRadius="20px"
-      boxShadow="0 10px 40px rgba(0,0,0,0.15)"
+      boxShadow="medium"
       _hover={{
-        boxShadow: '0 15px 50px rgba(0,0,0,0.25)',
+        boxShadow: 'cardHover',
         transform: 'translateY(-2px)',
       }}
       transition="all 0.2s"
@@ -26,16 +26,16 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
         left="0"
         w="4px"
         h="100%"
-        bg="purple.500"
+        bg="accent.500"
       />
       <VStack align="stretch" spacing={3} pl={2}>
         <HStack justify="space-between" flexWrap="wrap" gap={2}>
-          <Text fontWeight="bold" fontSize="lg" color="purple.700">
+          <Text fontWeight="bold" fontSize="lg" color="accent.700">
             {invoice.invoiceNumber}
           </Text>
           <Badge
-            bg="purple.100"
-            color="purple.700"
+            bg="pastel.blue.100"
+            color="accent.700"
             px={3}
             py={1}
             borderRadius="full"
@@ -46,7 +46,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
           </Badge>
         </HStack>
 
-        <VStack align="stretch" spacing={1} bg="purple.50" p={3} borderRadius="12px">
+        <VStack align="stretch" spacing={1} bg="pastel.blue.50" p={3} borderRadius="12px">
           <HStack>
             <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
               📅 Fecha:

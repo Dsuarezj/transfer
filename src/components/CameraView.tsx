@@ -40,7 +40,7 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
 
       {camera.error && (
         <Container maxW="md" pt={8}>
-          <Box bg="red.500" color="white" p={4} borderRadius="16px" boxShadow="0 4px 20px rgba(0, 0, 0, 0.3)">
+          <Box bg="danger.500" color="white" p={4} borderRadius="16px" boxShadow="card">
             <Text fontWeight="semibold">{camera.error}</Text>
           </Box>
         </Container>
@@ -66,12 +66,12 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
                 size="lg"
                 w="full"
                 maxW="300px"
-                bg="purple.600"
+                bg="accent.500"
                 color="white"
-                _hover={{ bg: 'purple.700' }}
-                _active={{ bg: 'purple.800' }}
+                _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
+                _active={{ bg: 'accent.700' }}
                 onClick={onCapture}
-                boxShadow="0 8px 30px rgba(103, 58, 183, 0.5)"
+                boxShadow="buttonHover"
                 h="56px"
                 fontSize="lg"
                 fontWeight="semibold"

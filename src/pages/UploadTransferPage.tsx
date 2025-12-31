@@ -120,8 +120,8 @@ export default function UploadTransferPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)" display="flex" flexDirection="column" overflow="hidden">
-      <Box bg="purple.700" py={4} boxShadow="md" flexShrink={0}>
+    <Box h="100%" w="100%" bgGradient="linear(135deg, secondary.300, pastel.blue.400)" display="flex" flexDirection="column" overflow="hidden">
+      <Box bg="accent.700" py={4} boxShadow="md" flexShrink={0}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">
             Nueva Transferencia
@@ -164,7 +164,7 @@ export default function UploadTransferPage() {
               </Box>
             )}
 
-            <Box bg="white" p={6} borderRadius="24px" boxShadow="0 20px 60px rgba(0,0,0,0.3)">
+            <Box bg="white" p={6} borderRadius="24px" boxShadow="cardHover">
               <VStack spacing={4}>
                 <FormControl>
                   <FormLabel color="neutral.700" fontWeight="semibold">Número de Factura</FormLabel>
@@ -174,12 +174,12 @@ export default function UploadTransferPage() {
                     placeholder="Opcional - Se generará automáticamente"
                     size="lg"
                     borderRadius="12px"
-                    bg="purple.50"
+                    bg="pastel.blue.50"
                     border="none"
                     _focus={{
                       bg: 'white',
-                      borderColor: 'purple.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)',
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
                     }}
                   />
                 </FormControl>
@@ -188,7 +188,7 @@ export default function UploadTransferPage() {
                   <FormLabel color="neutral.700" fontWeight="semibold">
                     Número de Transferencia
                     {isProcessingOCR && (
-                      <Text as="span" fontSize="sm" color="purple.500" ml={2}>
+                      <Text as="span" fontSize="sm" color="accent.500" ml={2}>
                         (Detectando...)
                       </Text>
                     )}
@@ -199,12 +199,12 @@ export default function UploadTransferPage() {
                     placeholder="Opcional - Se detectará automáticamente"
                     size="lg"
                     borderRadius="12px"
-                    bg="purple.50"
+                    bg="pastel.blue.50"
                     border="none"
                     _focus={{
                       bg: 'white',
-                      borderColor: 'purple.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-purple-500)',
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
                     }}
                   />
                 </FormControl>
@@ -216,11 +216,11 @@ export default function UploadTransferPage() {
                     onClick={handleSubmit}
                     isLoading={isUploading}
                     loadingText="Guardando..."
-                    bg="purple.600"
+                    bg="accent.500"
                     color="white"
-                    _hover={{ bg: 'purple.700' }}
-                    _active={{ bg: 'purple.800' }}
-                    boxShadow="0 4px 14px rgba(103, 58, 183, 0.4)"
+                    _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
+                    _active={{ bg: 'accent.700' }}
+                    boxShadow="buttonHover"
                   >
                     Guardar Transferencia
                   </Button>
@@ -230,9 +230,9 @@ export default function UploadTransferPage() {
                     size="lg"
                     variant="outline"
                     onClick={handleRetake}
-                    borderColor="purple.600"
-                    color="purple.600"
-                    _hover={{ bg: 'purple.50' }}
+                    borderColor="accent.500"
+                    color="accent.500"
+                    _hover={{ bg: 'accent.50' }}
                   >
                     Tomar otra foto
                   </Button>
@@ -247,10 +247,10 @@ export default function UploadTransferPage() {
       <Modal isOpen={showSuccess} onClose={handleSuccessClose} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="24px" mx={4} overflow="hidden">
-          <Box bg="purple.50" textAlign="center" pt={8}>
+          <Box bg="pastel.blue.50" textAlign="center" pt={8}>
             <Text fontSize="6xl">✅</Text>
           </Box>
-          <ModalHeader color="purple.700" fontSize="2xl" textAlign="center" pt={4}>
+          <ModalHeader color="accent.700" fontSize="2xl" textAlign="center" pt={4}>
             ¡Éxito!
           </ModalHeader>
           <ModalBody textAlign="center" pb={6}>
@@ -263,10 +263,10 @@ export default function UploadTransferPage() {
               size="lg"
               onClick={handleSuccessClose}
               px={12}
-              bg="purple.600"
+              bg="accent.500"
               color="white"
-              _hover={{ bg: 'purple.700' }}
-              _active={{ bg: 'purple.800' }}
+              _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
+              _active={{ bg: 'accent.700' }}
             >
               Continuar
             </Button>

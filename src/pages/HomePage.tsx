@@ -11,7 +11,7 @@ export default function HomePage() {
     <Box
       h="100%"
       w="100%"
-      bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+      bgGradient="linear(135deg, secondary.300, pastel.blue.400)"
       display="flex"
       flexDirection="column"
       overflow="hidden"
@@ -23,11 +23,11 @@ export default function HomePage() {
         left="0"
         right="0"
         bottom="0"
-        bg="radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)"
+        bgGradient="radial(circle at 20% 50%, whiteAlpha.200, transparent)"
         pointerEvents="none"
       />
 
-      <Box bg="purple.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
+      <Box bg="accent.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">
             Transferencias
