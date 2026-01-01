@@ -198,7 +198,6 @@ export default function UploadTransferPage() {
                   <Input
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
-                    placeholder="Opcional - Se generará automáticamente"
                     size="lg"
                     borderRadius="12px"
                     bg="accent.50"
@@ -223,7 +222,6 @@ export default function UploadTransferPage() {
                   <Input
                     value={transferNumber}
                     onChange={(e) => setTransferNumber(e.target.value)}
-                    placeholder="Opcional - Se detectará automáticamente"
                     size="lg"
                     borderRadius="12px"
                     bg="accent.50"
