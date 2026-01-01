@@ -36,14 +36,14 @@ function App() {
 
   return (
     <>
-      <Routes>
-        <Route path="/callback" element={<CallbackPage />} />
+    <Routes>
+      <Route path="/callback" element={<CallbackPage />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} />
         <Route path="/" element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} />
         <Route path="/upload" element={isAuthenticated ? <UploadTransferPage /> : <Navigate to="/login" />} />
         <Route path="/review" element={isAuthenticated ? <ReviewInvoicesPage /> : <Navigate to="/login" />} />
         <Route path="/test-ocr" element={isAuthenticated ? <TestOCRPage /> : <Navigate to="/login" />} />
-      </Routes>
+    </Routes>
 
       {isAuthenticated && isModelLoading && (
         <Box

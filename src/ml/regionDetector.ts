@@ -129,12 +129,25 @@ export class RegionDetector {
         // bboxNorm[0] = [ymin, xmin, ymax, xmax] normalizado
         const [ymin, xmin, ymax, xmax] = bboxNorm[0];
         
-        const bbox: BoundingBox = {
-          x: Math.max(0, xmin * img.width),
-          y: Math.max(0, ymin * img.height),
-          width: Math.min(img.width, (xmax - xmin) * img.width),
-          height: Math.min(img.height, (ymax - ymin) * img.height),
-        };
+        // Calcular dimensiones
+        let x = xmin * img.width;
+        let y = ymin * img.height;
+        let width = (xmax - xmin) * img.width;
+        let height = (ymax - ymin) * img.height;
+
+        // Validar y sanitizar coordenadas
+        if (width <= 0 || height <= 0 || isNaN(width) || isNaN(height)) {
+          console.warn('[RegionDetector] Coordenadas inválidas del modelo, usando región por defecto');
+          return this.getDefaultRegion(img.width, img.height);
+        }
+
+        // Asegurar que las coordenadas estén dentro de la imagen
+        x = Math.max(0, Math.min(x, img.width - 10));
+        y = Math.max(0, Math.min(y, img.height - 10));
+        width = Math.min(width, img.width - x);
+        height = Math.min(height, img.height - y);
+
+        const bbox: BoundingBox = { x, y, width, height };
 
         console.log('[RegionDetector] Región detectada:', bbox);
         return bbox;
