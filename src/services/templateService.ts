@@ -43,55 +43,11 @@ export class TemplateService {
   }
 
   detectBank(text: string): string | null {
-    const normalizedText = text.toUpperCase()
-      .replace(/[|Il1]/g, 'I')  // Normalizar caracteres similares
-      .replace(/[0O]/g, 'O')
-      .replace(/\s+/g, ' ');
-
     for (const [id, template] of this.templates) {
       if (id === 'generic') continue;
 
-      // Buscar keywords exactos
-      const hasExactKeyword = template.keywords.some((keyword) => 
-        normalizedText.includes(keyword.toUpperCase())
-      );
-      
-      if (hasExactKeyword) return id;
-
-      // Búsqueda flexible para errores comunes de OCR
-      // Ej: "py CHINCHA" -> "PICHINCHA", "BANCO py CHINCHA" -> "BANCO PICHINCHA"
-      const flexiblePatterns: Record<string, RegExp[]> = {
-        banco_pichincha: [
-          /(?:BANCO\s+)?(?:py|p[yi]|p[yi]y|p[yi]y)\s*CHINCHA/i,
-          /(?:BANCO\s+)?P[yi]CHINCHA/i,
-          /CHINCHA/i,
-        ],
-        banco_guayaquil: [
-          /(?:BANCO\s+)?GUAYAQU[il1]L/i,
-          /GUAYAQU[il1]L/i,
-        ],
-        banco_pacifico: [
-          /(?:BANCO\s+)?(?:DEL\s+)?PAC[il1]F[il1]CO/i,
-          /PAC[il1]F[il1]CO/i,
-        ],
-        produbanco: [
-          /PRODUBANCO/i,
-          /PRODU\s*BANCO/i,
-        ],
-        banco_de_loja: [
-          /(?:BANCO\s+)?(?:DE\s+)?LO[IJ]A/i,
-          /[A-Z\s]*BANCO\s+DE\s+LO[A-Z\s]*/i,  // "E BANCO DE LO e" (con caracteres alrededor)
-          /BANCO\s+DE\s+LO/i,  // "BANCO DE LO" (incompleto por OCR)
-          /LO[IJ]A/i,
-          /ahorita[!]?/i,
-          /AHORITA[!]?/i,
-        ],
-      };
-
-      const patterns = flexiblePatterns[id];
-      if (patterns && patterns.some(pattern => pattern.test(normalizedText))) {
-        return id;
-      }
+      const hasKeyword = template.keywords.some((keyword) => text.toUpperCase().includes(keyword.toUpperCase()));
+      if (hasKeyword) return id;
     }
 
     return 'generic';

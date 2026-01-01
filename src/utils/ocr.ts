@@ -64,24 +64,7 @@ export class OCREngine {
 
       // 5) OCR detallado
       log('\n📖 PASO 5: OCR detallado (multi-pasada)');
-      let fullText = await this.detailedOCR(processed);
-      
-      // Si el OCR detallado falló o tiene muy poco texto útil, usar el texto completo
-      const hasUsefulContent = fullText && fullText.trim().length > 20 && 
-        /(?:comprobante|transferencia|n[úu]mero|banco)/i.test(fullText);
-      
-      if (!hasUsefulContent) {
-        log('   ⚠️ OCR detallado falló o muy poco texto útil, usando OCR completo de la imagen');
-        log('   Ejecutando OCR completo en imagen mejorada...');
-        fullText = await this.detailedOCR(enhanced);
-        
-        // Si aún falla, usar quickText
-        if (!fullText || fullText.trim().length < 10) {
-          log('   Usando texto rápido como último recurso');
-          fullText = quickText;
-        }
-      }
-      
+      const fullText = await this.detailedOCR(processed);
       log(`   TEXTO COMPLETO EXTRAÍDO:`);
       log('   ' + '-'.repeat(40));
       fullText.split('\n').forEach((line, i) => {
@@ -89,15 +72,9 @@ export class OCREngine {
       });
       log('   ' + '-'.repeat(40));
 
-      // 6) Pattern matching - buscar en el texto completo
+      // 6) Pattern matching
       log('\n🔍 PASO 6: Pattern matching');
-      let number = this.matchPatterns(fullText, bankId || 'generic');
-      
-      // Si no encontró en texto detallado, intentar también en quickText
-      if (!number && fullText !== quickText) {
-        log('   Intentando también en texto rápido...');
-        number = this.matchPatterns(quickText, bankId || 'generic');
-      }
+      const number = this.matchPatterns(fullText, bankId || 'generic');
 
       // 7) Confianza heurística
       const confidence = this.calculateConfidence(number, fullText, template);
@@ -189,40 +166,13 @@ export class OCREngine {
     const patterns = templateService.getAllPatterns(bankId);
     log(`   Probando ${patterns.length} patrones para "${bankId}":`);
 
-    // Normalizar texto para mejor matching - más agresivo para OCR con errores
-    let normalizedText = text
-      .replace(/\s+/g, ' ')  // Múltiples espacios a uno
-      .replace(/[|]/g, 'I')  // | a I (error común de OCR)
-      .trim();
-    
-    log(`   Texto original (primeros 500 chars): "${text.substring(0, 500)}"`);
-    
-    // Palabras comunes que NO son códigos de comprobante
-    const invalidWords = [
-      'AHORROS', 'CUENTA', 'CUENTAS', 'ACTIVA', 'AHORRO', 'CORRIENTE',
-      'BANCO', 'BANCOS', 'TRANSFERENCIA', 'TRANSFERENCIAS', 'PAGO', 'PAGOS',
-      'MONTO', 'COSTO', 'TRANSACCION', 'TRANSACCIONES', 'OPERACION', 'OPERACIONES',
-      'ORIGEN', 'DESTINO', 'DESDE', 'PARA', 'FECHA', 'FECHAS', 'NOMBRE', 'NOMBRES',
-      'IDENTIFICACION', 'IDENTIFICACIONES', 'COMPROBANTE', 'COMPROBANTES', 'COMPRABANTE',
-      'EXITOSO', 'EXITOSA', 'REALIZADO', 'REALIZADA', 'MORALES', 'VILLAVICENCIO',
-      'CORONEL', 'MORENO', 'ADOLFO', 'SANTIAGO', 'PAUL', 'ABRAHAN'
-    ];
-    
-    const isInvalidWord = (word: string): boolean => {
-      const upperWord = word.toUpperCase();
-      return invalidWords.some(invalid => upperWord.includes(invalid) || invalid.includes(upperWord));
-    };
+    // Normalizar texto para mejor matching
+    const normalizedText = text.replace(/\s+/g, ' ').trim();
 
     for (const pattern of patterns) {
       try {
-        // Probar primero con texto normalizado
-        let regex = new RegExp(pattern.regex, 'i');
-        let match = normalizedText.match(regex);
-
-        // Si no hay match, probar con texto original (más flexible)
-        if (!match) {
-          match = text.match(regex);
-        }
+        const regex = new RegExp(pattern.regex, 'i');
+        const match = normalizedText.match(regex);
 
         if (match) {
           log(`   ✅ MATCH: "${pattern.regex}"`);
@@ -230,38 +180,8 @@ export class OCREngine {
           log(`      Grupo 1 (número): "${match[1] || 'N/A'}"`);
           
           if (match[1]) {
-            let result = match[1].trim();
-            
-            // Filtrar palabras comunes que NO son códigos
-            if (isInvalidWord(result)) {
-              log(`      ⚠️ Resultado filtrado (palabra común): "${result}"`);
-              continue; // Probar siguiente patrón
-            }
-            
-            // Validar que tenga estructura de código (no solo letras comunes)
-            // Debe tener al menos un número O tener estructura específica de código
-            const hasNumber = /[0-9]/.test(result);
-            const isCodeLike = /^[A-Z0-9]{7,12}$/.test(result) && hasNumber;
-            
-            if (!hasNumber && !isCodeLike) {
-              // Si no tiene números y no parece código, probablemente es una palabra común
-              log(`      ⚠️ Resultado filtrado (sin números y no parece código): "${result}"`);
-              continue;
-            }
-            
-            // Normalizar el resultado: O->0, I->1 en códigos alfanuméricos
-            // Si parece un código alfanumérico (tiene letras y números), normalizar
-            if (/[A-Za-z].*[0-9]|[0-9].*[A-Za-z]/.test(result)) {
-              result = result
-                .replace(/O/g, '0')  // O mayúscula a 0
-                .replace(/I/g, '1')  // I mayúscula a 1
-                .replace(/l/g, '1')  // l minúscula a 1
-                .toUpperCase();       // Todo a mayúsculas
-            }
-            
             pattern.successCount += 1;
-            log(`      Resultado normalizado: "${result}"`);
-            return result;
+            return match[1].trim();
           }
         } else {
           log(`   ❌ No match: "${pattern.regex}" (${pattern.description})`);
@@ -271,63 +191,19 @@ export class OCREngine {
       }
     }
 
-    // Búsqueda fallback: más flexible para errores de OCR
+    // Búsqueda fallback: cualquier secuencia de números/letras que parezca un código
     log('\n   🔄 Intentando búsqueda fallback de códigos...');
-    
     const fallbackPatterns = [
-      // Buscar después de "Nro. comprobante:" o "Voucher No.:" (patrón más confiable)
-      /(?:nro|n[úu]mero|n[úu]m[3e]ro|voucher\s+no\.?|voucher\s+number)[:\s\.]*(?:de\s+)?(?:comprobante|comprabante|comproban[e3]|comproban[te])[:\s;]*([A-Z0-9]{7,12})/i,
-      // Buscar después de "Voucher No.:" o "Voucher Number:" directamente (inglés)
-      /(?:voucher\s+no\.?|voucher\s+number)[:\s\.]*([A-Z0-9]{7,12})/i,
-      // Buscar después de "comprobante:" o "comprabante:" directamente
-      /(?:comprobante|comprabante|comproban[e3]|comproban[te]|voucher)[:\s;]+([A-Z0-9]{7,12})/i,
-      // Códigos alfanuméricos con estructura mixta (letras-números-letras-números) cerca de palabras clave
-      /(?:comprobante|n[úu]mero|nro)[:\s]*(?:de\s+)?[:\s]*([A-Z0-9]{2,5}[0-9]{2,}[A-Z]{2,3}[A-Z0-9]{2,5})/i,
-      // Nro: comprobante/comprabante con código alfanumérico (más flexible)
-      /(?:nro|n[úu]mero|n[úu]m[3e]ro)[:\s]*(?:de\s+)?(?:comprobante|comprabante|comproban[e3]|comproban[te])[:\s;]*([A-Z0-9]{7,12})/i,
-      // Comprobante/comprabante con código alfanumérico
-      /(?:comprobante|comprabante|comproban[e3]|comproban[te])[:\s;]*([A-Z0-9]{7,12})/i,
-      // Códigos alfanuméricos con estructura mixta (letras-números-letras-números)
-      /\b([A-Z0-9]{2,5}[0-9]{2}[A-Z]{2,3}[A-Z0-9]{2,5})\b/i,
-      // Comprobante con errores comunes de OCR (solo números)
-      /(?:comprobante|comproban[e3]|comproban[te]|comproban[te]e)[:\s#-]*([0-9]{6,15})/i,
-      // Número de comprobante con errores
-      /(?:n[úu]mero|n[úu]m[3e]ro|n[úu]m[e3]ro)[:\s]*(?:de\s+)?(?:comprobante|comproban[e3])[:\s]*([0-9]{6,15})/i,
-      // Cualquier secuencia de 8-15 dígitos después de "comprobante" o "transferencia"
-      /(?:comprobante|transferencia|transf[e3]rencia|voucher)[:\s]*([0-9]{8,15})/i,
+      /(?:comprobante|nro|número|operación|referencia)[:\s#-]*([A-Z0-9]{5,20})/i,
+      /(?:CNL|TRF|REF|OP)[A-Z0-9]{5,15}/i,
+      /\b([A-Z]{2,3}\d{5,15})\b/,
+      /\b(\d{10,20})\b/,
     ];
 
     for (const fallback of fallbackPatterns) {
-      // Probar primero en texto original (más información)
-      let match = text.match(fallback);
-      if (!match) {
-        match = normalizedText.match(fallback);
-      }
-      
+      const match = normalizedText.match(fallback);
       if (match) {
-        let found = match[1] || match[0];
-        
-        // Filtrar palabras comunes
-        if (isInvalidWord(found)) {
-          log(`   ⚠️ Fallback filtrado (palabra común): "${found}"`);
-          continue;
-        }
-        
-        // Validar que tenga números (códigos de comprobante siempre tienen números)
-        if (!/[0-9]/.test(found)) {
-          log(`   ⚠️ Fallback filtrado (sin números): "${found}"`);
-          continue;
-        }
-        
-        // Normalizar código alfanumérico
-        if (/[A-Za-z].*[0-9]|[0-9].*[A-Za-z]/.test(found)) {
-          found = found
-            .replace(/O/g, '0')
-            .replace(/I/g, '1')
-            .replace(/l/g, '1')
-            .toUpperCase();
-        }
-        
+        const found = match[1] || match[0];
         log(`   ✅ Fallback encontró: "${found}"`);
         return found;
       }
