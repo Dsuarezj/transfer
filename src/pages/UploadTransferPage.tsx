@@ -16,11 +16,14 @@ import {
   ModalFooter,
   Text,
   Heading,
+  HStack,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { invoiceService } from '../services/invoiceService';
 import CameraView from '../components/CameraView';
+
+type ModalType = 'none' | 'duplicate' | 'success';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
@@ -32,9 +35,9 @@ export default function UploadTransferPage() {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [transferNumber, setTransferNumber] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
-  const [duplicateStatus, setDuplicateStatus] = useState<'none' | 'duplicate' | 'unique'>('none');
+  const [modalType, setModalType] = useState<ModalType>('none');
+  const [duplicateSuggestedId, setDuplicateSuggestedId] = useState('');
+  const [savedTransferNumber, setSavedTransferNumber] = useState('');
 
   const handleCapture = async () => {
     const blob = await camera.capturePhoto();
@@ -43,56 +46,6 @@ export default function UploadTransferPage() {
       camera.stopCamera();
       setStep('form');
     }
-  };
-
-  const handleCheckDuplicate = async () => {
-    if (!transferNumber.trim()) {
-      toast({
-        title: 'Ingresa un número',
-        description: 'Escribe el número de transferencia para verificar',
-        status: 'info',
-        duration: 3000,
-      });
-      return;
-    }
-
-    setIsCheckingDuplicate(true);
-    try {
-      const isDuplicate = await invoiceService.checkDuplicate(transferNumber.trim());
-      setDuplicateStatus(isDuplicate ? 'duplicate' : 'unique');
-      
-      if (isDuplicate) {
-        toast({
-          title: 'Transferencia duplicada',
-          description: `El número ${transferNumber} ya está registrado`,
-          status: 'warning',
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        toast({
-          title: 'Número disponible',
-          description: 'Este número de transferencia no está registrado',
-          status: 'success',
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error('Error verificando duplicado:', error);
-      toast({
-        title: 'Error',
-        description: 'No se pudo verificar el duplicado',
-        status: 'error',
-        duration: 3000,
-      });
-    } finally {
-      setIsCheckingDuplicate(false);
-    }
-  };
-
-  const handleTransferNumberChange = (value: string) => {
-    setTransferNumber(value);
-    setDuplicateStatus('none');
   };
 
   const handleSubmit = async () => {
@@ -106,23 +59,42 @@ export default function UploadTransferPage() {
       return;
     }
 
-    if (duplicateStatus === 'duplicate') {
-      toast({
-        title: 'Advertencia',
-        description: 'Este número ya está registrado. ¿Deseas continuar de todos modos?',
-        status: 'warning',
-        duration: 5000,
-      });
+    if (transferNumber.trim()) {
+      setIsUploading(true);
+      try {
+        const result = await invoiceService.checkDuplicate(transferNumber.trim());
+        
+        if (result.isDuplicate) {
+          setDuplicateSuggestedId(result.suggestedId);
+          setModalType('duplicate');
+          setIsUploading(false);
+          return;
+        }
+      } catch (error) {
+        console.error('Error verificando duplicado:', error);
+      }
+      setIsUploading(false);
     }
+
+    await saveTransfer();
+  };
+
+  const saveTransfer = async () => {
+    if (!photoBlob) return;
 
     setIsUploading(true);
     const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
       const imageUrl = await invoiceService.uploadPhoto(photoBlob, finalInvoiceNumber);
-      await invoiceService.add(finalInvoiceNumber, imageUrl, transferNumber.trim() || undefined);
+      const finalTransferNumber = await invoiceService.add(
+        finalInvoiceNumber, 
+        imageUrl, 
+        transferNumber.trim() || undefined
+      );
 
-      setShowSuccess(true);
+      setSavedTransferNumber(finalTransferNumber);
+      setModalType('success');
     } catch (error) {
       toast({
         title: 'Error',
@@ -135,8 +107,17 @@ export default function UploadTransferPage() {
     }
   };
 
+  const handleDuplicateConfirm = async () => {
+    setModalType('none');
+    await saveTransfer();
+  };
+
+  const handleDuplicateCancel = () => {
+    setModalType('none');
+  };
+
   const handleSuccessClose = () => {
-    setShowSuccess(false);
+    setModalType('none');
     navigate('/');
   };
 
@@ -151,15 +132,8 @@ export default function UploadTransferPage() {
     setPhotoBlob(null);
     setInvoiceNumber('');
     setTransferNumber('');
-    setDuplicateStatus('none');
     setStep('camera');
     camera.startCamera();
-  };
-
-  const getInputBorderColor = () => {
-    if (duplicateStatus === 'duplicate') return 'red.500';
-    if (duplicateStatus === 'unique') return 'green.500';
-    return undefined;
   };
 
   return (
@@ -231,44 +205,20 @@ export default function UploadTransferPage() {
                   <FormLabel color="neutral.700" fontWeight="semibold">
                     Número de Transferencia
                   </FormLabel>
-                  <VStack spacing={2} align="stretch">
-                    <Input
-                      value={transferNumber}
-                      onChange={(e) => handleTransferNumberChange(e.target.value)}
-                      placeholder="Ingresa el número de la transferencia"
-                      size="lg"
-                      borderRadius="12px"
-                      bg="accent.50"
-                      border="2px solid"
-                      borderColor={getInputBorderColor() || 'transparent'}
-                      _focus={{
-                        bg: 'white',
-                        borderColor: getInputBorderColor() || 'accent.500',
-                        boxShadow: `0 0 0 1px ${getInputBorderColor() || 'var(--chakra-colors-accent-500)'}`,
-                      }}
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      colorScheme="blue"
-                      onClick={handleCheckDuplicate}
-                      isLoading={isCheckingDuplicate}
-                      loadingText="Verificando..."
-                      leftIcon={<Text>🔍</Text>}
-                    >
-                      Verificar duplicados
-                    </Button>
-                    {duplicateStatus === 'duplicate' && (
-                      <Text fontSize="sm" color="red.500" fontWeight="medium">
-                        ⚠️ Este número ya está registrado
-                      </Text>
-                    )}
-                    {duplicateStatus === 'unique' && (
-                      <Text fontSize="sm" color="green.500" fontWeight="medium">
-                        ✓ Número disponible
-                      </Text>
-                    )}
-                  </VStack>
+                  <Input
+                    value={transferNumber}
+                    onChange={(e) => setTransferNumber(e.target.value)}
+                    placeholder="Ingresa el número de la transferencia"
+                    size="lg"
+                    borderRadius="12px"
+                    bg="accent.50"
+                    border="none"
+                    _focus={{
+                      bg: 'white',
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+                    }}
+                  />
                 </FormControl>
 
                 <VStack w="full" spacing={3} pt={2}>
@@ -306,7 +256,55 @@ export default function UploadTransferPage() {
         )}
       </Box>
 
-      <Modal isOpen={showSuccess} onClose={handleSuccessClose} isCentered>
+      <Modal isOpen={modalType === 'duplicate'} onClose={handleDuplicateCancel} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+        <ModalContent borderRadius="24px" mx={4} overflow="hidden">
+          <Box bg="orange.50" textAlign="center" pt={8}>
+            <Text fontSize="6xl">⚠️</Text>
+          </Box>
+          <ModalHeader color="orange.600" fontSize="xl" textAlign="center" pt={4}>
+            Transferencia Duplicada
+          </ModalHeader>
+          <ModalBody textAlign="center" pb={4}>
+            <Text fontSize="md" color="neutral.700">
+              El número <strong>{transferNumber}</strong> ya existe.
+            </Text>
+            <Text fontSize="md" color="neutral.600" mt={2}>
+              Se guardará como: <strong>{duplicateSuggestedId}</strong>
+            </Text>
+            <Text fontSize="sm" color="neutral.500" mt={4}>
+              ¿Deseas continuar?
+            </Text>
+          </ModalBody>
+          <ModalFooter justifyContent="center" pb={8}>
+            <HStack spacing={3}>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDuplicateCancel}
+                px={8}
+                borderColor="neutral.300"
+                color="neutral.600"
+              >
+                Cancelar
+              </Button>
+              <Button
+                size="lg"
+                onClick={handleDuplicateConfirm}
+                px={8}
+                bg="orange.500"
+                color="white"
+                _hover={{ bg: 'orange.600' }}
+                isLoading={isUploading}
+              >
+                Sí, guardar
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={modalType === 'success'} onClose={handleSuccessClose} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="24px" mx={4} overflow="hidden">
           <Box bg="accent.50" textAlign="center" pt={8}>
@@ -317,8 +315,13 @@ export default function UploadTransferPage() {
           </ModalHeader>
           <ModalBody textAlign="center" pb={6}>
             <Text fontSize="lg" color="neutral.700">
-              La transferencia se guardó correctamente en tu Dropbox
+              La transferencia se guardó correctamente
             </Text>
+            {savedTransferNumber && (
+              <Text fontSize="md" color="neutral.500" mt={2}>
+                Número: <strong>{savedTransferNumber}</strong>
+              </Text>
+            )}
           </ModalBody>
           <ModalFooter justifyContent="center" pb={8}>
             <Button

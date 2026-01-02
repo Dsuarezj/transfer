@@ -17,3 +17,5 @@ export interface Invoice {
   imageUrl: string;
 }
 
+export type TransferIds = Record<string, string>;
+

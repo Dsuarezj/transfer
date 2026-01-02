@@ -4,6 +4,7 @@ import {
   Container,
   Heading,
   VStack,
+  HStack,
   Input,
   Text,
   Button,
@@ -12,11 +13,16 @@ import {
   Center,
   InputGroup,
   InputLeftElement,
+  Select,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
+import { format, subMonths, subDays } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { invoiceService } from '../services/invoiceService';
 import { Invoice } from '../types/dropbox';
 import InvoiceCard from '../components/InvoiceCard';
+
+type DateRange = '7days' | '1month' | '2months' | '3months';
 
 export default function ReviewInvoicesPage() {
   const navigate = useNavigate();
@@ -25,22 +31,50 @@ export default function ReviewInvoicesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [dateRange, setDateRange] = useState<DateRange>('7days');
 
   useEffect(() => {
     loadInvoices();
-  }, []);
+  }, [dateRange]);
 
   useEffect(() => {
     filterInvoices();
   }, [searchQuery, invoices]);
 
+  const getDateRangeParams = (): { start: Date; end: Date } => {
+    const end = new Date();
+    let start: Date;
+
+    switch (dateRange) {
+      case '7days':
+        start = subDays(end, 7);
+        break;
+      case '1month':
+        start = subMonths(end, 1);
+        break;
+      case '2months':
+        start = subMonths(end, 2);
+        break;
+      case '3months':
+        start = subMonths(end, 3);
+        break;
+      default:
+        start = subDays(end, 7);
+    }
+
+    return { start, end };
+  };
+
   const loadInvoices = async () => {
     try {
       setIsLoading(true);
-      const data = await invoiceService.getAll();
+      setError(null);
+      
+      const { start, end } = getDateRangeParams();
+      const data = await invoiceService.getByDateRange(start, end);
+      
       setInvoices(data);
       setFilteredInvoices(data);
-      setError(null);
     } catch (err) {
       setError('No se pudieron cargar las facturas');
     } finally {
@@ -63,6 +97,11 @@ export default function ReviewInvoicesPage() {
     );
 
     setFilteredInvoices(filtered);
+  };
+
+  const getDateRangeLabel = (): string => {
+    const { start, end } = getDateRangeParams();
+    return `${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`;
   };
 
   return (
@@ -97,26 +136,54 @@ export default function ReviewInvoicesPage() {
 
       <Box flex="1" overflow="auto" position="relative" zIndex={1}>
         <Container maxW="md" py={6}>
-          <VStack spacing={6} align="stretch">
-          <InputGroup>
-            <InputLeftElement pointerEvents="none" color="neutral.400">
-              🔍
-            </InputLeftElement>
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por factura, transferencia o fecha..."
-              size="lg"
-              bg="white"
-              borderRadius="16px"
-              border="none"
-              boxShadow="card"
-              _focus={{
-                borderColor: 'accent.500',
-                boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
-              }}
-            />
-          </InputGroup>
+          <VStack spacing={4} align="stretch">
+            <HStack spacing={3}>
+              <InputGroup flex={1}>
+                <InputLeftElement pointerEvents="none" color="neutral.400">
+                  🔍
+                </InputLeftElement>
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar..."
+                  size="lg"
+                  bg="white"
+                  borderRadius="16px"
+                  border="none"
+                  boxShadow="card"
+                  _focus={{
+                    borderColor: 'accent.500',
+                    boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
+                  }}
+                />
+              </InputGroup>
+              <Select
+                value={dateRange}
+                onChange={(e) => setDateRange(e.target.value as DateRange)}
+                size="lg"
+                bg="white"
+                borderRadius="16px"
+                border="none"
+                boxShadow="card"
+                w="auto"
+                minW="130px"
+                _focus={{
+                  borderColor: 'accent.500',
+                  boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
+                }}
+              >
+                <option value="7days">7 días</option>
+                <option value="1month">1 mes</option>
+                <option value="2months">2 meses</option>
+                <option value="3months">3 meses</option>
+              </Select>
+            </HStack>
+
+            {!isLoading && !error && (
+              <Text color="neutral.100" fontSize="sm" opacity={0.8}>
+                {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'} · {getDateRangeLabel()}
+              </Text>
+            )}
 
           {isLoading && (
             <Center py={12}>
@@ -134,27 +201,19 @@ export default function ReviewInvoicesPage() {
             <Center py={12}>
               <VStack spacing={2}>
                 <Text fontSize="4xl">📭</Text>
-                <Text color="neutral.600" fontSize="lg">
-                  {searchQuery ? 'No se encontraron resultados' : 'No hay facturas registradas'}
+                <Text color="neutral.100" fontSize="lg" textAlign="center">
+                  {searchQuery ? 'No se encontraron resultados' : 'No hay facturas en este periodo'}
                 </Text>
               </VStack>
             </Center>
           )}
 
           {!isLoading && filteredInvoices.length > 0 && (
-            <>
-              <Box bg="rgba(255, 255, 255, 0.2)" px={4} py={2} borderRadius="full" alignSelf="flex-start">
-                <Text color="neutral.50" fontSize="sm" fontWeight="semibold">
-                  {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'}
-                </Text>
-              </Box>
-
-              <SimpleGrid columns={1} spacing={4}>
-                {filteredInvoices.map((invoice, index) => (
-                  <InvoiceCard key={index} invoice={invoice} />
-                ))}
-              </SimpleGrid>
-            </>
+            <SimpleGrid columns={1} spacing={4}>
+              {filteredInvoices.map((invoice, index) => (
+                <InvoiceCard key={index} invoice={invoice} />
+              ))}
+            </SimpleGrid>
           )}
           </VStack>
         </Container>
