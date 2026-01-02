@@ -12,18 +12,20 @@ export default function ActionCard({ title, description, icon, onClick }: Action
     <Box
       as="button"
       w="full"
-      bg="white"
       p={6}
       borderRadius="24px"
-      boxShadow="medium"
+      bgGradient="linear(145deg, white 0%, #f7fafc 100%)"
+      boxShadow="2xl"
+      border="1px solid"
+      borderColor="blue.50"
       _hover={{
         boxShadow: 'cardHover',
-        transform: 'translateY(-4px)',
+        transform: 'translateY(-5px)',
       }}
       _active={{
-        transform: 'translateY(0)',
+        transform: 'translateY(-1px)',
       }}
-      transition="all 0.3s"
+      transition="all 0.2s ease"
       onClick={onClick}
       textAlign="left"
       position="relative"
@@ -42,9 +44,10 @@ export default function ActionCard({ title, description, icon, onClick }: Action
       <VStack align="start" spacing={3} position="relative" zIndex={1}>
         <Box
           fontSize="3xl"
-          bg="accent.50"
+          bgGradient="linear(135deg, accent.50 0%, white 100%)"
           p={3}
           borderRadius="16px"
+          boxShadow="lg"
           transition="all 0.2s"
         >
           {icon}
