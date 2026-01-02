@@ -21,7 +21,6 @@ import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
 import { invoiceService } from '../services/invoiceService';
 import CameraView from '../components/CameraView';
-import { extractTransferNumber } from '../utils/ocr';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
@@ -34,7 +33,8 @@ export default function UploadTransferPage() {
   const [transferNumber, setTransferNumber] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [isProcessingOCR, setIsProcessingOCR] = useState(false);
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
+  const [duplicateStatus, setDuplicateStatus] = useState<'none' | 'duplicate' | 'unique'>('none');
 
   const handleCapture = async () => {
     const blob = await camera.capturePhoto();
@@ -42,30 +42,57 @@ export default function UploadTransferPage() {
       setPhotoBlob(blob);
       camera.stopCamera();
       setStep('form');
-
-      setIsProcessingOCR(true);
-      try {
-        const detectedNumber = await extractTransferNumber(blob);
-        if (detectedNumber) {
-          setTransferNumber(detectedNumber);
-
-          const isDuplicate = await invoiceService.checkDuplicate(detectedNumber);
-          if (isDuplicate) {
-            toast({
-              title: 'Transferencia duplicada',
-              description: `El número ${detectedNumber} ya está registrado`,
-              status: 'warning',
-              duration: 5000,
-              isClosable: true,
-            });
-          }
-        }
-      } catch (error) {
-        console.error('OCR error:', error);
-      } finally {
-        setIsProcessingOCR(false);
-      }
     }
+  };
+
+  const handleCheckDuplicate = async () => {
+    if (!transferNumber.trim()) {
+      toast({
+        title: 'Ingresa un número',
+        description: 'Escribe el número de transferencia para verificar',
+        status: 'info',
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsCheckingDuplicate(true);
+    try {
+      const isDuplicate = await invoiceService.checkDuplicate(transferNumber.trim());
+      setDuplicateStatus(isDuplicate ? 'duplicate' : 'unique');
+      
+      if (isDuplicate) {
+        toast({
+          title: 'Transferencia duplicada',
+          description: `El número ${transferNumber} ya está registrado`,
+          status: 'warning',
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Número disponible',
+          description: 'Este número de transferencia no está registrado',
+          status: 'success',
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      console.error('Error verificando duplicado:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo verificar el duplicado',
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsCheckingDuplicate(false);
+    }
+  };
+
+  const handleTransferNumberChange = (value: string) => {
+    setTransferNumber(value);
+    setDuplicateStatus('none');
   };
 
   const handleSubmit = async () => {
@@ -79,12 +106,21 @@ export default function UploadTransferPage() {
       return;
     }
 
+    if (duplicateStatus === 'duplicate') {
+      toast({
+        title: 'Advertencia',
+        description: 'Este número ya está registrado. ¿Deseas continuar de todos modos?',
+        status: 'warning',
+        duration: 5000,
+      });
+    }
+
     setIsUploading(true);
     const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
       const imageUrl = await invoiceService.uploadPhoto(photoBlob, finalInvoiceNumber);
-      await invoiceService.add(finalInvoiceNumber, imageUrl, transferNumber || undefined);
+      await invoiceService.add(finalInvoiceNumber, imageUrl, transferNumber.trim() || undefined);
 
       setShowSuccess(true);
     } catch (error) {
@@ -115,8 +151,15 @@ export default function UploadTransferPage() {
     setPhotoBlob(null);
     setInvoiceNumber('');
     setTransferNumber('');
+    setDuplicateStatus('none');
     setStep('camera');
     camera.startCamera();
+  };
+
+  const getInputBorderColor = () => {
+    if (duplicateStatus === 'duplicate') return 'red.500';
+    if (duplicateStatus === 'unique') return 'green.500';
+    return undefined;
   };
 
   return (
@@ -187,26 +230,45 @@ export default function UploadTransferPage() {
                 <FormControl>
                   <FormLabel color="neutral.700" fontWeight="semibold">
                     Número de Transferencia
-                    {isProcessingOCR && (
-                      <Text as="span" fontSize="sm" color="accent.500" ml={2}>
-                        (Detectando...)
+                  </FormLabel>
+                  <VStack spacing={2} align="stretch">
+                    <Input
+                      value={transferNumber}
+                      onChange={(e) => handleTransferNumberChange(e.target.value)}
+                      placeholder="Ingresa el número de la transferencia"
+                      size="lg"
+                      borderRadius="12px"
+                      bg="accent.50"
+                      border="2px solid"
+                      borderColor={getInputBorderColor() || 'transparent'}
+                      _focus={{
+                        bg: 'white',
+                        borderColor: getInputBorderColor() || 'accent.500',
+                        boxShadow: `0 0 0 1px ${getInputBorderColor() || 'var(--chakra-colors-accent-500)'}`,
+                      }}
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorScheme="blue"
+                      onClick={handleCheckDuplicate}
+                      isLoading={isCheckingDuplicate}
+                      loadingText="Verificando..."
+                      leftIcon={<Text>🔍</Text>}
+                    >
+                      Verificar duplicados
+                    </Button>
+                    {duplicateStatus === 'duplicate' && (
+                      <Text fontSize="sm" color="red.500" fontWeight="medium">
+                        ⚠️ Este número ya está registrado
                       </Text>
                     )}
-                  </FormLabel>
-                  <Input
-                    value={transferNumber}
-                    onChange={(e) => setTransferNumber(e.target.value)}
-                    placeholder="Opcional - Se detectará automáticamente"
-                    size="lg"
-                    borderRadius="12px"
-                    bg="accent.50"
-                    border="none"
-                    _focus={{
-                      bg: 'white',
-                      borderColor: 'accent.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
-                    }}
-                  />
+                    {duplicateStatus === 'unique' && (
+                      <Text fontSize="sm" color="green.500" fontWeight="medium">
+                        ✓ Número disponible
+                      </Text>
+                    )}
+                  </VStack>
                 </FormControl>
 
                 <VStack w="full" spacing={3} pt={2}>

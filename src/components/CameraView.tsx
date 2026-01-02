@@ -3,14 +3,8 @@ import {
   Box,
   Button,
   VStack,
-  HStack,
   Text,
   Container,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  IconButton,
 } from '@chakra-ui/react';
 
 interface CameraCapabilities {
