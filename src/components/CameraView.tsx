@@ -35,9 +35,6 @@ interface CameraViewProps {
     isCapturing: boolean;
     startCamera: () => void;
     stopCamera: () => void;
-    setExposureCompensation: (value: number) => void;
-    setTorch: (enabled: boolean) => void;
-    setZoom: (value: number) => void;
     focusOnPoint: (x: number, y: number) => void;
   };
   onCapture: () => void;
@@ -51,7 +48,6 @@ interface FocusPoint {
 
 export default function CameraView({ camera, onCapture }: CameraViewProps) {
   const [focusPoint, setFocusPoint] = useState<FocusPoint | null>(null);
-  const [showControls, setShowControls] = useState(true);
 
   useEffect(() => {
     camera.startCamera();
@@ -90,10 +86,6 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
     },
     [camera]
   );
-
-  const hasExposureControl = !!camera.capabilities.exposureCompensation;
-  const hasTorch = !!camera.capabilities.torch;
-  const hasZoom = !!camera.capabilities.zoom;
 
   return (
     <Box
@@ -159,108 +151,6 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
             <Text fontWeight="semibold">{camera.error}</Text>
           </Box>
         </Container>
-      )}
-
-      {camera.isActive && showControls && (hasExposureControl || hasTorch || hasZoom) && (
-        <Box
-          position="absolute"
-          top={4}
-          right={4}
-          zIndex={10}
-        >
-          <VStack
-            spacing={3}
-            bg="blackAlpha.700"
-            backdropFilter="blur(8px)"
-            p={3}
-            borderRadius="xl"
-            align="stretch"
-            minW="180px"
-          >
-            {hasExposureControl && (
-              <VStack spacing={1} align="stretch">
-                <HStack justify="space-between">
-                  <Text color="neutral.50" fontSize="xs" fontWeight="medium">
-                    Brillo
-                  </Text>
-                  <Text color="neutral.300" fontSize="xs">
-                    {camera.settings.exposureCompensation > 0 ? '+' : ''}
-                    {camera.settings.exposureCompensation.toFixed(1)}
-                  </Text>
-                </HStack>
-                <Slider
-                  min={camera.capabilities.exposureCompensation!.min}
-                  max={camera.capabilities.exposureCompensation!.max}
-                  step={camera.capabilities.exposureCompensation!.step}
-                  value={camera.settings.exposureCompensation}
-                  onChange={camera.setExposureCompensation}
-                  size="sm"
-                >
-                  <SliderTrack bg="whiteAlpha.300">
-                    <SliderFilledTrack bg="yellow.400" />
-                  </SliderTrack>
-                  <SliderThumb boxSize={4} bg="yellow.400" />
-                </Slider>
-              </VStack>
-            )}
-
-            {hasZoom && (
-              <VStack spacing={1} align="stretch">
-                <HStack justify="space-between">
-                  <Text color="neutral.50" fontSize="xs" fontWeight="medium">
-                    Zoom
-                  </Text>
-                  <Text color="neutral.300" fontSize="xs">
-                    {camera.settings.zoom.toFixed(1)}x
-                  </Text>
-                </HStack>
-                <Slider
-                  min={camera.capabilities.zoom!.min}
-                  max={Math.min(camera.capabilities.zoom!.max, 5)}
-                  step={camera.capabilities.zoom!.step}
-                  value={camera.settings.zoom}
-                  onChange={camera.setZoom}
-                  size="sm"
-                >
-                  <SliderTrack bg="whiteAlpha.300">
-                    <SliderFilledTrack bg="blue.400" />
-                  </SliderTrack>
-                  <SliderThumb boxSize={4} bg="blue.400" />
-                </Slider>
-              </VStack>
-            )}
-
-            {hasTorch && (
-              <Button
-                size="sm"
-                variant={camera.settings.torch ? 'solid' : 'outline'}
-                colorScheme="yellow"
-                onClick={() => camera.setTorch(!camera.settings.torch)}
-                leftIcon={
-                  <Text>{camera.settings.torch ? 'ON' : 'OFF'}</Text>
-                }
-              >
-                Linterna
-              </Button>
-            )}
-          </VStack>
-        </Box>
-      )}
-
-      {camera.isActive && (
-        <IconButton
-          aria-label="Toggle controls"
-          position="absolute"
-          top={4}
-          left={4}
-          zIndex={10}
-          size="sm"
-          bg="blackAlpha.600"
-          color="white"
-          _hover={{ bg: 'blackAlpha.700' }}
-          onClick={() => setShowControls(!showControls)}
-          icon={<Text fontSize="lg">{showControls ? '[-]' : '[+]'}</Text>}
-        />
       )}
 
       <Box
