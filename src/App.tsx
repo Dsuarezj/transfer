@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useDropboxAuth } from './hooks/useDropboxAuth';
 import LoginPage from './pages/LoginPage';
 import CallbackPage from './pages/CallbackPage';
@@ -6,28 +6,26 @@ import HomePage from './pages/HomePage';
 import UploadTransferPage from './pages/UploadTransferPage';
 import ReviewInvoicesPage from './pages/ReviewInvoicesPage';
 
-function App() {
+function ProtectedRoute() {
   const { isAuthenticated } = useDropboxAuth();
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+}
 
+function LoginRoute() {
+  const { isAuthenticated } = useDropboxAuth();
+  return isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />;
+}
+
+function App() {
   return (
     <Routes>
       <Route path="/callback" element={<CallbackPage />} />
-      <Route
-        path="/login"
-        element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />}
-      />
-      <Route
-        path="/"
-        element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/upload"
-        element={isAuthenticated ? <UploadTransferPage /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/review"
-        element={isAuthenticated ? <ReviewInvoicesPage /> : <Navigate to="/login" />}
-      />
+      <Route path="/login" element={<LoginRoute />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/upload" element={<UploadTransferPage />} />
+        <Route path="/review" element={<ReviewInvoicesPage />} />
+      </Route>
     </Routes>
   );
 }
