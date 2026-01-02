@@ -95,11 +95,15 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
   const hasTorch = !!camera.capabilities.torch;
   const hasZoom = !!camera.capabilities.zoom;
 
-  // Aproximamos la altura del header en 64px para evitar overflow del botón
-  const viewportAvailable = 'calc(100vh - 64px)';
-
   return (
-    <Box position="relative" minH={viewportAvailable} maxH={viewportAvailable} userSelect="none" bg="black" overflow="hidden">
+    <Box
+      position="relative"
+      minH="calc(100vh - 64px)"
+      maxH="calc(100vh - 64px)"
+      overflow="hidden"
+      userSelect="none"
+      bg="black"
+    >
       <Box
         position="absolute"
         top={0}
@@ -260,7 +264,7 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
       )}
 
       <Box
-        position="absolute"
+        position="fixed"
         bottom={0}
         left={0}
         right={0}
