@@ -95,8 +95,11 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
   const hasTorch = !!camera.capabilities.torch;
   const hasZoom = !!camera.capabilities.zoom;
 
+  // Aproximamos la altura del header en 64px para evitar overflow del botón
+  const viewportAvailable = 'calc(100vh - 64px)';
+
   return (
-    <Box position="relative" minH="calc(100vh - 72px)" userSelect="none">
+    <Box position="relative" minH={viewportAvailable} maxH={viewportAvailable} userSelect="none" bg="black" overflow="hidden">
       <Box
         position="absolute"
         top={0}
@@ -256,10 +259,25 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
         />
       )}
 
-      <Box position="absolute" bottom={0} left={0} right={0} pb={8} zIndex={10}>
+      <Box
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        pb="calc(16px + env(safe-area-inset-bottom))"
+        zIndex={10}
+        bgGradient="linear(to top, blackAlpha.700, transparent)"
+      >
         <Container maxW="md">
-          <VStack spacing={4}>
-            <Box bg="blackAlpha.600" backdropFilter="blur(8px)" px={4} py={2} borderRadius="full">
+          <VStack spacing={3}>
+            <Box
+              bg="blackAlpha.600"
+              backdropFilter="blur(10px)"
+              px={4}
+              py={2}
+              borderRadius="full"
+              maxW="260px"
+            >
               <Text color="neutral.50" fontSize="sm" textAlign="center" fontWeight="medium">
                 Toca la pantalla para enfocar
               </Text>
@@ -269,15 +287,15 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
               <Button
                 size="lg"
                 w="full"
-                maxW="300px"
+                maxW="320px"
                 bg="accent.500"
                 color="neutral.50"
                 _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
                 _active={{ bg: 'accent.700' }}
                 onClick={onCapture}
                 boxShadow="buttonHover"
-                h="56px"
-                fontSize="lg"
+                h="54px"
+                fontSize="md"
                 fontWeight="semibold"
                 isLoading={camera.isCapturing}
                 loadingText="Capturando..."
