@@ -1,4 +1,12 @@
-import { Box, Button, Container, Heading, Text, VStack, SimpleGrid } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Container,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+} from '@chakra-ui/react';
 import { authService } from '../services/dropbox/authService';
 
 export default function LoginPage() {
@@ -7,51 +15,60 @@ export default function LoginPage() {
     window.location.href = url;
   };
 
-  const features = [
-    { emoji: '🔐', title: 'Privado', desc: 'Solo tú tienes acceso' },
-    { emoji: '🛡️', title: 'Seguro', desc: 'Protegido por Dropbox' },
-    { emoji: '☁️', title: 'Tu nube', desc: 'En tu espacio personal' }
+  const pills = [
+    { emoji: '⚡', label: 'Rápido' },
+    { emoji: '🗂️', label: 'Ordenado' },
+    { emoji: '👥', label: 'Para el equipo' },
   ];
 
   return (
     <Box
-      h="100%"
+      minH="100vh"
       w="100%"
       bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      overflow="hidden"
+      py={{ base: 8, md: 12 }}
+      px={{ base: 4, sm: 6 }}
       position="relative"
     >
+      {/* Fondos decorativos */}
       <Box
         position="absolute"
-        top="0"
-        left="0"
-        right="0"
-        bottom="0"
-        bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
-        pointerEvents="none"
+        top="-120px"
+        left="-80px"
+        w="260px"
+        h="260px"
+        bg="whiteAlpha.200"
+        rounded="full"
+        filter="blur(80px)"
+      />
+      <Box
+        position="absolute"
+        bottom="-140px"
+        right="-100px"
+        w="300px"
+        h="300px"
+        bg="blackAlpha.300"
+        rounded="full"
+        filter="blur(90px)"
       />
 
-      <Container maxW="md" px={6} position="relative" zIndex={1}>
-        <VStack spacing={8} align="stretch">
-          <VStack spacing={4}>
+      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
+        <VStack spacing={{ base: 8, md: 12 }} align="stretch">
+          {/* Header */}
+          <VStack spacing={{ base: 3, md: 5 }}>
             <Box
               bg="white"
-              borderRadius="24px"
-              p={4}
-              boxShadow="medium"
+              borderRadius={{ base: '16px', md: '20px' }}
+              p={{ base: 2, md: 3 }}
+              boxShadow="lg"
             >
-              <Text fontSize="6xl" fontWeight="bold" color="accent.500">
-                📤
-              </Text>
+              <Text fontSize={{ base: '3xl', md: '5xl' }}>📤</Text>
             </Box>
 
             <Heading
               as="h1"
-              size="2xl"
-              color="neutral.50"
+              fontSize={{ base: '2xl', md: '3xl' }}
+              color="white"
               textAlign="center"
               fontWeight="bold"
             >
@@ -59,83 +76,103 @@ export default function LoginPage() {
             </Heading>
 
             <Text
-              color="neutral.50"
+              color="whiteAlpha.900"
               textAlign="center"
-              fontSize="lg"
-              fontWeight="medium"
+              fontSize={{ base: 'md', md: 'lg' }}
+              maxW="md"
             >
-              Registra transferencias con privacidad total
+              Registra transferencias rápido, ordénalas y compártelas con tu equipo
             </Text>
           </VStack>
 
+          {/* Card principal */}
           <Box
             bg="white"
-            p={8}
-            borderRadius="24px"
-            boxShadow="cardHover"
+            p={{ base: 6, md: 8 }}
+            borderRadius="22px"
+            boxShadow="xl"
+            w="full"
+            maxW={{ base: 'md', md: 'lg' }}
+            border="1px solid"
+            borderColor="blackAlpha.50"
           >
-            <VStack spacing={6}>
-              <SimpleGrid columns={3} spacing={3} w="full">
-                {features.map((feature) => (
-                  <VStack
-                    key={feature.title}
+            <VStack spacing={{ base: 5, md: 7 }} align="stretch">
+              {/* Feature pills compactas */}
+              <HStack
+                spacing={{ base: 2, md: 3 }}
+                justify="center"
+                wrap="wrap"
+              >
+                {pills.map((pill, idx) => (
+                  <HStack
+                    key={pill.label}
+                    bg="gray.50"
+                    borderRadius="full"
+                    py={{ base: 2, md: 3 }}
+                    px={{ base: 3, md: 4 }}
                     spacing={2}
-                    bg="accent.50"
-                    p={4}
-                    borderRadius="16px"
-                    transition="all 0.2s"
-                    _hover={{ transform: 'translateY(-2px)', bg: 'accent.100' }}
+                    boxShadow="md"
+                    border="1px solid"
+                    borderColor={idx === 0 ? 'accent.100' : 'gray.100'}
                   >
-                    <Text fontSize="2xl">{feature.emoji}</Text>
-                    <Text
-                      fontSize="sm"
-                      fontWeight="bold"
-                      color="accent.700"
-                      textAlign="center"
-                    >
-                      {feature.title}
+                    <Text fontSize={{ base: 'lg', md: 'xl' }}>{pill.emoji}</Text>
+                    <Text fontSize={{ base: 'xs', md: 'sm' }} fontWeight="semibold" color="gray.700">
+                      {pill.label}
                     </Text>
-                    <Text
-                      fontSize="xs"
-                      color="neutral.600"
-                      textAlign="center"
-                      lineHeight="short"
-                    >
-                      {feature.desc}
-                    </Text>
-                  </VStack>
+                  </HStack>
                 ))}
-              </SimpleGrid>
+              </HStack>
 
-              <Box w="full" h="1px" bg="neutral.200" />
-
-              <Text color="neutral.600" textAlign="center" fontSize="md" lineHeight="tall">
-                Tus datos se guardan únicamente en <strong>tu Dropbox personal</strong>.
-                Tú tienes el control total.
-              </Text>
+              <VStack spacing={2} textAlign="center">
+                <Text 
+                  color="gray.700" 
+                  fontSize={{ base: 'md', md: 'lg' }}
+                  fontWeight="medium"
+                >
+                  Empieza a organizar tus transferencias
+                </Text>
+                <Text 
+                  color="gray.500" 
+                  fontSize={{ base: 'sm', md: 'md' }}
+                >
+                  Conecta tu Dropbox y sincroniza al instante
+                </Text>
+              </VStack>
 
               <Button
                 size="lg"
                 w="full"
                 onClick={login}
                 bg="accent.500"
-                color="neutral.50"
-                _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
-                _active={{ bg: 'accent.700' }}
-                h="56px"
-                fontSize="lg"
+                color="white"
+                _hover={{ bg: 'accent.600', transform: 'translateY(-1px)', boxShadow: 'xl' }}
+                _active={{ bg: 'accent.700', transform: 'translateY(0)' }}
+                h={{ base: '50px', md: '56px' }}
+                fontSize={{ base: 'md', md: 'lg' }}
                 fontWeight="semibold"
-                boxShadow="buttonHover"
+                borderRadius="14px"
+                transition="all 0.2s"
               >
-                Conectar con Dropbox
+                Comenzar con Dropbox
               </Button>
 
-              <Text fontSize="xs" color="neutral.500" textAlign="center" lineHeight="tall">
-                Al conectar, solo autorizas el acceso a una carpeta privada en tu cuenta.
-                Nadie más puede ver tus datos.
+              <Text 
+                fontSize="xs" 
+                color="gray.500" 
+                textAlign="center"
+              >
+                Tus datos se guardan en tu Dropbox personal
               </Text>
             </VStack>
           </Box>
+
+          {/* Footer info minimal */}
+          <VStack spacing={1} color="whiteAlpha.900" fontSize={{ base: 'sm', md: 'md' }} textAlign="center">
+            <Text>Conecta • Captura • Comparte</Text>
+            <Text color="whiteAlpha.700" fontSize={{ base: 'xs', md: 'sm' }}>
+              En segundos, para todo tu equipo
+            </Text>
+          </VStack>
         </VStack>
       </Container>
     </Box>

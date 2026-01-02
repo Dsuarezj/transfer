@@ -34,6 +34,7 @@ interface CameraViewProps {
     settings: CameraSettings;
     isCapturing: boolean;
     startCamera: () => void;
+    stopCamera: () => void;
     setExposureCompensation: (value: number) => void;
     setTorch: (enabled: boolean) => void;
     setZoom: (value: number) => void;
@@ -54,6 +55,9 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
 
   useEffect(() => {
     camera.startCamera();
+    return () => {
+      camera.stopCamera();
+    };
   }, []);
 
   useEffect(() => {

@@ -31,6 +31,7 @@ export function useCamera() {
   const streamRef = useRef<MediaStream | null>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const imageCapture = useRef<ImageCapture | null>(null);
+  const sessionIdRef = useRef(0);
 
   const getAdvancedConstraints = () => ({
     video: {
@@ -115,10 +116,18 @@ export function useCamera() {
   };
 
   const startCamera = async () => {
+    const currentSessionId = ++sessionIdRef.current;
+    
     try {
       setError(null);
 
       const stream = await navigator.mediaDevices.getUserMedia(getAdvancedConstraints());
+      
+      if (currentSessionId !== sessionIdRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+
       const track = stream.getVideoTracks()[0];
 
       if (!track) {
@@ -135,6 +144,14 @@ export function useCamera() {
       const caps = extractCapabilities(track);
       await applyOptimalSettings(track, caps);
 
+      if (currentSessionId !== sessionIdRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+        trackRef.current = null;
+        imageCapture.current = null;
+        return;
+      }
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
@@ -148,11 +165,12 @@ export function useCamera() {
         ? 'No se encontro camara trasera.'
         : 'No se pudo acceder a la camara.';
       setError(message);
-      console.error('Camera error:', err);
     }
   };
 
   const stopCamera = useCallback(() => {
+    sessionIdRef.current++;
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
