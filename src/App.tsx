@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import CallbackPage from './pages/CallbackPage';
 import HomePage from './pages/HomePage';
 import UploadTransferPage from './pages/UploadTransferPage';
+import SaveTransferPage from './pages/SaveTransferPage';
 import ReviewInvoicesPage from './pages/ReviewInvoicesPage';
 
 function ProtectedRoute() {
@@ -24,6 +25,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/upload" element={<UploadTransferPage />} />
+        <Route path="/save" element={<SaveTransferPage />} />
         <Route path="/review" element={<ReviewInvoicesPage />} />
       </Route>
     </Routes>

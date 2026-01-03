@@ -273,16 +273,25 @@ export function useCamera() {
 
     try {
       if (imageCapture.current) {
+        // Algunos navegadores no soportan setPhotoOptions; probamos sin opciones antes de caer a canvas.
         try {
-          const blob = await imageCapture.current.takePhoto({
-            imageWidth: 4032,
-            imageHeight: 3024,
-          });
+          const blob = await imageCapture.current.takePhoto();
           const url = URL.createObjectURL(blob);
           setCapturedImage(url);
           return blob;
         } catch (err) {
-          console.warn('ImageCapture.takePhoto failed, falling back to canvas:', err);
+          console.warn('takePhoto() sin opciones falló, probando con opciones:', err);
+          try {
+            const blob = await imageCapture.current.takePhoto({
+              imageWidth: 4032,
+              imageHeight: 3024,
+            });
+            const url = URL.createObjectURL(blob);
+            setCapturedImage(url);
+            return blob;
+          } catch (err2) {
+            console.warn('ImageCapture.takePhoto falló, usando canvas:', err2);
+          }
         }
       }
 
