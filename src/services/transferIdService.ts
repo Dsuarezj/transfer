@@ -1,58 +1,68 @@
 import { fileService } from './dropbox/fileService';
 import { TransferIds } from '../types/dropbox';
 
-class TransferIdService {
-  private readonly idsPath = '/transfer-ids.json';
+const IDS_PATH = '/transfer-ids.json';
 
-  async getAll(): Promise<TransferIds> {
-    try {
-      const content = await fileService.get(this.idsPath);
-      return JSON.parse(content);
-    } catch {
-      return {};
-    }
-  }
+function normalize(value: string): string {
+  return value.toLowerCase().trim();
+}
 
-  async save(ids: TransferIds): Promise<void> {
-    const content = JSON.stringify(ids, null, 2);
-    const blob = new Blob([content], { type: 'application/json' });
-    await fileService.update(this.idsPath, blob);
-  }
-
-  async exists(transferNumber: string): Promise<boolean> {
-    const ids = await this.getAll();
-    return transferNumber in ids;
-  }
-
-  async add(transferNumber: string, date: string): Promise<void> {
-    const ids = await this.getAll();
-    ids[transferNumber] = date;
-    await this.save(ids);
-  }
-
-  getNextAvailableId(ids: TransferIds, baseNumber: string): string {
-    if (!(baseNumber in ids)) {
-      return baseNumber;
-    }
-    
-    let suffix = 1;
-    while (`${baseNumber}-${suffix}` in ids) {
-      suffix++;
-    }
-    return `${baseNumber}-${suffix}`;
-  }
-
-  async checkDuplicateWithSuggestion(transferNumber: string): Promise<{
-    isDuplicate: boolean;
-    suggestedId: string;
-  }> {
-    const ids = await this.getAll();
-    const isDuplicate = transferNumber in ids;
-    const suggestedId = this.getNextAvailableId(ids, transferNumber);
-    
-    return { isDuplicate, suggestedId };
+async function getAll(): Promise<TransferIds> {
+  try {
+    const content = await fileService.get(IDS_PATH);
+    return JSON.parse(content);
+  } catch {
+    return {};
   }
 }
 
-export const transferIdService = new TransferIdService();
+async function save(ids: TransferIds): Promise<void> {
+  const content = JSON.stringify(ids, null, 2);
+  const blob = new Blob([content], { type: 'application/json' });
+  await fileService.update(IDS_PATH, blob);
+}
 
+async function exists(transferNumber: string): Promise<boolean> {
+  const ids = await getAll();
+  return normalize(transferNumber) in ids;
+}
+
+async function add(transferNumber: string, date: string): Promise<void> {
+  const ids = await getAll();
+  ids[normalize(transferNumber)] = date;
+  await save(ids);
+}
+
+function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
+  const normalized = normalize(baseNumber);
+  if (!(normalized in ids)) {
+    return normalized;
+  }
+  
+  let suffix = 1;
+  while (`${normalized}-${suffix}` in ids) {
+    suffix++;
+  }
+  return `${normalized}-${suffix}`;
+}
+
+async function checkDuplicateWithSuggestion(transferNumber: string): Promise<{
+  isDuplicate: boolean;
+  suggestedId: string;
+}> {
+  const ids = await getAll();
+  const normalized = normalize(transferNumber);
+  const isDuplicate = normalized in ids;
+  const suggestedId = getNextAvailableId(ids, normalized);
+  
+  return { isDuplicate, suggestedId };
+}
+
+export const transferIdService = {
+  getAll,
+  save,
+  exists,
+  add,
+  getNextAvailableId,
+  checkDuplicateWithSuggestion,
+};
