@@ -360,7 +360,7 @@ export default function UploadTransferPage() {
         </Container>
       </Box>
 
-      <Box flex="1" overflow="auto">
+      <Box flex="1" overflow="hidden">
         {step === 'camera' && (
           <CameraView
             camera={camera}

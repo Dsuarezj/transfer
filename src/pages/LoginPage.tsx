@@ -5,7 +5,6 @@ import {
   Heading,
   Text,
   VStack,
-  HStack,
 } from '@chakra-ui/react';
 import { authService } from '../services/dropbox/authService';
 
@@ -15,20 +14,18 @@ export default function LoginPage() {
     window.location.href = url;
   };
 
-  const pills = [
-    { emoji: '⚡', label: 'Rápido' },
-    { emoji: '🗂️', label: 'Ordenado' },
-    { emoji: '👥', label: 'Para el equipo' },
-  ];
-
   return (
     <Box
       minH="100vh"
       w="100%"
       bgGradient="linear(135deg, accent.500, primary.500)"
-      py={{ base: 8, md: 12 }}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      py={{ base: 4, md: 6 }}
       px={{ base: 4, sm: 6 }}
       position="relative"
+      overflow="hidden"
     >
       {/* Fondos decorativos */}
       <Box
@@ -89,6 +86,7 @@ export default function LoginPage() {
           <Box
             bg="white"
             p={{ base: 6, md: 8 }}
+            pt={{ base: 8, md: 10 }}
             borderRadius="22px"
             boxShadow="xl"
             w="full"
@@ -97,32 +95,6 @@ export default function LoginPage() {
             borderColor="blackAlpha.50"
           >
             <VStack spacing={{ base: 5, md: 7 }} align="stretch">
-              {/* Feature pills compactas */}
-              <HStack
-                spacing={{ base: 2, md: 3 }}
-                justify="center"
-                wrap="wrap"
-              >
-                {pills.map((pill, idx) => (
-                  <HStack
-                    key={pill.label}
-                    bg="gray.50"
-                    borderRadius="full"
-                    py={{ base: 2, md: 3 }}
-                    px={{ base: 3, md: 4 }}
-                    spacing={2}
-                    boxShadow="md"
-                    border="1px solid"
-                    borderColor={idx === 0 ? 'accent.100' : 'gray.100'}
-                  >
-                    <Text fontSize={{ base: 'lg', md: 'xl' }}>{pill.emoji}</Text>
-                    <Text fontSize={{ base: 'xs', md: 'sm' }} fontWeight="semibold" color="gray.700">
-                      {pill.label}
-                    </Text>
-                  </HStack>
-                ))}
-              </HStack>
-
               <VStack spacing={2} textAlign="center">
                 <Text 
                   color="gray.700" 
@@ -145,13 +117,22 @@ export default function LoginPage() {
                 onClick={login}
                 bg="accent.500"
                 color="white"
-                _hover={{ bg: 'accent.600', transform: 'translateY(-1px)', boxShadow: 'xl' }}
-                _active={{ bg: 'accent.700', transform: 'translateY(0)' }}
-                h={{ base: '50px', md: '56px' }}
+                boxShadow="0 4px 14px rgba(58, 124, 165, 0.4)"
+                _hover={{ 
+                  bg: 'accent.600', 
+                  transform: 'translateY(-2px)', 
+                  boxShadow: '0 6px 20px rgba(58, 124, 165, 0.5)' 
+                }}
+                _active={{ 
+                  bg: 'accent.700', 
+                  transform: 'translateY(0)',
+                  boxShadow: '0 2px 8px rgba(58, 124, 165, 0.4)'
+                }}
+                h={{ base: '52px', md: '58px' }}
                 fontSize={{ base: 'md', md: 'lg' }}
                 fontWeight="semibold"
                 borderRadius="14px"
-                transition="all 0.2s"
+                transition="all 0.2s ease-out"
               >
                 Comenzar con Dropbox
               </Button>

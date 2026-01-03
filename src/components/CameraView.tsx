@@ -84,8 +84,8 @@ export default function CameraView({ camera, onCapture }: CameraViewProps) {
   return (
     <Box
       position="relative"
-      minH="calc(100vh - 64px)"
-      maxH="calc(100vh - 64px)"
+      h="100%"
+      w="100%"
       overflow="hidden"
       userSelect="none"
       bg="black"
