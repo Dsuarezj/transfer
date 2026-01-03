@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Box,
   Container,
-  VStack,
   Button,
   FormControl,
   FormLabel,
@@ -17,6 +16,10 @@ import {
   Text,
   Heading,
   HStack,
+  VStack,
+  IconButton,
+  Flex,
+  useBreakpointValue,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useCamera } from '../hooks/useCamera';
@@ -24,6 +27,207 @@ import { invoiceService } from '../services/invoiceService';
 import CameraView from '../components/CameraView';
 
 type ModalType = 'none' | 'duplicate' | 'success';
+
+// Componente de formulario con layouts responsive
+interface FormLayoutProps {
+  capturedImage: string | null;
+  invoiceNumber: string;
+  setInvoiceNumber: (value: string) => void;
+  transferNumber: string;
+  setTransferNumber: (value: string) => void;
+  isUploading: boolean;
+  onSubmit: () => void;
+  onRetake: () => void;
+}
+
+function FormLayout({
+  capturedImage,
+  invoiceNumber,
+  setInvoiceNumber,
+  transferNumber,
+  setTransferNumber,
+  isUploading,
+  onSubmit,
+  onRetake,
+}: FormLayoutProps) {
+  const isMobile = useBreakpointValue({ base: true, md: false });
+
+  // Componente de formulario reutilizable
+  const FormFields = ({ compact = false }: { compact?: boolean }) => (
+    <>
+      <HStack spacing={3} mb={3} flexDir={compact ? 'row' : { base: 'row', md: 'column' }} w="full">
+        <FormControl flex="1">
+          <FormLabel color="neutral.600" fontWeight="medium" fontSize={compact ? 'xs' : 'sm'} mb={1}>
+            {compact ? 'Factura' : 'Número de Factura'}
+          </FormLabel>
+          <Input
+            value={invoiceNumber}
+            onChange={(e) => setInvoiceNumber(e.target.value)}
+            placeholder={compact ? 'Opcional' : 'Opcional - Se genera automático'}
+            size={compact ? 'sm' : 'md'}
+            borderRadius={compact ? '8px' : '12px'}
+            bg="gray.50"
+            border="1px solid"
+            borderColor="gray.200"
+            _focus={{
+              bg: 'white',
+              borderColor: 'accent.500',
+              boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+            }}
+          />
+        </FormControl>
+
+        <FormControl flex="1">
+          <FormLabel color="neutral.600" fontWeight="medium" fontSize={compact ? 'xs' : 'sm'} mb={1}>
+            {compact ? 'N° Transferencia' : 'Número de Transferencia'}
+          </FormLabel>
+          <Input
+            value={transferNumber}
+            onChange={(e) => setTransferNumber(e.target.value)}
+            placeholder="Ingresa el número"
+            size={compact ? 'sm' : 'md'}
+            borderRadius={compact ? '8px' : '12px'}
+            bg="gray.50"
+            border="1px solid"
+            borderColor="gray.200"
+            _focus={{
+              bg: 'white',
+              borderColor: 'accent.500',
+              boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+            }}
+          />
+        </FormControl>
+      </HStack>
+
+      <HStack spacing={2} w="full">
+        <Button
+          flex="1"
+          size={compact ? 'md' : 'lg'}
+          onClick={onSubmit}
+          isLoading={isUploading}
+          loadingText="Guardando..."
+          bg="accent.500"
+          color="white"
+          _hover={{ bg: 'accent.600' }}
+          _active={{ bg: 'accent.700' }}
+          borderRadius={compact ? '10px' : '12px'}
+          fontWeight="semibold"
+        >
+          {compact ? 'Guardar' : 'Guardar Transferencia'}
+        </Button>
+        <IconButton
+          aria-label="Tomar otra foto"
+          icon={<Text fontSize="lg">📷</Text>}
+          size={compact ? 'md' : 'lg'}
+          variant="outline"
+          onClick={onRetake}
+          borderColor="gray.300"
+          borderRadius={compact ? '10px' : '12px'}
+        />
+      </HStack>
+    </>
+  );
+
+  // === LAYOUT MOBILE ===
+  if (isMobile) {
+    return (
+      <Box h="100%" display="flex" flexDirection="column">
+        {/* Imagen que se ajusta al espacio disponible */}
+        <Flex
+          flex="1"
+          bg="neutral.900"
+          align="center"
+          justify="center"
+          overflow="hidden"
+          minH={0}
+        >
+          {capturedImage && (
+            <img
+              src={capturedImage}
+              alt="Transferencia capturada"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          )}
+        </Flex>
+
+        {/* Panel de formulario FIJO abajo */}
+        <Box
+          bg="white"
+          px={4}
+          py={3}
+          borderTopRadius="20px"
+          boxShadow="0 -4px 20px rgba(0,0,0,0.15)"
+          flexShrink={0}
+        >
+          <FormFields compact />
+        </Box>
+      </Box>
+    );
+  }
+
+  // === LAYOUT DESKTOP ===
+  return (
+    <Container maxW="5xl" h="100%" py={6}>
+      <Flex
+        h="100%"
+        gap={6}
+        direction={{ base: 'column', md: 'row' }}
+      >
+        {/* Imagen a la izquierda */}
+        <Box
+          flex="1"
+          bg="neutral.900"
+          borderRadius="16px"
+          overflow="hidden"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          {capturedImage && (
+            <img
+              src={capturedImage}
+              alt="Transferencia capturada"
+              style={{
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          )}
+        </Box>
+
+        {/* Formulario a la derecha - centrado verticalmente */}
+        <Flex
+          w={{ base: '100%', md: '320px' }}
+          flexShrink={0}
+          align="center"
+          justify="center"
+        >
+          <Box
+            bg="white"
+            p={6}
+            borderRadius="24px"
+            boxShadow="lg"
+            w="100%"
+          >
+            <VStack spacing={4} align="stretch">
+              <Text fontSize="lg" fontWeight="semibold" color="neutral.700" mb={2}>
+                Datos de la transferencia
+              </Text>
+              <FormFields />
+            </VStack>
+          </Box>
+        </Flex>
+      </Flex>
+    </Container>
+  );
+}
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
@@ -165,94 +369,16 @@ export default function UploadTransferPage() {
         )}
 
         {step === 'form' && (
-          <Container maxW="md" py={6}>
-            <VStack spacing={6} align="stretch">
-            {camera.capturedImage && (
-              <Box
-                borderRadius="16px"
-                overflow="hidden"
-                boxShadow="card"
-              >
-                <img
-                  src={camera.capturedImage}
-                  alt="Captured"
-                  style={{ width: '100%', display: 'block' }}
-                />
-              </Box>
-            )}
-
-            <Box bg="white" p={6} borderRadius="24px" boxShadow="cardHover">
-              <VStack spacing={4}>
-                <FormControl>
-                  <FormLabel color="neutral.700" fontWeight="semibold">Número de Factura</FormLabel>
-                  <Input
-                    value={invoiceNumber}
-                    onChange={(e) => setInvoiceNumber(e.target.value)}
-                    placeholder="Opcional - Se generará automáticamente"
-                    size="lg"
-                    borderRadius="12px"
-                    bg="accent.50"
-                    border="none"
-                    _focus={{
-                      bg: 'white',
-                      borderColor: 'accent.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
-                    }}
-                  />
-                </FormControl>
-
-                <FormControl>
-                  <FormLabel color="neutral.700" fontWeight="semibold">
-                    Número de Transferencia
-                  </FormLabel>
-                  <Input
-                    value={transferNumber}
-                    onChange={(e) => setTransferNumber(e.target.value)}
-                    placeholder="Ingresa el número de la transferencia"
-                    size="lg"
-                    borderRadius="12px"
-                    bg="accent.50"
-                    border="none"
-                    _focus={{
-                      bg: 'white',
-                      borderColor: 'accent.500',
-                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
-                    }}
-                  />
-                </FormControl>
-
-                <VStack w="full" spacing={3} pt={2}>
-                  <Button
-                    w="full"
-                    size="lg"
-                    onClick={handleSubmit}
-                    isLoading={isUploading}
-                    loadingText="Guardando..."
-                    bg="accent.500"
-                    color="neutral.50"
-                    _hover={{ bg: 'accent.600', boxShadow: 'buttonHover' }}
-                    _active={{ bg: 'accent.700' }}
-                    boxShadow="buttonHover"
-                  >
-                    Guardar Transferencia
-                  </Button>
-
-                  <Button
-                    w="full"
-                    size="lg"
-                    variant="outline"
-                    onClick={handleRetake}
-                    borderColor="accent.500"
-                    color="accent.500"
-                    _hover={{ bg: 'accent.50' }}
-                  >
-                    Tomar otra foto
-                  </Button>
-                </VStack>
-              </VStack>
-            </Box>
-          </VStack>
-        </Container>
+          <FormLayout
+            capturedImage={camera.capturedImage}
+            invoiceNumber={invoiceNumber}
+            setInvoiceNumber={setInvoiceNumber}
+            transferNumber={transferNumber}
+            setTransferNumber={setTransferNumber}
+            isUploading={isUploading}
+            onSubmit={handleSubmit}
+            onRetake={handleRetake}
+          />
         )}
       </Box>
 
