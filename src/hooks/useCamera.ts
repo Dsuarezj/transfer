@@ -153,8 +153,25 @@ export function useCamera() {
       }
 
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
+        const video = videoRef.current;
+        video.srcObject = stream;
+        
+        // Esperar a que el video realmente tenga datos antes de activar
+        await new Promise<void>((resolve) => {
+          const onReady = () => {
+            video.removeEventListener('loadeddata', onReady);
+            resolve();
+          };
+          
+          // Si ya tiene datos, resolver inmediatamente
+          if (video.readyState >= 2 && video.videoWidth > 0) {
+            resolve();
+          } else {
+            video.addEventListener('loadeddata', onReady);
+          }
+        });
+        
+        await video.play();
       }
 
       setIsActive(true);
@@ -272,46 +289,31 @@ export function useCamera() {
     setIsCapturing(true);
 
     try {
+      // Intentar con ImageCapture API primero (mejor calidad)
       if (imageCapture.current) {
-        // Algunos navegadores no soportan setPhotoOptions; probamos sin opciones antes de caer a canvas.
         try {
           const blob = await imageCapture.current.takePhoto();
           const url = URL.createObjectURL(blob);
           setCapturedImage(url);
           return blob;
-        } catch (err) {
-          console.warn('takePhoto() sin opciones falló, probando con opciones:', err);
-          try {
-            const blob = await imageCapture.current.takePhoto({
-              imageWidth: 4032,
-              imageHeight: 3024,
-            });
-            const url = URL.createObjectURL(blob);
-            setCapturedImage(url);
-            return blob;
-          } catch (err2) {
-            console.warn('ImageCapture.takePhoto falló, usando canvas:', err2);
-          }
+        } catch {
+          // Fallback a canvas si ImageCapture falla
         }
       }
 
-      if (!videoRef.current) return null;
-
+      // Fallback: capturar desde canvas
       const video = videoRef.current;
-      const canvas = document.createElement('canvas');
+      if (!video || video.videoWidth === 0 || video.videoHeight === 0) {
+        return null;
+      }
 
+      const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      const ctx = canvas.getContext('2d', {
-        alpha: false,
-        desynchronized: true,
-      });
-
+      const ctx = canvas.getContext('2d');
       if (!ctx) return null;
 
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(video, 0, 0);
 
       return new Promise<Blob | null>((resolve) => {
@@ -326,7 +328,7 @@ export function useCamera() {
             }
           },
           'image/jpeg',
-          0.98
+          0.95
         );
       });
     } finally {

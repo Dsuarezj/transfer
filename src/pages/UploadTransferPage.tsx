@@ -16,12 +16,14 @@ export default function UploadTransferPage() {
 
   const handleCapture = async () => {
     const blob = await camera.capturePhoto();
-    if (blob && camera.capturedImage) {
+    if (blob) {
+      // Crear URL directamente del blob (no depender del estado async)
+      const imageUrl = URL.createObjectURL(blob);
       camera.stopCamera();
       // Navegar a la página de guardado con la imagen
       navigate('/save', {
         state: {
-          imageUrl: camera.capturedImage,
+          imageUrl,
           photoBlob: blob,
         },
       });
