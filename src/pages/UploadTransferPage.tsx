@@ -131,15 +131,23 @@ function FormLayout({
   // === LAYOUT MOBILE ===
   if (isMobile) {
     return (
-      <Box h="100%" display="flex" flexDirection="column">
-        {/* Imagen que se ajusta al espacio disponible */}
+      <Box 
+        h="100%" 
+        overflow="auto"
+        bg="neutral.900"
+        sx={{
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {/* Imagen con altura controlada */}
         <Flex
-          flex="1"
+          h="45vh"
+          minH="200px"
+          maxH="350px"
           bg="neutral.900"
           align="center"
           justify="center"
-          overflow="hidden"
-          minH={0}
+          flexShrink={0}
         >
           {capturedImage && (
             <img
@@ -155,14 +163,15 @@ function FormLayout({
           )}
         </Flex>
 
-        {/* Panel de formulario FIJO abajo */}
+        {/* Panel de formulario - scrolleable con el contenido */}
         <Box
           bg="white"
           px={4}
-          py={3}
+          py={4}
           borderTopRadius="20px"
           boxShadow="0 -4px 20px rgba(0,0,0,0.15)"
-          flexShrink={0}
+          minH="calc(55vh - env(safe-area-inset-bottom))"
+          pb="calc(16px + env(safe-area-inset-bottom))"
         >
           <FormFields compact />
         </Box>
@@ -360,7 +369,7 @@ export default function UploadTransferPage() {
         </Container>
       </Box>
 
-      <Box flex="1" overflow="hidden">
+      <Box flex="1" overflow={step === 'camera' ? 'hidden' : 'auto'}>
         {step === 'camera' && (
           <CameraView
             camera={camera}
