@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { dateRangeService } from './dateRangeService';
-import { parse } from 'date-fns';
 
 describe('dateRangeService', () => {
   beforeEach(() => {
