@@ -4,8 +4,31 @@ type TransferIds = Record<string, string>;
 
 const IDS_PATH = '/transfer-ids.json';
 
-function normalize(value: string): string {
+export function normalize(value: string): string {
   return value.toLowerCase().trim();
+}
+
+export function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
+  const normalized = normalize(baseNumber);
+  if (!(normalized in ids)) {
+    return normalized;
+  }
+
+  let suffix = 1;
+  while (`${normalized}-${suffix}` in ids) {
+    suffix++;
+  }
+  return `${normalized}-${suffix}`;
+}
+
+export function checkDuplicateLocal(
+  ids: TransferIds,
+  transferNumber: string
+): { isDuplicate: boolean; suggestedId: string } {
+  const normalized = normalize(transferNumber);
+  const isDuplicate = normalized in ids;
+  const suggestedId = getNextAvailableId(ids, normalized);
+  return { isDuplicate, suggestedId };
 }
 
 async function getAll(): Promise<TransferIds> {
@@ -29,30 +52,14 @@ async function add(transferNumber: string, date: string): Promise<void> {
   await save(ids);
 }
 
-function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
-  const normalized = normalize(baseNumber);
-  if (!(normalized in ids)) {
-    return normalized;
-  }
-
-  let suffix = 1;
-  while (`${normalized}-${suffix}` in ids) {
-    suffix++;
-  }
-  return `${normalized}-${suffix}`;
-}
-
 async function checkDuplicate(transferNumber: string): Promise<{
   isDuplicate: boolean;
   suggestedId: string;
   loadedIds: TransferIds;
 }> {
   const ids = await getAll();
-  const normalized = normalize(transferNumber);
-  const isDuplicate = normalized in ids;
-  const suggestedId = getNextAvailableId(ids, normalized);
-
-  return { isDuplicate, suggestedId, loadedIds: ids };
+  const result = checkDuplicateLocal(ids, transferNumber);
+  return { ...result, loadedIds: ids };
 }
 
 async function addWithIds(transferNumber: string, date: string, existingIds: TransferIds): Promise<void> {

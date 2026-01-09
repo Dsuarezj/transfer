@@ -22,7 +22,7 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import { invoiceService } from '../services/invoiceService';
-import { TransferIds } from '../services/transferIdService';
+import { TransferIds, checkDuplicateLocal } from '../services/transferIdService';
 
 type ModalType = 'none' | 'duplicate' | 'success';
 
@@ -94,22 +94,6 @@ export default function SaveTransferPage() {
       viewport.removeEventListener('scroll', handleViewportChange);
     };
   }, [isMobile]);
-
-  const checkDuplicateLocal = (ids: TransferIds, transferNum: string): { isDuplicate: boolean; suggestedId: string } => {
-    const normalized = transferNum.toLowerCase().trim();
-    const isDuplicate = normalized in ids;
-
-    let suggestedId = normalized;
-    if (isDuplicate) {
-      let suffix = 1;
-      while (`${normalized}-${suffix}` in ids) {
-        suffix++;
-      }
-      suggestedId = `${normalized}-${suffix}`;
-    }
-
-    return { isDuplicate, suggestedId };
-  };
 
   const handleSubmit = async () => {
     if (!photoBlob) {
