@@ -1,14 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Text, VStack, Container } from '@chakra-ui/react';
 import { useCamera } from '../hooks/useCamera';
+import { transferIdService, TransferIds } from '../services/transferIdService';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
   const camera = useCamera();
+  const [preloadedIds, setPreloadedIds] = useState<TransferIds | null>(null);
 
   useEffect(() => {
     camera.startCamera();
+
+    transferIdService.getAll()
+      .then((ids) => setPreloadedIds(ids))
+      .catch(() => {});
+
     return () => {
       camera.stopCamera();
     };
@@ -17,14 +24,13 @@ export default function UploadTransferPage() {
   const handleCapture = async () => {
     const blob = await camera.capturePhoto();
     if (blob) {
-      // Crear URL directamente del blob (no depender del estado async)
       const imageUrl = URL.createObjectURL(blob);
       camera.stopCamera();
-      // Navegar a la página de guardado con la imagen
       navigate('/save', {
         state: {
           imageUrl,
           photoBlob: blob,
+          preloadedIds,
         },
       });
     }
@@ -45,7 +51,6 @@ export default function UploadTransferPage() {
       bg="black"
       overflow="hidden"
     >
-      {/* Video de la cámara */}
       <Box
         position="absolute"
         top={0}
@@ -66,7 +71,6 @@ export default function UploadTransferPage() {
         />
       </Box>
 
-      {/* Error */}
       {camera.error && (
         <Box
           position="absolute"
@@ -84,7 +88,6 @@ export default function UploadTransferPage() {
         </Box>
       )}
 
-      {/* Controles */}
       <Box
         position="absolute"
         bottom={0}

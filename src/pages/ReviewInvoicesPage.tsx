@@ -16,7 +16,7 @@ import {
   Select,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { format, subMonths, subDays } from 'date-fns';
+import { format, subMonths, subDays, parse, isAfter, isBefore, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { invoiceService } from '../services/invoiceService';
 import { Invoice } from '../types/dropbox';
@@ -70,11 +70,18 @@ export default function ReviewInvoicesPage() {
       setIsLoading(true);
       setError(null);
       
+      const allInvoices = await invoiceService.getAll();
       const { start, end } = getDateRangeParams();
-      const data = await invoiceService.getByDateRange(start, end);
       
-      setInvoices(data);
-      setFilteredInvoices(data);
+      const filtered = allInvoices.filter(invoice => {
+        const invoiceDate = startOfDay(parse(invoice.date, 'yyyy-MM-dd', new Date()));
+        const startDate = startOfDay(start);
+        const endDate = startOfDay(end);
+        return !isBefore(invoiceDate, startDate) && !isAfter(invoiceDate, endDate);
+      });
+      
+      setInvoices(filtered);
+      setFilteredInvoices(filtered);
     } catch (err) {
       setError('No se pudieron cargar las facturas');
     } finally {

@@ -1,21 +1,18 @@
-import { format, subDays, parse, isAfter, isBefore, startOfDay } from 'date-fns';
+import { format } from 'date-fns';
 import { fileService } from './dropbox/fileService';
-import { transferIdService } from './transferIdService';
-import { Invoice, TransferIds } from '../types/dropbox';
+import { transferIdService, TransferIds } from './transferIdService';
+import { Invoice } from '../types/dropbox';
 
-interface PreloadedDuplicateCheck {
+interface PreloadedCheck {
   suggestedId: string;
   loadedIds: TransferIds;
 }
 
 class InvoiceService {
-  private getCsvPath(yearMonth: string): string {
-    return `/reportes/transfers-${yearMonth}.csv`;
-  }
+  private readonly csvPath = '/reportes/resumen.csv';
 
-  private getCurrentMonthPath(): string {
-    const yearMonth = format(new Date(), 'yyyy-MM');
-    return this.getCsvPath(yearMonth);
+  async checkTransferDuplicate(transferNumber: string) {
+    return transferIdService.checkDuplicate(transferNumber);
   }
 
   async uploadPhoto(photoBlob: Blob, invoiceNumber: string): Promise<string> {
@@ -32,13 +29,11 @@ class InvoiceService {
     photoBlob: Blob,
     invoiceNumber: string,
     transferNumber?: string,
-    preloadedCheck?: PreloadedDuplicateCheck
+    preloadedCheck?: PreloadedCheck
   ): Promise<string> {
     const now = new Date();
     const date = format(now, 'yyyy-MM-dd');
     const time = format(now, 'HH:mm:ss');
-    const csvPath = this.getCurrentMonthPath();
-
     const timestamp = format(now, 'yyyyMMdd_HHmmss');
     const fileName = `${invoiceNumber}_${timestamp}.jpg`;
     const imagePath = `/capturas/${fileName}`;
@@ -50,7 +45,7 @@ class InvoiceService {
 
     parallelOps.push(fileService.save(imagePath, photoBlob));
 
-    const csvPromise = fileService.get(csvPath).catch((error: any) => {
+    const csvPromise = fileService.get(this.csvPath).catch((error: any) => {
       if (error.message?.includes('not found')) {
         return 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n';
       }
@@ -58,15 +53,9 @@ class InvoiceService {
     });
     parallelOps.push(csvPromise);
 
-    if (finalTransferNumber) {
-      if (preloadedCheck) {
-        finalTransferNumber = preloadedCheck.suggestedId;
-        parallelOps.push(transferIdService.addWithIds(finalTransferNumber, date, preloadedCheck.loadedIds));
-      } else {
-        const { suggestedId, loadedIds } = await transferIdService.checkDuplicateWithSuggestion(finalTransferNumber);
-        finalTransferNumber = suggestedId;
-        parallelOps.push(transferIdService.addWithIds(finalTransferNumber, date, loadedIds));
-      }
+    if (finalTransferNumber && preloadedCheck) {
+      finalTransferNumber = preloadedCheck.suggestedId;
+      parallelOps.push(transferIdService.addWithIds(finalTransferNumber, date, preloadedCheck.loadedIds));
     }
 
     const results = await Promise.all(parallelOps);
@@ -75,39 +64,21 @@ class InvoiceService {
     const newLine = `${date},${time},${invoiceNumber},${finalTransferNumber},${imageUrl}\n`;
     const updatedContent = existingContent + newLine;
     const blob = new Blob([updatedContent], { type: 'text/csv' });
-    await fileService.update(csvPath, blob);
+
+    await fileService.update(this.csvPath, blob);
 
     return finalTransferNumber;
   }
 
-  async add(
-    invoiceNumber: string,
-    imageUrl: string,
-    transferNumber?: string,
-    preloadedCheck?: PreloadedDuplicateCheck
-  ): Promise<string> {
+  async add(invoiceNumber: string, imageUrl: string, transferNumber?: string): Promise<void> {
     const now = new Date();
     const date = format(now, 'yyyy-MM-dd');
     const time = format(now, 'HH:mm:ss');
-    const csvPath = this.getCurrentMonthPath();
-
-    let finalTransferNumber = transferNumber || '';
-    let transferIdsPromise: Promise<void> | null = null;
-
-    if (finalTransferNumber) {
-      if (preloadedCheck) {
-        finalTransferNumber = preloadedCheck.suggestedId;
-        transferIdsPromise = transferIdService.addWithIds(finalTransferNumber, date, preloadedCheck.loadedIds);
-      } else {
-        const { suggestedId, loadedIds } = await transferIdService.checkDuplicateWithSuggestion(finalTransferNumber);
-        finalTransferNumber = suggestedId;
-        transferIdsPromise = transferIdService.addWithIds(finalTransferNumber, date, loadedIds);
-      }
-    }
+    const newLine = `${date},${time},${invoiceNumber},${transferNumber || ''},${imageUrl}\n`;
 
     let existingContent = '';
     try {
-      existingContent = await fileService.get(csvPath);
+      existingContent = await fileService.get(this.csvPath);
     } catch (error: any) {
       if (error.message?.includes('not found')) {
         existingContent = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n';
@@ -116,97 +87,48 @@ class InvoiceService {
       }
     }
 
-    if (transferIdsPromise) {
-      await transferIdsPromise;
-    }
-
-    const newLine = `${date},${time},${invoiceNumber},${finalTransferNumber},${imageUrl}\n`;
     const updatedContent = existingContent + newLine;
     const blob = new Blob([updatedContent], { type: 'text/csv' });
-    await fileService.update(csvPath, blob);
-
-    return finalTransferNumber;
+    await fileService.update(this.csvPath, blob);
   }
 
-  async getByMonth(yearMonth: string): Promise<Invoice[]> {
+  async getAll(): Promise<Invoice[]> {
     try {
-      const csvPath = this.getCsvPath(yearMonth);
-      const content = await fileService.get(csvPath);
-      return this.parseCsv(content);
-    } catch {
-      return [];
-    }
-  }
+      const content = await fileService.get(this.csvPath);
+      const lines = content.split('\n').filter((line: string) => line.trim());
+      const invoices: Invoice[] = [];
 
-  async getByDateRange(startDate: Date, endDate: Date): Promise<Invoice[]> {
-    const months = this.getMonthsInRange(startDate, endDate);
-    const allInvoices: Invoice[] = [];
-
-    for (const month of months) {
-      const invoices = await this.getByMonth(month);
-      allInvoices.push(...invoices);
-    }
-
-    const start = startOfDay(startDate);
-    const end = startOfDay(endDate);
-
-    return allInvoices
-      .filter(inv => {
-        const invDate = startOfDay(parse(inv.date, 'yyyy-MM-dd', new Date()));
-        return !isBefore(invDate, start) && !isAfter(invDate, end);
-      })
-      .sort((a, b) => {
-        const dateA = parse(`${a.date} ${a.time}`, 'yyyy-MM-dd HH:mm:ss', new Date());
-        const dateB = parse(`${b.date} ${b.time}`, 'yyyy-MM-dd HH:mm:ss', new Date());
-        return dateB.getTime() - dateA.getTime();
-      });
-  }
-
-  async getLast7Days(): Promise<Invoice[]> {
-    const endDate = new Date();
-    const startDate = subDays(endDate, 7);
-    return this.getByDateRange(startDate, endDate);
-  }
-
-  async checkDuplicate(transferNumber: string): Promise<{
-    isDuplicate: boolean;
-    suggestedId: string;
-    loadedIds: TransferIds;
-  }> {
-    return transferIdService.checkDuplicateWithSuggestion(transferNumber);
-  }
-
-  private parseCsv(content: string): Invoice[] {
-    const lines = content.split('\n').filter((line: string) => line.trim());
-    const invoices: Invoice[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const [date, time, invoiceNumber, transferNumber, imageUrl] = lines[i].split(',');
-      if (date && invoiceNumber) {
-        invoices.push({
-          date,
-          time,
-          invoiceNumber,
-          transferNumber: transferNumber || undefined,
-          imageUrl,
-        });
+      for (let i = 1; i < lines.length; i++) {
+        const [date, time, invoiceNumber, transferNumber, imageUrl] = lines[i].split(',');
+        if (date && invoiceNumber) {
+          invoices.push({
+            date,
+            time,
+            invoiceNumber,
+            transferNumber: transferNumber || undefined,
+            imageUrl,
+          });
+        }
       }
-    }
 
-    return invoices;
+      return invoices.reverse();
+    } catch (error: any) {
+      if (error.message?.includes('not found')) {
+        return [];
+      }
+      throw error;
+    }
   }
 
-  private getMonthsInRange(startDate: Date, endDate: Date): string[] {
-    const months: string[] = [];
-    const current = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
-    const end = new Date(endDate.getFullYear(), endDate.getMonth(), 1);
+  async checkDuplicate(transferNumber: string): Promise<boolean> {
+    if (!transferNumber) return false;
 
-    while (current <= end) {
-      months.push(format(current, 'yyyy-MM'));
-      current.setMonth(current.getMonth() + 1);
+    try {
+      const invoices = await this.getAll();
+      return invoices.some(inv => inv.transferNumber === transferNumber);
+    } catch {
+      return false;
     }
-
-    return months;
   }
 }
 

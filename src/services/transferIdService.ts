@@ -1,5 +1,6 @@
 import { fileService } from './dropbox/fileService';
-import { TransferIds } from '../types/dropbox';
+
+type TransferIds = Record<string, string>;
 
 const IDS_PATH = '/transfer-ids.json';
 
@@ -22,20 +23,10 @@ async function save(ids: TransferIds): Promise<void> {
   await fileService.update(IDS_PATH, blob);
 }
 
-async function exists(transferNumber: string): Promise<boolean> {
-  const ids = await getAll();
-  return normalize(transferNumber) in ids;
-}
-
 async function add(transferNumber: string, date: string): Promise<void> {
   const ids = await getAll();
   ids[normalize(transferNumber)] = date;
   await save(ids);
-}
-
-async function addWithIds(transferNumber: string, date: string, existingIds: TransferIds): Promise<void> {
-  existingIds[normalize(transferNumber)] = date;
-  await save(existingIds);
 }
 
 function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
@@ -51,7 +42,7 @@ function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
   return `${normalized}-${suffix}`;
 }
 
-async function checkDuplicateWithSuggestion(transferNumber: string): Promise<{
+async function checkDuplicate(transferNumber: string): Promise<{
   isDuplicate: boolean;
   suggestedId: string;
   loadedIds: TransferIds;
@@ -64,12 +55,16 @@ async function checkDuplicateWithSuggestion(transferNumber: string): Promise<{
   return { isDuplicate, suggestedId, loadedIds: ids };
 }
 
+async function addWithIds(transferNumber: string, date: string, existingIds: TransferIds): Promise<void> {
+  existingIds[normalize(transferNumber)] = date;
+  await save(existingIds);
+}
+
 export const transferIdService = {
   getAll,
-  save,
-  exists,
+  checkDuplicate,
   add,
   addWithIds,
-  getNextAvailableId,
-  checkDuplicateWithSuggestion,
 };
+
+export type { TransferIds };

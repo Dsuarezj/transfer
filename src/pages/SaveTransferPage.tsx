@@ -22,7 +22,7 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import { invoiceService } from '../services/invoiceService';
-import { TransferIds } from '../types/dropbox';
+import { TransferIds } from '../services/transferIdService';
 
 type ModalType = 'none' | 'duplicate' | 'success';
 
@@ -41,7 +41,11 @@ export default function SaveTransferPage() {
   const location = useLocation();
   const toast = useToast();
 
-  const { imageUrl, photoBlob } = (location.state as { imageUrl?: string; photoBlob?: Blob }) || {};
+  const { imageUrl, photoBlob, preloadedIds } = (location.state as {
+    imageUrl?: string;
+    photoBlob?: Blob;
+    preloadedIds?: TransferIds;
+  }) || {};
 
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [transferNumber, setTransferNumber] = useState('');
@@ -91,6 +95,22 @@ export default function SaveTransferPage() {
     };
   }, [isMobile]);
 
+  const checkDuplicateLocal = (ids: TransferIds, transferNum: string): { isDuplicate: boolean; suggestedId: string } => {
+    const normalized = transferNum.toLowerCase().trim();
+    const isDuplicate = normalized in ids;
+
+    let suggestedId = normalized;
+    if (isDuplicate) {
+      let suffix = 1;
+      while (`${normalized}-${suffix}` in ids) {
+        suffix++;
+      }
+      suggestedId = `${normalized}-${suffix}`;
+    }
+
+    return { isDuplicate, suggestedId };
+  };
+
   const handleSubmit = async () => {
     if (!photoBlob) {
       toast({
@@ -103,23 +123,40 @@ export default function SaveTransferPage() {
     }
 
     if (transferNumber.trim()) {
-      setIsUploading(true);
-      try {
-        const result = await invoiceService.checkDuplicate(transferNumber.trim());
+      if (preloadedIds) {
+        const result = checkDuplicateLocal(preloadedIds, transferNumber.trim());
+
         preloadedCheckRef.current = {
           suggestedId: result.suggestedId,
-          loadedIds: result.loadedIds,
+          loadedIds: preloadedIds,
         };
+
         if (result.isDuplicate) {
           setDuplicateSuggestedId(result.suggestedId);
           setModalType('duplicate');
-          setIsUploading(false);
           return;
         }
-      } catch (error) {
-        console.error('Error verificando duplicado:', error);
+      } else {
+        setIsUploading(true);
+
+        try {
+          const result = await invoiceService.checkTransferDuplicate(transferNumber.trim());
+
+          preloadedCheckRef.current = {
+            suggestedId: result.suggestedId,
+            loadedIds: result.loadedIds,
+          };
+
+          if (result.isDuplicate) {
+            setDuplicateSuggestedId(result.suggestedId);
+            setModalType('duplicate');
+            setIsUploading(false);
+            return;
+          }
+        } catch {
+        }
+        setIsUploading(false);
       }
-      setIsUploading(false);
     }
 
     await saveTransfer();
@@ -129,9 +166,10 @@ export default function SaveTransferPage() {
     if (!photoBlob) return;
 
     setIsUploading(true);
-    const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
+      const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
+
       const finalTransferNumber = await invoiceService.saveWithPhoto(
         photoBlob,
         finalInvoiceNumber,
@@ -143,7 +181,7 @@ export default function SaveTransferPage() {
 
       setSavedTransferNumber(finalTransferNumber);
       setModalType('success');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'No se pudo guardar la transferencia',
