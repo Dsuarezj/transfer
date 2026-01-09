@@ -12,22 +12,22 @@ describe('imageService', () => {
   });
 
   describe('upload', () => {
-    it('saves image to /capturas/ with timestamp in filename', async () => {
+    it('saves image to /capturas/YYYY-MM/ with timestamp in filename', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
       vi.mocked(fileService.save).mockResolvedValue(undefined);
-      vi.mocked(fileService.getFullPath).mockReturnValue('/Apps/Transferido/capturas/FAC-001_20260115_103045.jpg');
+      vi.mocked(fileService.getFullPath).mockReturnValue('/Apps/Transferido/capturas/2026-01/FAC-001_20260115_103045.jpg');
 
       await imageService.upload(mockBlob, 'FAC-001');
 
       expect(fileService.save).toHaveBeenCalledWith(
-        expect.stringMatching(/\/capturas\/FAC-001_\d{8}_\d{6}\.jpg/),
+        expect.stringMatching(/\/capturas\/2026-01\/FAC-001_\d{8}_\d{6}\.jpg/),
         mockBlob
       );
     });
 
     it('returns the full path URL of the uploaded image', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
-      const expectedUrl = '/Apps/Transferido/capturas/FAC-001_20260115_103045.jpg';
+      const expectedUrl = '/Apps/Transferido/capturas/2026-01/FAC-001_20260115_103045.jpg';
       vi.mocked(fileService.save).mockResolvedValue(undefined);
       vi.mocked(fileService.getFullPath).mockReturnValue(expectedUrl);
 
@@ -45,6 +45,19 @@ describe('imageService', () => {
 
       expect(fileService.save).toHaveBeenCalledWith(
         expect.stringContaining('MI-FACTURA-123'),
+        mockBlob
+      );
+    });
+
+    it('organizes images by month in YYYY-MM format', async () => {
+      const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
+      vi.mocked(fileService.getFullPath).mockReturnValue('/path');
+
+      await imageService.upload(mockBlob, 'FAC-001');
+
+      expect(fileService.save).toHaveBeenCalledWith(
+        expect.stringMatching(/\/capturas\/2026-01\//),
         mockBlob
       );
     });
