@@ -44,7 +44,7 @@ src/
    - **Access**: Full Dropbox
    - **Name**: Elige un nombre único
 4. En la configuración de la app:
-   - **Redirect URIs**: Agrega `http://localhost:5173/login` (desarrollo) y tu URL de producción
+   - **Redirect URIs**: Agrega `http://localhost:5173/login` (desarrollo) y `https://transferidoya.com/login` (producción)
    - **Permissions**: Activa `files.content.write` y `files.content.read`
 5. Copia el **App key**
 

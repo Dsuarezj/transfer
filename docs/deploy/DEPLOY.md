@@ -29,7 +29,7 @@
 
 5. Configurar Redirect URI en Dropbox:
    ```
-   https://tu-proyecto.vercel.app/login
+   https://transferidoya.com/login
    ```
 
 6. Deploy automático en cada push a main
@@ -182,7 +182,7 @@ Desarrollo:
 http://localhost:5173/login
 
 Producción:
-https://tu-dominio.com/login
+https://transferidoya.com/login
 ```
 
 ### 3. Build Local
@@ -404,7 +404,7 @@ npm run build
 **Solución:**
 1. Ir a Dropbox App Console
 2. Settings → Redirect URIs
-3. Agregar URL exacta: `https://tu-dominio.com/login`
+3. Agregar URL exacta: `https://transferidoya.com/login`
 4. Guardar cambios
 
 ### Build size muy grande

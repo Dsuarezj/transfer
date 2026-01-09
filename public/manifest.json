@@ -1,13 +1,19 @@
 {
-  "name": "Transferido",
-  "short_name": "Transferido",
+  "name": "TransferidoYa",
+  "short_name": "TransferidoYa",
   "description": "Registra transferencias bancarias con privacidad",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2D3748",
+  "theme_color": "#3182CE",
   "orientation": "portrait",
   "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icon.png",
       "sizes": "512x512",

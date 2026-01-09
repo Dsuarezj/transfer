@@ -69,7 +69,7 @@ export default function LoginPage() {
               textAlign="center"
               fontWeight="bold"
             >
-              Transferido
+              TransferidoYa
             </Heading>
 
             <Text

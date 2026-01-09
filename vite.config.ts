@@ -9,14 +9,20 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'icon.png'],
       manifest: {
-        name: 'Transferencias Contables',
-        short_name: 'Contable',
-        description: 'Sistema para registrar transferencias bancarias',
-        theme_color: '#2D3748',
+        name: 'TransferidoYa',
+        short_name: 'TransferidoYa',
+        description: 'Registra transferencias bancarias con privacidad',
+        theme_color: '#3182CE',
         background_color: '#ffffff',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
+          {
+            src: 'icon.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any'
+          },
           {
             src: 'icon.png',
             sizes: '512x512',

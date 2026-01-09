@@ -229,7 +229,7 @@ Mobile-first approach:
 4. En la pestaña "Settings":
    - **Redirect URIs**:
      - Desarrollo: `http://localhost:5173/login`
-     - Producción: `https://tu-dominio.com/login`
+     - Producción: `https://transferidoya.com/login`
 5. En la pestaña "Permissions":
    - Activar: `files.content.write`
    - Activar: `files.content.read`
