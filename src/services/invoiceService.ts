@@ -1,7 +1,12 @@
 import { format, subDays, parse, isAfter, isBefore, startOfDay } from 'date-fns';
 import { fileService } from './dropbox/fileService';
 import { transferIdService } from './transferIdService';
-import { Invoice } from '../types/dropbox';
+import { Invoice, TransferIds } from '../types/dropbox';
+
+interface PreloadedDuplicateCheck {
+  suggestedId: string;
+  loadedIds: TransferIds;
+}
 
 class InvoiceService {
   private getCsvPath(yearMonth: string): string {
@@ -23,21 +28,82 @@ class InvoiceService {
     return fileService.getFullPath(path);
   }
 
-  async add(invoiceNumber: string, imageUrl: string, transferNumber?: string): Promise<string> {
+  async saveWithPhoto(
+    photoBlob: Blob,
+    invoiceNumber: string,
+    transferNumber?: string,
+    preloadedCheck?: PreloadedDuplicateCheck
+  ): Promise<string> {
     const now = new Date();
     const date = format(now, 'yyyy-MM-dd');
     const time = format(now, 'HH:mm:ss');
-    
+    const csvPath = this.getCurrentMonthPath();
+
+    const timestamp = format(now, 'yyyyMMdd_HHmmss');
+    const fileName = `${invoiceNumber}_${timestamp}.jpg`;
+    const imagePath = `/capturas/${fileName}`;
+    const imageUrl = fileService.getFullPath(imagePath);
+
     let finalTransferNumber = transferNumber || '';
-    
+
+    const parallelOps: Promise<any>[] = [];
+
+    parallelOps.push(fileService.save(imagePath, photoBlob));
+
+    const csvPromise = fileService.get(csvPath).catch((error: any) => {
+      if (error.message?.includes('not found')) {
+        return 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n';
+      }
+      throw error;
+    });
+    parallelOps.push(csvPromise);
+
     if (finalTransferNumber) {
-      const { suggestedId } = await transferIdService.checkDuplicateWithSuggestion(finalTransferNumber);
-      finalTransferNumber = suggestedId;
-      await transferIdService.add(finalTransferNumber, date);
+      if (preloadedCheck) {
+        finalTransferNumber = preloadedCheck.suggestedId;
+        parallelOps.push(transferIdService.addWithIds(finalTransferNumber, date, preloadedCheck.loadedIds));
+      } else {
+        const { suggestedId, loadedIds } = await transferIdService.checkDuplicateWithSuggestion(finalTransferNumber);
+        finalTransferNumber = suggestedId;
+        parallelOps.push(transferIdService.addWithIds(finalTransferNumber, date, loadedIds));
+      }
     }
 
+    const results = await Promise.all(parallelOps);
+    const existingContent = results[1] as string;
+
     const newLine = `${date},${time},${invoiceNumber},${finalTransferNumber},${imageUrl}\n`;
+    const updatedContent = existingContent + newLine;
+    const blob = new Blob([updatedContent], { type: 'text/csv' });
+    await fileService.update(csvPath, blob);
+
+    return finalTransferNumber;
+  }
+
+  async add(
+    invoiceNumber: string,
+    imageUrl: string,
+    transferNumber?: string,
+    preloadedCheck?: PreloadedDuplicateCheck
+  ): Promise<string> {
+    const now = new Date();
+    const date = format(now, 'yyyy-MM-dd');
+    const time = format(now, 'HH:mm:ss');
     const csvPath = this.getCurrentMonthPath();
+
+    let finalTransferNumber = transferNumber || '';
+    let transferIdsPromise: Promise<void> | null = null;
+
+    if (finalTransferNumber) {
+      if (preloadedCheck) {
+        finalTransferNumber = preloadedCheck.suggestedId;
+        transferIdsPromise = transferIdService.addWithIds(finalTransferNumber, date, preloadedCheck.loadedIds);
+      } else {
+        const { suggestedId, loadedIds } = await transferIdService.checkDuplicateWithSuggestion(finalTransferNumber);
+        finalTransferNumber = suggestedId;
+        transferIdsPromise = transferIdService.addWithIds(finalTransferNumber, date, loadedIds);
+      }
+    }
 
     let existingContent = '';
     try {
@@ -50,10 +116,15 @@ class InvoiceService {
       }
     }
 
+    if (transferIdsPromise) {
+      await transferIdsPromise;
+    }
+
+    const newLine = `${date},${time},${invoiceNumber},${finalTransferNumber},${imageUrl}\n`;
     const updatedContent = existingContent + newLine;
     const blob = new Blob([updatedContent], { type: 'text/csv' });
     await fileService.update(csvPath, blob);
-    
+
     return finalTransferNumber;
   }
 
@@ -100,6 +171,7 @@ class InvoiceService {
   async checkDuplicate(transferNumber: string): Promise<{
     isDuplicate: boolean;
     suggestedId: string;
+    loadedIds: TransferIds;
   }> {
     return transferIdService.checkDuplicateWithSuggestion(transferNumber);
   }

@@ -33,12 +33,17 @@ async function add(transferNumber: string, date: string): Promise<void> {
   await save(ids);
 }
 
+async function addWithIds(transferNumber: string, date: string, existingIds: TransferIds): Promise<void> {
+  existingIds[normalize(transferNumber)] = date;
+  await save(existingIds);
+}
+
 function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
   const normalized = normalize(baseNumber);
   if (!(normalized in ids)) {
     return normalized;
   }
-  
+
   let suffix = 1;
   while (`${normalized}-${suffix}` in ids) {
     suffix++;
@@ -49,13 +54,14 @@ function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
 async function checkDuplicateWithSuggestion(transferNumber: string): Promise<{
   isDuplicate: boolean;
   suggestedId: string;
+  loadedIds: TransferIds;
 }> {
   const ids = await getAll();
   const normalized = normalize(transferNumber);
   const isDuplicate = normalized in ids;
   const suggestedId = getNextAvailableId(ids, normalized);
-  
-  return { isDuplicate, suggestedId };
+
+  return { isDuplicate, suggestedId, loadedIds: ids };
 }
 
 export const transferIdService = {
@@ -63,6 +69,7 @@ export const transferIdService = {
   save,
   exists,
   add,
+  addWithIds,
   getNextAvailableId,
   checkDuplicateWithSuggestion,
 };

@@ -22,10 +22,15 @@ import {
   Heading,
 } from '@chakra-ui/react';
 import { invoiceService } from '../services/invoiceService';
+import { TransferIds } from '../types/dropbox';
 
 type ModalType = 'none' | 'duplicate' | 'success';
 
-// Detectar si es mobile
+interface PreloadedCheck {
+  suggestedId: string;
+  loadedIds: TransferIds;
+}
+
 const isMobileDevice = () => {
   if (typeof window === 'undefined') return false;
   return window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -35,10 +40,9 @@ export default function SaveTransferPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
-  
-  // Obtener datos de la navegación
+
   const { imageUrl, photoBlob } = (location.state as { imageUrl?: string; photoBlob?: Blob }) || {};
-  
+
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [transferNumber, setTransferNumber] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -46,14 +50,14 @@ export default function SaveTransferPage() {
   const [duplicateSuggestedId, setDuplicateSuggestedId] = useState('');
   const [savedTransferNumber, setSavedTransferNumber] = useState('');
   const [isMobile, setIsMobile] = useState(isMobileDevice());
-  
-  // Para manejar el teclado en mobile
+
+  const preloadedCheckRef = useRef<PreloadedCheck | null>(null);
+
   const [bottomOffset, setBottomOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Si no hay imagen, volver a la cámara
     if (!imageUrl) {
       navigate('/upload', { replace: true });
     }
@@ -65,7 +69,6 @@ export default function SaveTransferPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Manejar el teclado virtual con visualViewport - método mejorado
   useEffect(() => {
     if (!isMobile) return;
 
@@ -73,18 +76,15 @@ export default function SaveTransferPage() {
     if (!viewport) return;
 
     const handleViewportChange = () => {
-      // Calcular el offset desde el bottom de la ventana
       const offsetFromBottom = window.innerHeight - viewport.height - viewport.offsetTop;
       setBottomOffset(Math.max(0, offsetFromBottom));
     };
 
-    // Escuchar cambios del viewport
     viewport.addEventListener('resize', handleViewportChange);
     viewport.addEventListener('scroll', handleViewportChange);
-    
-    // Llamar inmediatamente
+
     handleViewportChange();
-    
+
     return () => {
       viewport.removeEventListener('resize', handleViewportChange);
       viewport.removeEventListener('scroll', handleViewportChange);
@@ -106,6 +106,10 @@ export default function SaveTransferPage() {
       setIsUploading(true);
       try {
         const result = await invoiceService.checkDuplicate(transferNumber.trim());
+        preloadedCheckRef.current = {
+          suggestedId: result.suggestedId,
+          loadedIds: result.loadedIds,
+        };
         if (result.isDuplicate) {
           setDuplicateSuggestedId(result.suggestedId);
           setModalType('duplicate');
@@ -128,12 +132,14 @@ export default function SaveTransferPage() {
     const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
 
     try {
-      const uploadedImageUrl = await invoiceService.uploadPhoto(photoBlob, finalInvoiceNumber);
-      const finalTransferNumber = await invoiceService.add(
+      const finalTransferNumber = await invoiceService.saveWithPhoto(
+        photoBlob,
         finalInvoiceNumber,
-        uploadedImageUrl,
-        transferNumber.trim() || undefined
+        transferNumber.trim() || undefined,
+        preloadedCheckRef.current || undefined
       );
+
+      preloadedCheckRef.current = null;
 
       setSavedTransferNumber(finalTransferNumber);
       setModalType('success');
@@ -169,10 +175,8 @@ export default function SaveTransferPage() {
 
   if (!imageUrl) return null;
 
-  // Altura del formulario
-  const formHeight = 130; // px aproximado del formulario
+  const formHeight = 130;
 
-  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
       <Box
@@ -185,7 +189,6 @@ export default function SaveTransferPage() {
         bg="black"
         overflow="hidden"
       >
-        {/* Área de imagen - scrolleable */}
         <Box
           position="absolute"
           top={0}
@@ -210,7 +213,6 @@ export default function SaveTransferPage() {
           />
         </Box>
 
-        {/* Bottom bar con inputs y botones */}
         <Box
           ref={formRef}
           position="absolute"
@@ -254,7 +256,7 @@ export default function SaveTransferPage() {
               />
             </Box>
           </HStack>
-          
+
           <HStack spacing={2}>
             <Button
               flex={1}
@@ -283,7 +285,6 @@ export default function SaveTransferPage() {
           </HStack>
         </Box>
 
-        {/* Modales */}
         <Modal isOpen={modalType === 'duplicate'} onClose={handleDuplicateCancel} isCentered>
           <ModalOverlay bg="blackAlpha.700" />
           <ModalContent borderRadius="20px" mx={4}>
@@ -322,10 +323,8 @@ export default function SaveTransferPage() {
     );
   }
 
-  // ========== DESKTOP LAYOUT ==========
   return (
     <Box h="100vh" bgGradient="linear(135deg, #4299E1, #2B6CB0)">
-      {/* Header */}
       <Box bg="#1a365d" py={4} boxShadow="md">
         <Container maxW="5xl" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="white">Nueva Transferencia</Heading>
@@ -342,10 +341,8 @@ export default function SaveTransferPage() {
         </Container>
       </Box>
 
-      {/* Content */}
       <Container maxW="5xl" py={6} h="calc(100vh - 72px)">
         <Flex h="100%" gap={6}>
-          {/* Imagen */}
           <Box
             flex={1}
             bg="gray.900"
@@ -366,7 +363,6 @@ export default function SaveTransferPage() {
             />
           </Box>
 
-          {/* Formulario */}
           <Flex w="320px" align="center" justify="center">
             <Box bg="white" p={6} borderRadius="20px" boxShadow="xl" w="100%">
               <VStack spacing={4} align="stretch">
@@ -428,7 +424,6 @@ export default function SaveTransferPage() {
         </Flex>
       </Container>
 
-      {/* Modales */}
       <Modal isOpen={modalType === 'duplicate'} onClose={handleDuplicateCancel} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
         <ModalContent borderRadius="24px" mx={4}>
@@ -472,4 +467,3 @@ export default function SaveTransferPage() {
     </Box>
   );
 }
-
