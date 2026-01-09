@@ -89,7 +89,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
           fontWeight="semibold"
           _hover={{ color: 'accent.700', textDecoration: 'underline' }}
         >
-          🔗 Ver en Dropbox
+          🔗 Ver archivo
         </Link>
       </VStack>
     </Box>

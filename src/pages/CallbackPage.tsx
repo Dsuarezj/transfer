@@ -14,7 +14,7 @@ export default function CallbackPage() {
       if (success) {
         navigate('/', { replace: true });
       } else {
-        setError('Error al conectar con Dropbox');
+        setError('Error al conectar la cuenta');
         setTimeout(() => navigate('/login', { replace: true }), 2000);
       }
     };
@@ -26,6 +26,6 @@ export default function CallbackPage() {
     return <LoadingSpinner message={error} fullScreen />;
   }
 
-  return <LoadingSpinner message="Conectando con Dropbox..." fullScreen />;
+  return <LoadingSpinner message="Conectando cuenta..." fullScreen />;
 }
 

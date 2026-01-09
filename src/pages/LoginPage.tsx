@@ -107,7 +107,7 @@ export default function LoginPage() {
                   color="gray.500" 
                   fontSize={{ base: 'sm', md: 'md' }}
                 >
-                  Conecta tu Dropbox y sincroniza al instante
+                  Conecta tu cuenta y sincroniza al instante
                 </Text>
               </VStack>
 
@@ -134,7 +134,7 @@ export default function LoginPage() {
                 borderRadius="14px"
                 transition="all 0.2s ease-out"
               >
-                Comenzar con Dropbox
+                Conectar cuenta
               </Button>
 
               <Text 
@@ -142,7 +142,7 @@ export default function LoginPage() {
                 color="gray.500" 
                 textAlign="center"
               >
-                Tus datos se guardan en tu Dropbox personal
+                Tus datos se guardan de forma segura en tu cuenta
               </Text>
             </VStack>
           </Box>
