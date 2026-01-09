@@ -5,6 +5,7 @@ import {
   Heading,
   Text,
   VStack,
+  Image,
 } from '@chakra-ui/react';
 import { authService } from '../services/dropbox/authService';
 
@@ -56,10 +57,19 @@ export default function LoginPage() {
             <Box
               bg="white"
               borderRadius={{ base: '16px', md: '20px' }}
-              p={{ base: 2, md: 3 }}
+              p={{ base: 3, md: 4 }}
               boxShadow="lg"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
             >
-              <Text fontSize={{ base: '3xl', md: '5xl' }}>📤</Text>
+              <Image
+                src="/login.png"
+                alt="Transferido Ya"
+                maxW={{ base: '120px', md: '150px' }}
+                h="auto"
+                objectFit="contain"
+              />
             </Box>
 
             <Heading
@@ -69,7 +79,7 @@ export default function LoginPage() {
               textAlign="center"
               fontWeight="bold"
             >
-              TransferidoYa
+              Transferido Ya!
             </Heading>
 
             <Text
