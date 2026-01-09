@@ -28,6 +28,7 @@ export default function UploadTransferPage() {
           imageUrl,
           photoBlob: blob,
           preloadedIds,
+          source: 'camera',
         },
       });
     }

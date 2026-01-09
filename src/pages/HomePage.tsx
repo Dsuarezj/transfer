@@ -60,6 +60,13 @@ export default function HomePage() {
             />
 
             <ActionCard
+              title="Subir Archivo"
+              description="Sube una imagen del comprobante de transferencia desde tu dispositivo"
+              icon="📁"
+              onClick={() => navigate('/upload-file')}
+            />
+
+            <ActionCard
               title="Revisar transferencias"
               description="Consulta y busca las transferencias que ya has registrado anteriormente"
               icon="📋"

@@ -37,10 +37,11 @@ export default function SaveTransferPage() {
   const toast = useToast();
   const { save } = useTransferSave();
 
-  const { imageUrl, photoBlob, preloadedIds } = (location.state as {
+  const { imageUrl, photoBlob, preloadedIds, source } = (location.state as {
     imageUrl?: string;
     photoBlob?: Blob;
     preloadedIds?: TransferIds;
+    source?: 'camera' | 'file';
   }) || {};
 
   const [invoiceNumber, setInvoiceNumber] = useState('');
@@ -58,7 +59,8 @@ export default function SaveTransferPage() {
 
   useEffect(() => {
     if (!imageUrl) {
-      navigate('/upload', { replace: true });
+      const targetRoute = source === 'file' ? '/upload-file' : '/upload';
+      navigate(targetRoute, { replace: true });
     }
   }, [imageUrl, navigate]);
 
@@ -133,7 +135,8 @@ export default function SaveTransferPage() {
   };
 
   const handleRetake = () => {
-    navigate('/upload', { replace: true });
+    const targetRoute = source === 'file' ? '/upload-file' : '/upload';
+    navigate(targetRoute, { replace: true });
   };
 
   const handleSuccessClose = () => {
