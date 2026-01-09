@@ -16,10 +16,9 @@ import {
   Select,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { format, subMonths, subDays, parse, isAfter, isBefore, startOfDay } from 'date-fns';
+import { format, subMonths, subDays } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { invoiceService } from '../services/invoiceService';
-import { Invoice } from '../types/dropbox';
+import { reportService, Invoice } from '../services/transfer';
 import InvoiceCard from '../components/InvoiceCard';
 
 type DateRange = '7days' | '1month' | '2months' | '3months';
@@ -69,19 +68,12 @@ export default function ReviewInvoicesPage() {
     try {
       setIsLoading(true);
       setError(null);
-      
-      const allInvoices = await invoiceService.getAll();
+
       const { start, end } = getDateRangeParams();
-      
-      const filtered = allInvoices.filter(invoice => {
-        const invoiceDate = startOfDay(parse(invoice.date, 'yyyy-MM-dd', new Date()));
-        const startDate = startOfDay(start);
-        const endDate = startOfDay(end);
-        return !isBefore(invoiceDate, startDate) && !isAfter(invoiceDate, endDate);
-      });
-      
-      setInvoices(filtered);
-      setFilteredInvoices(filtered);
+      const data = await reportService.getByDateRange(start, end);
+
+      setInvoices(data);
+      setFilteredInvoices(data);
     } catch (err) {
       setError('No se pudieron cargar las facturas');
     } finally {
@@ -97,7 +89,7 @@ export default function ReviewInvoicesPage() {
 
     const query = searchQuery.toLowerCase();
     const filtered = invoices.filter(
-      (invoice) =>
+      (invoice: Invoice) =>
         invoice.invoiceNumber.toLowerCase().includes(query) ||
         invoice.date.includes(query) ||
         (invoice.transferNumber && invoice.transferNumber.toLowerCase().includes(query))

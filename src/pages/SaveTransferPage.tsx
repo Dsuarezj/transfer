@@ -21,15 +21,10 @@ import {
   FormLabel,
   Heading,
 } from '@chakra-ui/react';
-import { invoiceService } from '../services/invoiceService';
-import { TransferIds, checkDuplicateLocal } from '../services/transferIdService';
+import { idService, TransferIds } from '../services/transfer';
+import { useTransferSave } from '../hooks/useTransferSave';
 
 type ModalType = 'none' | 'duplicate' | 'success';
-
-interface PreloadedCheck {
-  suggestedId: string;
-  loadedIds: TransferIds;
-}
 
 const isMobileDevice = () => {
   if (typeof window === 'undefined') return false;
@@ -40,6 +35,7 @@ export default function SaveTransferPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
+  const { save } = useTransferSave();
 
   const { imageUrl, photoBlob, preloadedIds } = (location.state as {
     imageUrl?: string;
@@ -54,8 +50,7 @@ export default function SaveTransferPage() {
   const [duplicateSuggestedId, setDuplicateSuggestedId] = useState('');
   const [savedTransferNumber, setSavedTransferNumber] = useState('');
   const [isMobile, setIsMobile] = useState(isMobileDevice());
-
-  const preloadedCheckRef = useRef<PreloadedCheck | null>(null);
+  const [loadedIds, setLoadedIds] = useState<TransferIds | null>(preloadedIds || null);
 
   const [bottomOffset, setBottomOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -97,81 +92,41 @@ export default function SaveTransferPage() {
 
   const handleSubmit = async () => {
     if (!photoBlob) {
-      toast({
-        title: 'Error',
-        description: 'No hay foto capturada',
-        status: 'error',
-        duration: 3000,
-      });
+      toast({ title: 'Error', description: 'No hay foto capturada', status: 'error', duration: 3000 });
       return;
     }
 
-    if (transferNumber.trim()) {
-      if (preloadedIds) {
-        const result = checkDuplicateLocal(preloadedIds, transferNumber.trim());
+    const ids = loadedIds || await idService.getAll();
+    setLoadedIds(ids);
 
-        preloadedCheckRef.current = {
-          suggestedId: result.suggestedId,
-          loadedIds: preloadedIds,
-        };
+    const prepared = idService.prepare(ids, transferNumber.trim());
 
-        if (result.isDuplicate) {
-          setDuplicateSuggestedId(result.suggestedId);
-          setModalType('duplicate');
-          return;
-        }
-      } else {
-        setIsUploading(true);
-
-        try {
-          const result = await invoiceService.checkTransferDuplicate(transferNumber.trim());
-
-          preloadedCheckRef.current = {
-            suggestedId: result.suggestedId,
-            loadedIds: result.loadedIds,
-          };
-
-          if (result.isDuplicate) {
-            setDuplicateSuggestedId(result.suggestedId);
-            setModalType('duplicate');
-            setIsUploading(false);
-            return;
-          }
-        } catch {
-        }
-        setIsUploading(false);
-      }
+    if (prepared.isDuplicate) {
+      setDuplicateSuggestedId(prepared.finalNumber);
+      setModalType('duplicate');
+      return;
     }
 
-    await saveTransfer();
+    await saveTransfer(ids, prepared.finalNumber);
   };
 
-  const saveTransfer = async () => {
+  const saveTransfer = async (ids: TransferIds, finalTransferNumber: string) => {
     if (!photoBlob) return;
 
     setIsUploading(true);
 
     try {
-      const finalInvoiceNumber = invoiceNumber.trim() || 'SIN-FACTURA';
-
-      const finalTransferNumber = await invoiceService.saveWithPhoto(
+      const savedNumber = await save({
         photoBlob,
-        finalInvoiceNumber,
-        transferNumber.trim() || undefined,
-        preloadedCheckRef.current || undefined
-      );
+        invoiceNumber: invoiceNumber.trim(),
+        transferNumber: finalTransferNumber,
+        loadedIds: ids,
+      });
 
-      preloadedCheckRef.current = null;
-
-      setSavedTransferNumber(finalTransferNumber);
+      setSavedTransferNumber(savedNumber);
       setModalType('success');
     } catch {
-      toast({
-        title: 'Error',
-        description: 'No se pudo guardar la transferencia',
-        status: 'error',
-        duration: 3000,
-      });
+      toast({ title: 'Error', description: 'No se pudo guardar la transferencia', status: 'error', duration: 3000 });
     } finally {
       setIsUploading(false);
     }
@@ -188,7 +143,9 @@ export default function SaveTransferPage() {
 
   const handleDuplicateConfirm = async () => {
     setModalType('none');
-    await saveTransfer();
+    if (loadedIds) {
+      await saveTransfer(loadedIds, duplicateSuggestedId);
+    }
   };
 
   const handleDuplicateCancel = () => {

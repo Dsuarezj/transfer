@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Text, VStack, Container } from '@chakra-ui/react';
 import { useCamera } from '../hooks/useCamera';
-import { transferIdService, TransferIds } from '../services/transferIdService';
+import { idService, TransferIds } from '../services/transfer';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();
@@ -11,10 +11,7 @@ export default function UploadTransferPage() {
 
   useEffect(() => {
     camera.startCamera();
-
-    transferIdService.getAll()
-      .then((ids) => setPreloadedIds(ids))
-      .catch(() => {});
+    idService.getAll().then(setPreloadedIds).catch(() => {});
 
     return () => {
       camera.stopCamera();

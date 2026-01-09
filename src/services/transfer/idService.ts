@@ -1,14 +1,14 @@
-import { fileService } from './dropbox/fileService';
+import { fileService } from '../dropbox/fileService';
 
 type TransferIds = Record<string, string>;
 
 const IDS_PATH = '/transfer-ids.json';
 
-export function normalize(value: string): string {
+function normalize(value: string): string {
   return value.toLowerCase().trim();
 }
 
-export function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
+function getNextAvailableId(ids: TransferIds, baseNumber: string): string {
   const normalized = normalize(baseNumber);
   if (!(normalized in ids)) {
     return normalized;
@@ -19,16 +19,6 @@ export function getNextAvailableId(ids: TransferIds, baseNumber: string): string
     suffix++;
   }
   return `${normalized}-${suffix}`;
-}
-
-export function checkDuplicateLocal(
-  ids: TransferIds,
-  transferNumber: string
-): { isDuplicate: boolean; suggestedId: string } {
-  const normalized = normalize(transferNumber);
-  const isDuplicate = normalized in ids;
-  const suggestedId = getNextAvailableId(ids, normalized);
-  return { isDuplicate, suggestedId };
 }
 
 async function getAll(): Promise<TransferIds> {
@@ -46,20 +36,32 @@ async function save(ids: TransferIds): Promise<void> {
   await fileService.update(IDS_PATH, blob);
 }
 
+function checkDuplicate(ids: TransferIds, transferNumber: string): {
+  isDuplicate: boolean;
+  suggestedId: string;
+} {
+  const normalized = normalize(transferNumber);
+  const isDuplicate = normalized in ids;
+  const suggestedId = getNextAvailableId(ids, normalized);
+  return { isDuplicate, suggestedId };
+}
+
+function prepare(ids: TransferIds, transferNumber: string): {
+  isDuplicate: boolean;
+  finalNumber: string;
+} {
+  const trimmed = transferNumber.trim();
+  if (!trimmed) {
+    return { isDuplicate: false, finalNumber: '' };
+  }
+  const check = checkDuplicate(ids, trimmed);
+  return { isDuplicate: check.isDuplicate, finalNumber: check.suggestedId };
+}
+
 async function add(transferNumber: string, date: string): Promise<void> {
   const ids = await getAll();
   ids[normalize(transferNumber)] = date;
   await save(ids);
-}
-
-async function checkDuplicate(transferNumber: string): Promise<{
-  isDuplicate: boolean;
-  suggestedId: string;
-  loadedIds: TransferIds;
-}> {
-  const ids = await getAll();
-  const result = checkDuplicateLocal(ids, transferNumber);
-  return { ...result, loadedIds: ids };
 }
 
 async function addWithIds(transferNumber: string, date: string, existingIds: TransferIds): Promise<void> {
@@ -67,9 +69,10 @@ async function addWithIds(transferNumber: string, date: string, existingIds: Tra
   await save(existingIds);
 }
 
-export const transferIdService = {
+export const idService = {
   getAll,
   checkDuplicate,
+  prepare,
   add,
   addWithIds,
 };
