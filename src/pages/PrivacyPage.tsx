@@ -32,460 +32,162 @@ export default function PrivacyPage() {
           </Text>
 
           <Text color="gray.700" lineHeight="tall">
-            This Privacy Policy describes Our policies and procedures on the collection, use and disclosure of Your information when You use the Service and tells You about Your privacy rights and how the law protects You.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            We use Your Personal data to provide and improve the Service. By using the Service, You agree to the collection and use of information in accordance with this Privacy Policy. This Privacy Policy has been created with the help of the{' '}
-            <Link href="https://www.termsfeed.com/privacy-policy-generator/" target="_blank" color="blue.500" isExternal>
-              Privacy Policy Generator
-            </Link>.
+            This Privacy Policy describes how Transferido Ya (&quot;We&quot;, &quot;Us&quot;, or &quot;Our&quot;) handles information when You use our Service. We are committed to protecting Your privacy and being transparent about our practices.
           </Text>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Interpretation and Definitions
+            Our Privacy Commitment
           </Heading>
 
-          <Heading as="h3" size="md" color="gray.700" mt={4}>
-            Interpretation
-          </Heading>
+          <Text color="gray.700" lineHeight="tall" fontWeight="semibold">
+            Transferido Ya does not collect, store, or process any personal data on our servers. We do not have databases or backend servers that store user information.
+          </Text>
 
           <Text color="gray.700" lineHeight="tall">
-            The words whose initial letters are capitalized have meanings defined under the following conditions. The following definitions shall have the same meaning regardless of whether they appear in singular or in plural.
+            All Your data (transfer images, reports, and documents) is stored exclusively in Your own Dropbox account, which You control entirely. We never have access to Your files or personal information.
           </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={4}>
-            Definitions
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall" mb={4}>
-            For the purposes of this Privacy Policy:
-          </Text>
-
-          <List spacing={3} color="gray.700">
-            <ListItem>
-              <Text>
-                <strong>Account</strong> means a unique account created for You to access our Service or parts of our Service.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Affiliate</strong> means an entity that controls, is controlled by, or is under common control with a party, where &quot;control&quot; means ownership of 50% or more of the shares, equity interest or other securities entitled to vote for election of directors or other managing authority.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Company</strong> (referred to as either &quot;the Company&quot;, &quot;We&quot;, &quot;Us&quot; or &quot;Our&quot; in this Agreement) refers to Transferido ya.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Cookies</strong> are small files that are placed on Your computer, mobile device or any other device by a website, containing the details of Your browsing history on that website among its many uses.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Country</strong> refers to: Ecuador
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Device</strong> means any device that can access the Service such as a computer, a cell phone or a digital tablet.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Personal Data</strong> is any information that relates to an identified or identifiable individual.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Service</strong> refers to the Website.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Service Provider</strong> means any natural or legal person who processes the data on behalf of the Company. It refers to third-party companies or individuals employed by the Company to facilitate the Service, to provide the Service on behalf of the Company, to perform services related to the Service or to assist the Company in analyzing how the Service is used.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Usage Data</strong> refers to data collected automatically, either generated by the use of the Service or from the Service infrastructure itself (for example, the duration of a page visit).
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Website</strong> refers to Transferido ya, accessible from{' '}
-                <Link href="https://www.transferidoya.com/" rel="external nofollow noopener" target="_blank" color="blue.500" isExternal>
-                  https://www.transferidoya.com/
-                </Link>
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>You</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
-              </Text>
-            </ListItem>
-          </List>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Collecting and Using Your Personal Data
+            How the Application Works
           </Heading>
 
           <Heading as="h3" size="md" color="gray.700" mt={4}>
-            Types of Data Collected
-          </Heading>
-
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Personal Data
+            Authentication
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            While using Our Service, We may ask You to provide Us with certain personally identifiable information that can be used to contact or identify You. Personally identifiable information may include, but is not limited to:
+            Authentication is handled entirely by Dropbox through their secure OAuth 2.0 system. When You log in:
           </Text>
 
           <List spacing={2} color="gray.700" ml={6}>
-            <ListItem>Usage Data</ListItem>
+            <ListItem>You are redirected to Dropbox&apos;s official login page</ListItem>
+            <ListItem>You enter Your credentials directly on Dropbox (we never see Your password)</ListItem>
+            <ListItem>Dropbox provides an access token that is stored locally in Your browser (localStorage)</ListItem>
+            <ListItem>This token allows the app to save files to Your Dropbox account on Your behalf</ListItem>
           </List>
 
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Usage Data
+          <Heading as="h3" size="md" color="gray.700" mt={4}>
+            Local Storage
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            Usage Data is collected automatically when using the Service.
+            We use Your browser&apos;s localStorage (not cookies) to store:
           </Text>
+
+          <List spacing={2} color="gray.700" ml={6}>
+            <ListItem>Dropbox access token (to maintain Your session)</ListItem>
+            <ListItem>Dropbox refresh token (to renew Your session automatically)</ListItem>
+            <ListItem>Token expiration time</ListItem>
+          </List>
 
           <Text color="gray.700" lineHeight="tall">
-            Usage Data may include information such as Your Device's Internet Protocol address (e.g. IP address), browser type, browser version, the pages of our Service that You visit, the time and date of Your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
+            This data remains exclusively on Your device and is deleted when You log out or clear Your browser data.
           </Text>
 
-          <Text color="gray.700" lineHeight="tall">
-            When You access the Service by or through a mobile device, We may collect certain information automatically, including, but not limited to, the type of mobile device You use, Your mobile device's unique ID, the IP address of Your mobile device, Your mobile operating system, the type of mobile Internet browser You use, unique device identifiers and other diagnostic data.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            We may also collect information that Your browser sends whenever You visit Our Service or when You access the Service by or through a mobile device.
-          </Text>
-
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Tracking Technologies and Cookies
+          <Heading as="h3" size="md" color="gray.700" mt={4}>
+            Your Data
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            We use Cookies and similar tracking technologies to track the activity on Our Service and store certain information. Tracking technologies We use include beacons, tags, and scripts to collect and track information and to improve and analyze Our Service. The technologies We use may include:
+            All files You create through the application (transfer captures, reports, etc.) are saved directly to Your Dropbox account in the &quot;Aplicaciones/TransferidoYa&quot; folder. We do not have access to these files and cannot view, modify, or delete them. You have full control over Your data through Your Dropbox account.
           </Text>
 
-          <List spacing={3} color="gray.700" ml={6}>
-            <ListItem>
-              <Text>
-                <strong>Cookies or Browser Cookies.</strong> A cookie is a small file placed on Your Device. You can instruct Your browser to refuse all Cookies or to indicate when a Cookie is being sent. However, if You do not accept Cookies, You may not be able to use some parts of our Service. Unless you have adjusted Your browser setting so that it will refuse Cookies, our Service may use Cookies.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Web Beacons.</strong> Certain sections of our Service and our emails may contain small electronic files known as web beacons (also referred to as clear gifs, pixel tags, and single-pixel gifs) that permit the Company, for example, to count users who have visited those pages or opened an email and for other related website statistics (for example, recording the popularity of a certain section and verifying system and server integrity).
-              </Text>
-            </ListItem>
-          </List>
-
-          <Text color="gray.700" lineHeight="tall" mt={4}>
-            Cookies can be &quot;Persistent&quot; or &quot;Session&quot; Cookies. Persistent Cookies remain on Your personal computer or mobile device when You go offline, while Session Cookies are deleted as soon as You close Your web browser. You can learn more about cookies on{' '}
-            <Link href="https://www.termsfeed.com/blog/cookies/#What_Are_Cookies" target="_blank" color="blue.500" isExternal>
-              TermsFeed website
-            </Link>{' '}
-            article.
-          </Text>
+          <Heading as="h2" size="lg" color="gray.800" mt={8}>
+            Third-Party Services
+          </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            We use both Session and Persistent Cookies for the purposes set out below:
+            Our Service uses the following third-party services:
           </Text>
 
           <List spacing={4} color="gray.700" ml={6}>
             <ListItem>
               <Text>
-                <strong>Necessary / Essential Cookies</strong>
-              </Text>
-              <Text>Type: Session Cookies</Text>
-              <Text>Administered by: Us</Text>
-              <Text>
-                Purpose: These Cookies are essential to provide You with services available through the Website and to enable You to use some of its features. They help to authenticate users and prevent fraudulent use of user accounts. Without these Cookies, the services that You have asked for cannot be provided, and We only use these Cookies to provide You with those services.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Cookies Policy / Notice Acceptance Cookies</strong>
-              </Text>
-              <Text>Type: Persistent Cookies</Text>
-              <Text>Administered by: Us</Text>
-              <Text>
-                Purpose: These Cookies identify if users have accepted the use of cookies on the Website.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>Functionality Cookies</strong>
-              </Text>
-              <Text>Type: Persistent Cookies</Text>
-              <Text>Administered by: Us</Text>
-              <Text>
-                Purpose: These Cookies allow us to remember choices You make when You use the Website, such as remembering your login details or language preference. The purpose of these Cookies is to provide You with a more personal experience and to avoid You having to re-enter your preferences every time You use the Website.
-              </Text>
-            </ListItem>
-          </List>
-
-          <Text color="gray.700" lineHeight="tall" mt={4}>
-            For more information about the cookies we use and your choices regarding cookies, please visit our Cookies Policy or the Cookies section of our Privacy Policy.
-          </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Use of Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Company may use Personal Data for the following purposes:
-          </Text>
-
-          <List spacing={3} color="gray.700" ml={6}>
-            <ListItem>
-              <Text>
-                <strong>To provide and maintain our Service</strong>, including to monitor the usage of our Service.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>To manage Your Account:</strong> to manage Your registration as a user of the Service. The Personal Data You provide can give You access to different functionalities of the Service that are available to You as a registered user.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>For the performance of a contract:</strong> the development, compliance and undertaking of the purchase contract for the products, items or services You have purchased or of any other contract with Us through the Service.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>To contact You:</strong> To contact You by email, telephone calls, SMS, or other equivalent forms of electronic communication, such as a mobile application's push notifications regarding updates or informative communications related to the functionalities, products or contracted services, including the security updates, when necessary or reasonable for their implementation.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>To provide You</strong> with news, special offers, and general information about other goods, services and events which We offer that are similar to those that you have already purchased or inquired about unless You have opted not to receive such information.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>To manage Your requests:</strong> To attend and manage Your requests to Us.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>For business transfers:</strong> We may use Your information to evaluate or conduct a merger, divestiture, restructuring, reorganization, dissolution, or other sale or transfer of some or all of Our assets, whether as a going concern or as part of bankruptcy, liquidation, or similar proceeding, in which Personal Data held by Us about our Service users is among the assets transferred.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>For other purposes</strong>: We may use Your information for other purposes, such as data analysis, identifying usage trends, determining the effectiveness of our promotional campaigns and to evaluate and improve our Service, products, services, marketing and your experience.
-              </Text>
-            </ListItem>
-          </List>
-
-          <Text color="gray.700" lineHeight="tall" mt={4}>
-            We may share Your personal information in the following situations:
-          </Text>
-
-          <List spacing={3} color="gray.700" ml={6}>
-            <ListItem>
-              <Text>
-                <strong>With Service Providers:</strong> We may share Your personal information with Service Providers to monitor and analyze the use of our Service, to contact You.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>For business transfers:</strong> We may share or transfer Your personal information in connection with, or during negotiations of, any merger, sale of Company assets, financing, or acquisition of all or a portion of Our business to another company.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>With Affiliates:</strong> We may share Your information with Our affiliates, in which case we will require those affiliates to honor this Privacy Policy. Affiliates include Our parent company and any other subsidiaries, joint venture partners or other companies that We control or that are under common control with Us.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>With business partners:</strong> We may share Your information with Our business partners to offer You certain products, services or promotions.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>With other users:</strong> when You share personal information or otherwise interact in the public areas with other users, such information may be viewed by all users and may be publicly distributed outside.
-              </Text>
-            </ListItem>
-            <ListItem>
-              <Text>
-                <strong>With Your consent</strong>: We may disclose Your personal information for any other purpose with Your consent.
-              </Text>
-            </ListItem>
-          </List>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Retention of Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Company will retain Your Personal Data only for as long as is necessary for the purposes set out in this Privacy Policy. We will retain and use Your Personal Data to the extent necessary to comply with our legal obligations (for example, if we are required to retain your data to comply with applicable laws), resolve disputes, and enforce our legal agreements and policies.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Company will also retain Usage Data for internal analysis purposes. Usage Data is generally retained for a shorter period of time, except when this data is used to strengthen the security or to improve the functionality of Our Service, or We are legally obligated to retain this data for longer periods.
-          </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Transfer of Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            Your information, including Personal Data, is processed at the Company's operating offices and in any other places where the parties involved in the processing are located. It means that this information may be transferred to — and maintained on — computers located outside of Your state, province, country or other governmental jurisdiction where the data protection laws may differ from those from Your jurisdiction.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            Your consent to this Privacy Policy followed by Your submission of such information represents Your agreement to that transfer.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Company will take all steps reasonably necessary to ensure that Your data is treated securely and in accordance with this Privacy Policy and no transfer of Your Personal Data will take place to an organization or a country unless there are adequate controls in place including the security of Your data and other personal information.
-          </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Delete Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            You have the right to delete or request that We assist in deleting the Personal Data that We have collected about You.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            Our Service may give You the ability to delete certain information about You from within the Service.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            You may update, amend, or delete Your information at any time by signing in to Your Account, if you have one, and visiting the account settings section that allows you to manage Your personal information. You may also contact Us to request access to, correct, or delete any personal information that You have provided to Us.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            Please note, however, that We may need to retain certain information when we have a legal obligation or lawful basis to do so.
-          </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Disclosure of Your Personal Data
-          </Heading>
-
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Business Transactions
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            If the Company is involved in a merger, acquisition or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.
-          </Text>
-
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Law enforcement
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            Under certain circumstances, the Company may be required to disclose Your Personal Data if required to do so by law or in response to valid requests by public authorities (e.g. a court or a government agency).
-          </Text>
-
-          <Heading as="h4" size="sm" color="gray.700" mt={4}>
-            Other legal requirements
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:
-          </Text>
-
-          <List spacing={2} color="gray.700" ml={6}>
-            <ListItem>Comply with a legal obligation</ListItem>
-            <ListItem>Protect and defend the rights or property of the Company</ListItem>
-            <ListItem>Prevent or investigate possible wrongdoing in connection with the Service</ListItem>
-            <ListItem>Protect the personal safety of Users of the Service or the public</ListItem>
-            <ListItem>Protect against legal liability</ListItem>
-          </List>
-
-          <Heading as="h3" size="md" color="gray.700" mt={6}>
-            Security of Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            The security of Your Personal Data is important to Us, but remember that no method of transmission over the Internet, or method of electronic storage is 100% secure. While We strive to use commercially reasonable means to protect Your Personal Data, We cannot guarantee its absolute security.
-          </Text>
-
-          <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Detailed Information on the Processing of Your Personal Data
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            The Service Providers We use may have access to Your Personal Data. These third-party vendors collect, store, use, process and transfer information about Your activity on Our Service in accordance with their Privacy Policies.
-          </Text>
-
-          <Heading as="h3" size="md" color="gray.700" mt={4}>
-            Usage, Performance and Miscellaneous
-          </Heading>
-
-          <Text color="gray.700" lineHeight="tall">
-            We may use third-party Service Providers to maintain and improve our Service.
-          </Text>
-
-          <List spacing={3} color="gray.700" ml={6}>
-            <ListItem>
-              <Text>
                 <strong>Dropbox</strong>
               </Text>
               <Text>
-                Their Privacy Policy can be viewed at{' '}
+                Used for authentication and file storage. Your data is stored in Your Dropbox account and is subject to Dropbox&apos;s Privacy Policy:{' '}
                 <Link href="https://www.dropbox.com/privacy" rel="external nofollow noopener" target="_blank" color="blue.500" isExternal>
                   https://www.dropbox.com/privacy
+                </Link>
+              </Text>
+            </ListItem>
+            <ListItem>
+              <Text>
+                <strong>Vercel Analytics</strong>
+              </Text>
+              <Text>
+                We use Vercel Analytics to collect anonymous, aggregated usage statistics (such as page views and general usage patterns). This helps us understand how the Service is used and improve it. No personally identifiable information is collected. Learn more:{' '}
+                <Link href="https://vercel.com/docs/analytics/privacy-policy" rel="external nofollow noopener" target="_blank" color="blue.500" isExternal>
+                  https://vercel.com/docs/analytics/privacy-policy
                 </Link>
               </Text>
             </ListItem>
           </List>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Children's Privacy
+            Advertising
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            Our Service does not address anyone under the age of 13. We do not knowingly collect personally identifiable information from anyone under the age of 13. If You are a parent or guardian and You are aware that Your child has provided Us with Personal Data, please contact Us. If We become aware that We have collected Personal Data from anyone under the age of 13 without verification of parental consent, We take steps to remove that information from Our servers.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            If We need to rely on consent as a legal basis for processing Your information and Your country requires consent from a parent, We may require Your parent's consent before We collect and use that information.
+            To maintain and improve our Service, we may display advertisements in the application in the future. These ads may be provided by third-party advertising networks. When implemented, these advertising partners may collect anonymous information about Your visits to our Service and other websites to provide relevant advertisements. We will update this Privacy Policy when advertising is implemented to provide detailed information about our advertising partners and how to opt out of personalized advertising if applicable.
           </Text>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Links to Other Websites
+            Cookies
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            Our Service may contain links to other websites that are not operated by Us. If You click on a third party link, You will be directed to that third party's site. We strongly advise You to review the Privacy Policy of every site You visit.
-          </Text>
-
-          <Text color="gray.700" lineHeight="tall">
-            We have no control over and assume no responsibility for the content, privacy policies or practices of any third party sites or services.
+            Transferido Ya does not use cookies. We use localStorage for session management, which is different from cookies and does not track You across websites.
           </Text>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
-            Changes to this Privacy Policy
+            Data Security
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            We may update Our Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page.
+            Since we don&apos;t store Your data on our servers, the security of Your information depends on:
           </Text>
 
-          <Text color="gray.700" lineHeight="tall">
-            We will let You know via email and/or a prominent notice on Our Service, prior to the change becoming effective and update the &quot;Last updated&quot; date at the top of this Privacy Policy.
-          </Text>
+          <List spacing={2} color="gray.700" ml={6}>
+            <ListItem>Dropbox&apos;s security measures for Your stored files</ListItem>
+            <ListItem>Your browser&apos;s security for locally stored tokens</ListItem>
+            <ListItem>Your device&apos;s security</ListItem>
+          </List>
 
           <Text color="gray.700" lineHeight="tall">
-            You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective when they are posted on this page.
+            We recommend keeping Your browser and device updated and using a secure internet connection.
+          </Text>
+
+          <Heading as="h2" size="lg" color="gray.800" mt={8}>
+            Your Rights
+          </Heading>
+
+          <Text color="gray.700" lineHeight="tall">
+            Since we don&apos;t collect or store personal data, traditional data rights requests (access, deletion, portability) don&apos;t apply to us directly. However:
+          </Text>
+
+          <List spacing={2} color="gray.700" ml={6}>
+            <ListItem>You can disconnect the app from Your Dropbox account at any time through Dropbox settings</ListItem>
+            <ListItem>You can delete all Your data by removing the &quot;Aplicaciones/TransferidoYa&quot; folder from Your Dropbox</ListItem>
+            <ListItem>You can clear Your browser&apos;s localStorage to remove the stored tokens</ListItem>
+            <ListItem>Logging out of the app removes all locally stored data</ListItem>
+          </List>
+
+          <Heading as="h2" size="lg" color="gray.800" mt={8}>
+            Children&apos;s Privacy
+          </Heading>
+
+          <Text color="gray.700" lineHeight="tall">
+            Our Service is not intended for anyone under the age of 13. We do not knowingly collect any information from children under 13.
+          </Text>
+
+          <Heading as="h2" size="lg" color="gray.800" mt={8}>
+            Changes to This Privacy Policy
+          </Heading>
+
+          <Text color="gray.700" lineHeight="tall">
+            We may update this Privacy Policy from time to time. We will notify You of any changes by posting the new Privacy Policy on this page and updating the &quot;Last updated&quot; date.
           </Text>
 
           <Heading as="h2" size="lg" color="gray.800" mt={8}>
@@ -493,7 +195,7 @@ export default function PrivacyPage() {
           </Heading>
 
           <Text color="gray.700" lineHeight="tall">
-            If you have any questions about this Privacy Policy, You can contact us:
+            If You have any questions about this Privacy Policy, You can contact us:
           </Text>
 
           <List spacing={2} color="gray.700" ml={6}>
@@ -516,4 +218,3 @@ export default function PrivacyPage() {
     </Box>
   );
 }
-
