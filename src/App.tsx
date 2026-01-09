@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import UploadTransferPage from './pages/UploadTransferPage';
 import SaveTransferPage from './pages/SaveTransferPage';
 import ReviewInvoicesPage from './pages/ReviewInvoicesPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useDropboxAuth();
@@ -22,6 +23,7 @@ function App() {
     <Routes>
       <Route path="/callback" element={<CallbackPage />} />
       <Route path="/login" element={<LoginRoute />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/upload" element={<UploadTransferPage />} />
