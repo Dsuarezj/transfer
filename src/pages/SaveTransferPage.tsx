@@ -207,7 +207,7 @@ export default function SaveTransferPage() {
         >
           <HStack spacing={2} mb={3}>
             <Box flex={1}>
-              <Text fontSize="xs" color="gray.500" mb={1}>Factura</Text>
+              <Text fontSize="xs" color="gray.500" mb={1}>Comprobante</Text>
               <Input
                 placeholder="Opcional"
                 value={invoiceNumber}
@@ -350,7 +350,7 @@ export default function SaveTransferPage() {
                 </Text>
 
                 <FormControl>
-                  <FormLabel fontSize="sm" color="gray.600">Número de Factura</FormLabel>
+                  <FormLabel fontSize="sm" color="gray.600">Número de Comprobante</FormLabel>
                   <Input
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}

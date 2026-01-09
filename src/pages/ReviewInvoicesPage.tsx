@@ -78,7 +78,7 @@ export default function ReviewInvoicesPage() {
 
         setInvoices(data);
       } catch (err) {
-        setError('No se pudieron cargar las facturas');
+        setError('No se pudieron cargar las transferencias');
       } finally {
         setIsLoading(false);
       }
@@ -121,7 +121,7 @@ export default function ReviewInvoicesPage() {
       <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
           <Heading size="md" color="neutral.50">
-            Facturas
+            Transferencias
           </Heading>
           <Button
             size="sm"
@@ -199,7 +199,7 @@ export default function ReviewInvoicesPage() {
 
             {!isLoading && !error && (
               <Text color="neutral.100" fontSize="sm" opacity={0.8}>
-                {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'} · {getDateRangeLabel()}
+                {filteredInvoices.length} {filteredInvoices.length === 1 ? 'transferencia' : 'transferencias'} · {getDateRangeLabel()}
               </Text>
             )}
 
@@ -220,7 +220,7 @@ export default function ReviewInvoicesPage() {
               <VStack spacing={2}>
                 <Text fontSize="4xl">📭</Text>
                 <Text color="neutral.100" fontSize="lg" textAlign="center">
-                  {searchQuery ? 'No se encontraron resultados' : 'No hay facturas en este periodo'}
+                  {searchQuery ? 'No se encontraron resultados' : 'No hay transferencias en este periodo'}
                 </Text>
               </VStack>
             </Center>

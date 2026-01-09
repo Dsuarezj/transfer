@@ -53,15 +53,15 @@ export default function HomePage() {
 
           <SimpleGrid columns={1} spacing={4} w="full">
             <ActionCard
-              title="Subir Transferencia"
-              description="Toma una foto del comprobante y registra los datos"
+              title="Tomar Foto"
+              description="Captura una foto del comprobante de transferencia y registra los datos de la operación"
               icon="📸"
               onClick={() => navigate('/upload')}
             />
 
             <ActionCard
-              title="Revisar Facturas"
-              description="Consulta y busca las transferencias registradas"
+              title="Revisar transferencias"
+              description="Consulta y busca las transferencias que ya has registrado anteriormente"
               icon="📋"
               onClick={() => navigate('/review')}
             />
