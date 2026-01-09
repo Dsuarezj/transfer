@@ -1,0 +1,60 @@
+# Reglas de Código
+
+## Formato
+- No incluir trailing spaces (espacios al final de las líneas)
+- Usar indentación consistente con 2 espacios
+- Líneas vacías entre secciones lógicas del código
+
+## Comentarios
+- NO agregar comentarios innecesarios
+- El código debe ser autoexplicativo
+- Solo incluir comentarios cuando:
+  - Sea absolutamente necesario explicar el "por qué" (no el "qué")
+  - Haya lógica de negocio compleja que no sea evidente
+  - Existan workarounds o hacks temporales que requieran contexto
+  - Se necesite documentación de API pública (JSDoc/TSDoc)
+
+## Nombres
+- Variables, funciones y clases con nombres autoexplicativos
+- Usar nombres descriptivos que expresen la intención
+- Preferir nombres largos y claros sobre abreviaciones crípticas
+- Seguir convenciones del lenguaje (camelCase para JS/TS)
+
+## Funciones y Métodos
+- Mantener funciones cortas (máximo 20-30 líneas idealmente)
+- Cada función debe hacer UNA sola cosa
+- Si una función necesita comentarios para explicar qué hace, dividirla en funciones más pequeñas
+- Extraer lógica compleja en funciones auxiliares con nombres descriptivos
+
+## Estructura
+- Organizar el código de forma lógica y predecible
+- Agrupar código relacionado
+- Separar responsabilidades claramente
+- Seguir el principio de responsabilidad única
+
+## Clean Code
+- No dejar código muerto o comentado
+- No dejar console.log de debugging
+- Preferir early returns para reducir anidación
+- Evitar números mágicos (usar constantes con nombres descriptivos)
+
+## Testing (TDD)
+- Seguir el ciclo Red-Green-Refactor
+- Escribir la prueba ANTES de implementar la funcionalidad
+
+### Pruebas Unitarias
+- Para funciones y métodos cortos con lógica aislada
+- Probar casos límite y escenarios de error
+- Usar mocks para dependencias externas
+- Nombres descriptivos: `describe` para el módulo, `it` para el comportamiento esperado
+
+### Pruebas de Integración
+- Para verificar que múltiples componentes/módulos funcionan juntos
+- Probar flujos de datos entre servicios
+- Probar interacción con APIs y bases de datos (con mocks cuando sea necesario)
+
+### Pruebas E2E
+- Solo para features complejos que involucren múltiples sistemas
+- Probar flujos completos desde la perspectiva del usuario
+- Reservar para casos críticos del negocio
+- Mantener un número reducido para evitar tiempos de ejecución largos

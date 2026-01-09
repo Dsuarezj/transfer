@@ -167,6 +167,15 @@ La aplicación funciona como PWA y puede ser instalada en dispositivos móviles:
 - [ ] Sincronización con otros servicios (Google Drive)
 - [ ] Dark mode
 
+## Documentación
+
+Toda la documentación del proyecto está organizada en la carpeta [`docs/`](./docs/):
+
+- **[Inicio Rápido](./docs/INICIO_RAPIDO.md)** - Configuración en 5 pasos
+- **[Guía de Implementación](./docs/guia/GUIA_IMPLEMENTACION.md)** - Arquitectura y decisiones técnicas
+- **[Testing](./docs/testing/README.md)** - Estrategia y estructura de pruebas
+- **[Guía de Deploy](./docs/deploy/DEPLOY.md)** - Opciones de hosting
+
 ## Licencia
 
 Proyecto privado para uso interno.
