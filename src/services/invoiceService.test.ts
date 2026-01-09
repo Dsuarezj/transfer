@@ -12,16 +12,17 @@ describe('InvoiceService', () => {
   });
 
   describe('getAll', () => {
-    it('debe retornar lista de facturas cuando el archivo existe', async () => {
+    it('returns invoices in reverse order (most recent first)', async () => {
       vi.mocked(fileService.get).mockResolvedValue(mockCsvContent);
 
       const result = await invoiceService.getAll();
 
       expect(result).toHaveLength(2);
-      expect(result[0].invoiceNumber).toBe('FAC-001');
+      expect(result[0].invoiceNumber).toBe('FAC-002');
+      expect(result[1].invoiceNumber).toBe('FAC-001');
     });
 
-    it('debe retornar array vacío cuando el archivo no existe', async () => {
+    it('returns empty array when file does not exist', async () => {
       vi.mocked(fileService.get).mockRejectedValue(
         new Error('File not found')
       );
@@ -33,7 +34,7 @@ describe('InvoiceService', () => {
   });
 
   describe('uploadPhoto', () => {
-    it('debe subir foto y retornar la URL completa', async () => {
+    it('uploads photo and returns full URL', async () => {
       const mockBlob = new Blob(['test'], { type: 'image/jpeg' });
       const mockUrl = 'https://dropbox.com/capturas/FAC-001_20240115_103000.jpg';
 
