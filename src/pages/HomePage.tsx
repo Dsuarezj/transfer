@@ -45,36 +45,38 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Container maxW="md" flex="1" display="flex" alignItems="center" py={6} position="relative" zIndex={1}>
-        <VStack spacing={6} w="full">
-          <Heading size="lg" color="neutral.50" textAlign="center">
-            ¿Qué deseas hacer?
-          </Heading>
+      <Box flex="1" overflow="auto" position="relative" zIndex={1}>
+        <Container maxW="md" py={6}>
+          <VStack spacing={4} w="full">
+            <Heading size="md" color="neutral.50" textAlign="center">
+              ¿Qué deseas hacer?
+            </Heading>
 
-          <SimpleGrid columns={1} spacing={4} w="full">
-            <ActionCard
-              title="Tomar Foto"
-              description="Captura una foto del comprobante de transferencia y registra los datos de la operación"
-              icon="📸"
-              onClick={() => navigate('/upload')}
-            />
+            <SimpleGrid columns={1} spacing={3} w="full">
+              <ActionCard
+                title="Tomar Foto"
+                description="Captura una foto del comprobante de transferencia y registra los datos de la operación"
+                icon="📸"
+                onClick={() => navigate('/upload')}
+              />
 
-            <ActionCard
-              title="Subir Archivo"
-              description="Sube una imagen del comprobante de transferencia desde tu dispositivo"
-              icon="📁"
-              onClick={() => navigate('/upload-file')}
-            />
+              <ActionCard
+                title="Subir Archivo"
+                description="Sube una imagen del comprobante de transferencia desde tu dispositivo"
+                icon="📁"
+                onClick={() => navigate('/upload-file')}
+              />
 
-            <ActionCard
-              title="Revisar transferencias"
-              description="Consulta y busca las transferencias que ya has registrado anteriormente"
-              icon="📋"
-              onClick={() => navigate('/review')}
-            />
-          </SimpleGrid>
-        </VStack>
-      </Container>
+              <ActionCard
+                title="Revisar transferencias"
+                description="Consulta y busca las transferencias que ya has registrado anteriormente"
+                icon="📋"
+                onClick={() => navigate('/review')}
+              />
+            </SimpleGrid>
+          </VStack>
+        </Container>
+      </Box>
     </Box>
   );
 }

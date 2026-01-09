@@ -1,4 +1,4 @@
-import { Box, Heading, Text, VStack } from '@chakra-ui/react';
+import { Box, Heading, Text, VStack, Flex } from '@chakra-ui/react';
 
 interface ActionCardProps {
   title: string;
@@ -12,18 +12,18 @@ export default function ActionCard({ title, description, icon, onClick }: Action
     <Box
       as="button"
       w="full"
-      p={6}
-      borderRadius="24px"
+      p={4}
+      borderRadius="16px"
       bgGradient="linear(145deg, white 0%, #f7fafc 100%)"
-      boxShadow="2xl"
+      boxShadow="lg"
       border="1px solid"
       borderColor="blue.50"
       _hover={{
         boxShadow: 'cardHover',
-        transform: 'translateY(-5px)',
+        transform: 'translateY(-2px)',
       }}
       _active={{
-        transform: 'translateY(-1px)',
+        transform: 'translateY(0px)',
       }}
       transition="all 0.2s ease"
       onClick={onClick}
@@ -35,30 +35,36 @@ export default function ActionCard({ title, description, icon, onClick }: Action
         position="absolute"
         top="0"
         right="0"
-        w="100px"
-        h="100px"
+        w="60px"
+        h="60px"
         bg="accent.50"
         borderRadius="full"
-        transform="translate(30%, -30%)"
+        transform="translate(20%, -20%)"
       />
-      <VStack align="start" spacing={3} position="relative" zIndex={1}>
+      <Flex align="center" gap={3} position="relative" zIndex={1}>
         <Box
-          fontSize="3xl"
+          fontSize="2xl"
           bgGradient="linear(135deg, accent.50 0%, white 100%)"
-          p={3}
-          borderRadius="16px"
-          boxShadow="lg"
+          p={2.5}
+          borderRadius="10px"
+          boxShadow="sm"
           transition="all 0.2s"
+          flexShrink={0}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
         >
           {icon}
         </Box>
-        <Heading size="md" color="primary.700">
-          {title}
-        </Heading>
-        <Text color="neutral.600" fontSize="sm">
-          {description}
-        </Text>
-      </VStack>
+        <VStack align="start" spacing={1} flex="1">
+          <Heading size="sm" color="primary.700">
+            {title}
+          </Heading>
+          <Text color="neutral.600" fontSize="xs">
+            {description}
+          </Text>
+        </VStack>
+      </Flex>
     </Box>
   );
 }
