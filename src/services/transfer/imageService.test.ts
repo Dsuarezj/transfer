@@ -15,7 +15,7 @@ describe('imageService', () => {
     it('saves image to /capturas/YYYY-MM/ with timestamp in filename', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
       vi.mocked(fileService.save).mockResolvedValue(undefined);
-      vi.mocked(fileService.getFullPath).mockReturnValue('/Apps/Transferido/capturas/2026-01/FAC-001_20260115_103045.jpg');
+      vi.mocked(fileService.getDropboxUrl).mockReturnValue('https://www.dropbox.com/home/path');
 
       await imageService.upload(mockBlob, 'FAC-001');
 
@@ -25,21 +25,22 @@ describe('imageService', () => {
       );
     });
 
-    it('returns the full path URL of the uploaded image', async () => {
+    it('returns the Dropbox URL of the uploaded image', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
-      const expectedUrl = '/Apps/Transferido/capturas/2026-01/FAC-001_20260115_103045.jpg';
+      const expectedUrl = 'https://www.dropbox.com/home/Apps/Transferido/capturas/2026-01/FAC-001_20260115_103045.jpg';
       vi.mocked(fileService.save).mockResolvedValue(undefined);
-      vi.mocked(fileService.getFullPath).mockReturnValue(expectedUrl);
+      vi.mocked(fileService.getDropboxUrl).mockReturnValue(expectedUrl);
 
       const result = await imageService.upload(mockBlob, 'FAC-001');
 
       expect(result).toBe(expectedUrl);
+      expect(fileService.getDropboxUrl).toHaveBeenCalledWith('/capturas/2026-01/FAC-001_20260115_103045.jpg');
     });
 
     it('includes invoice number in the filename', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
       vi.mocked(fileService.save).mockResolvedValue(undefined);
-      vi.mocked(fileService.getFullPath).mockReturnValue('/path');
+      vi.mocked(fileService.getDropboxUrl).mockReturnValue('https://www.dropbox.com/home/path');
 
       await imageService.upload(mockBlob, 'MI-FACTURA-123');
 
@@ -52,7 +53,7 @@ describe('imageService', () => {
     it('organizes images by month in YYYY-MM format', async () => {
       const mockBlob = new Blob(['test-image'], { type: 'image/jpeg' });
       vi.mocked(fileService.save).mockResolvedValue(undefined);
-      vi.mocked(fileService.getFullPath).mockReturnValue('/path');
+      vi.mocked(fileService.getDropboxUrl).mockReturnValue('https://www.dropbox.com/home/path');
 
       await imageService.upload(mockBlob, 'FAC-001');
 

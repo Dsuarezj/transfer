@@ -6,10 +6,6 @@ interface InvoiceCardProps {
 }
 
 export default function InvoiceCard({ invoice }: InvoiceCardProps) {
-  const getDropboxUrl = (path: string) => {
-    return `https://www.dropbox.com/home${path}`;
-  };
-
   return (
     <Box
       bg="white"
@@ -82,7 +78,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
         </VStack>
 
         <Link
-          href={getDropboxUrl(invoice.imageUrl)}
+          href={invoice.imageUrl}
           isExternal
           color="accent.600"
           fontSize="xs"

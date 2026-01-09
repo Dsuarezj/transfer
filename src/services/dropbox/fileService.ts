@@ -60,6 +60,11 @@ class FileService {
   getFullPath(path: string): string {
     return this.buildPath(path);
   }
+
+  getDropboxUrl(path: string): string {
+    const fullPath = this.getFullPath(path);
+    return `https://www.dropbox.com/home${fullPath}`;
+  }
 }
 
 export const fileService = new FileService();

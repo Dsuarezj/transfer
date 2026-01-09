@@ -9,7 +9,7 @@ async function upload(blob: Blob, name: string): Promise<string> {
   const path = `/capturas/${yearMonth}/${fileName}`;
 
   await fileService.save(path, blob);
-  return fileService.getFullPath(path);
+  return fileService.getDropboxUrl(path);
 }
 
 export const imageService = {
