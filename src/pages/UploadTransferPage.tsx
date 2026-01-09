@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Text, VStack, Container } from '@chakra-ui/react';
 import { useCamera } from '../hooks/useCamera';
-import { idService, TransferIds } from '../services/transfer';
+import { idService, TransferIds } from '../services/transfer/idService';
 
 export default function UploadTransferPage() {
   const navigate = useNavigate();

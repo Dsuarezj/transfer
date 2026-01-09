@@ -21,7 +21,7 @@ import {
   FormLabel,
   Heading,
 } from '@chakra-ui/react';
-import { idService, TransferIds } from '../services/transfer';
+import { idService, TransferIds } from '../services/transfer/idService';
 import { useTransferSave } from '../hooks/useTransferSave';
 
 type ModalType = 'none' | 'duplicate' | 'success';

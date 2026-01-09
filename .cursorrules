@@ -31,6 +31,9 @@
 - Agrupar código relacionado
 - Separar responsabilidades claramente
 - Seguir el principio de responsabilidad única
+- NO usar archivos index.ts para reexportar módulos
+- Cada módulo debe exportar directamente lo que necesita
+- Importar directamente desde el archivo del módulo, no desde index
 
 ## Clean Code
 - No dejar código muerto o comentado

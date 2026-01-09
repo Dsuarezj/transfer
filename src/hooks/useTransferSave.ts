@@ -1,5 +1,7 @@
 import { format } from 'date-fns';
-import { imageService, reportService, idService, TransferIds } from '../services/transfer';
+import { imageService } from '../services/transfer/imageService';
+import { reportService } from '../services/transfer/reportService';
+import { idService, TransferIds } from '../services/transfer/idService';
 
 interface SaveParams {
   photoBlob: Blob;
