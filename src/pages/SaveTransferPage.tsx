@@ -172,6 +172,27 @@ export default function SaveTransferPage() {
         bg="black"
         overflow="hidden"
       >
+        <IconButton
+          aria-label="Cancelar"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          }
+          position="absolute"
+          top={3}
+          left={3}
+          zIndex={200}
+          size="sm"
+          variant="solid"
+          bg="blackAlpha.600"
+          color="white"
+          borderRadius="full"
+          _hover={{ bg: 'blackAlpha.700' }}
+          _active={{ bg: 'blackAlpha.800' }}
+          onClick={() => navigate('/')}
+        />
+
         <Box
           position="absolute"
           top={0}
