@@ -179,7 +179,7 @@ export default function SaveTransferPage() {
           bottom={`${formHeight + bottomOffset}px`}
           overflow="auto"
           bg="black"
-          style={{ WebkitOverflowScrolling: 'touch' }}
+          sx={{ touchAction: 'pinch-zoom pan-x pan-y', WebkitOverflowScrolling: 'touch' }}
         >
           <img
             src={imageUrl}
