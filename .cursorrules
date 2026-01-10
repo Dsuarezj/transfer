@@ -44,11 +44,18 @@
 ## Testing (TDD)
 - Seguir el ciclo Red-Green-Refactor
 - Escribir la prueba ANTES de implementar la funcionalidad
+- **Minimizar el uso de mocks**: Usar funciones reales siempre que sea posible
+- Solo mockear cuando sea realmente necesario:
+  - Dependencias externas (APIs, servicios de red, bases de datos)
+  - Funciones con efectos secundarios no deseados en tests
+  - Funciones lentas que afecten el tiempo de ejecución
+- **NO mockear funciones puras**: Funciones determinísticas sin efectos secundarios deben usarse directamente
+- Los mocks deben ser lo más simples posible y reflejar el comportamiento real
 
 ### Pruebas Unitarias
 - Para funciones y métodos cortos con lógica aislada
 - Probar casos límite y escenarios de error
-- Usar mocks para dependencias externas
+- Usar mocks solo para dependencias externas cuando sea necesario
 - Nombres descriptivos: `describe` para el módulo, `it` para el comportamiento esperado
 
 ### Pruebas de Integración
@@ -61,3 +68,7 @@
 - Probar flujos completos desde la perspectiva del usuario
 - Reservar para casos críticos del negocio
 - Mantener un número reducido para evitar tiempos de ejecución largos
+
+
+### Guia de estilo y texto
+- Sigue las guias recuerda https://www.dropbox.com/developers/reference/developer-guide https://www.dropbox.com/developers/reference/branding-guide  y que las politicas y guias se respeten

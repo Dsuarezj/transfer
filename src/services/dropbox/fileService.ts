@@ -1,13 +1,17 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { DROPBOX_APP_FOLDER_PATH } from '../../constants/dropbox';
+import { companyService } from '../company/companyService';
 
 class FileService {
   private buildPath(relativePath: string): string {
+    const activeCompany = companyService.getActiveCompany();
+    const basePath = activeCompany ? activeCompany.folderPath : DROPBOX_APP_FOLDER_PATH;
+    
     const cleanRel = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-    if (cleanRel === DROPBOX_APP_FOLDER_PATH || cleanRel.startsWith(`${DROPBOX_APP_FOLDER_PATH}/`)) {
+    if (cleanRel === basePath || cleanRel.startsWith(`${basePath}/`)) {
       return cleanRel;
     }
-    return `${DROPBOX_APP_FOLDER_PATH}${cleanRel}`;
+    return `${basePath}${cleanRel}`;
   }
 
   private async getClient() {

@@ -10,13 +10,14 @@ export default function CallbackPage() {
   useEffect(() => {
     const processCallback = async () => {
       const success = await authService.handleRedirect();
-      
-      if (success) {
-        navigate('/', { replace: true });
-      } else {
+
+      if (!success) {
         setError('Error al conectar la cuenta');
         setTimeout(() => navigate('/login', { replace: true }), 2000);
+        return;
       }
+
+      navigate('/', { replace: true });
     };
 
     processCallback();

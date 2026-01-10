@@ -1,12 +1,39 @@
+import { useEffect } from 'react';
 import { Box, Container, Heading, SimpleGrid, VStack, IconButton, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, useDisclosure, Button, Divider } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useDropboxAuth } from '../hooks/useDropboxAuth';
+import { companyService } from '../services/company/companyService';
 import ActionCard from '../components/ActionCard';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { logout } = useDropboxAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  useEffect(() => {
+    const checkCompany = async () => {
+      const activeCompany = companyService.getActiveCompany();
+      if (!activeCompany) {
+        try {
+          const companies = await companyService.detectCompanies();
+          if (companies.length === 0) {
+            navigate('/create-company', { replace: true });
+          } else if (companies.length === 1) {
+            companyService.setActiveCompany(companies[0].id);
+          } else {
+            const activeCompany = companyService.getActiveCompany();
+            if (!activeCompany || !companies.find(c => c.id === activeCompany.id)) {
+              companyService.setActiveCompany(companies[0].id);
+            }
+          }
+        } catch (error) {
+          navigate('/create-company', { replace: true });
+        }
+      }
+    };
+
+    checkCompany();
+  }, [navigate]);
 
   return (
     <Box
