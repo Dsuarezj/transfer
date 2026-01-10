@@ -21,6 +21,7 @@ import {
   FormLabel,
   Heading,
 } from '@chakra-ui/react';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { idService, TransferIds } from '../services/transfer/idService';
 import { useTransferSave } from '../hooks/useTransferSave';
 
@@ -177,22 +178,43 @@ export default function SaveTransferPage() {
           left={0}
           right={0}
           bottom={`${formHeight + bottomOffset}px`}
-          overflow="auto"
+          overflow="hidden"
           bg="black"
-          sx={{ touchAction: 'pinch-zoom pan-x pan-y', WebkitOverflowScrolling: 'touch' }}
         >
-          <img
-            src={imageUrl}
-            alt="Transferencia"
-            style={{
-              width: '100%',
-              height: 'auto',
-              display: 'block',
-              minHeight: '100%',
-              objectFit: 'contain',
-              objectPosition: 'top',
-            }}
-          />
+          <TransformWrapper
+            initialScale={1}
+            minScale={1}
+            maxScale={4}
+            centerOnInit
+            wheel={{ disabled: true }}
+            doubleClick={{ mode: 'reset' }}
+          >
+            <TransformComponent
+              wrapperStyle={{
+                width: '100%',
+                height: '100%',
+              }}
+              contentStyle={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center',
+              }}
+            >
+              <img
+                src={imageUrl}
+                alt="Transferencia"
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  display: 'block',
+                  objectFit: 'contain',
+                  objectPosition: 'top',
+                }}
+              />
+            </TransformComponent>
+          </TransformWrapper>
         </Box>
 
         <Box
