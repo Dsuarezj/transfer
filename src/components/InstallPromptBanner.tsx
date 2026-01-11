@@ -5,12 +5,12 @@ import InstallInstructionsModal from './InstallInstructionsModal';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export default function InstallPromptBanner() {
-  const { isInstalled, canInstall, isIOS } = usePWA();
+  const { isInstalled, canInstall, isIOS, install, deferredPrompt } = usePWA();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    if (isInstalled || !canInstall || !isIOS) {
+    if (isInstalled || !canInstall) {
       setShowBanner(false);
       return;
     }
@@ -33,17 +33,27 @@ export default function InstallPromptBanner() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [isInstalled, canInstall, isIOS]);
+  }, [isInstalled, canInstall]);
 
   if (!showBanner) {
     return null;
   }
 
-  const handleInstall = () => {
-    onOpen();
-    setShowBanner(false);
-    localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-    localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
+  const handleInstall = async () => {
+    if (isIOS) {
+      onOpen();
+      setShowBanner(false);
+      localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
+      localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
+    } else if (deferredPrompt) {
+      await install();
+      setShowBanner(false);
+    } else {
+      onOpen();
+      setShowBanner(false);
+      localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
+      localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
+    }
   };
 
   const handleDismiss = () => {

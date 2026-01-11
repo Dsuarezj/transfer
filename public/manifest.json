@@ -3,6 +3,7 @@
   "short_name": "TransferidoYa",
   "description": "Registra transferencias bancarias con privacidad",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3182CE",
