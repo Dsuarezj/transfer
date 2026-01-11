@@ -258,25 +258,29 @@ export default function CompanyMembersPage() {
       return;
     }
 
+    onRemoveClose();
+    setIsLoading(true);
+
     try {
-      // TODO: Implementar removeMember en companyService
-      // await companyService.removeMember(activeCompany.id, memberToRemove.accountId);
+      await memberService.removeMember(activeCompany.id, memberToRemove.accountId);
       toast({
         title: 'Miembro removido',
         description: `${memberToRemove.email} ha sido removido de la empresa`,
         status: 'success',
         duration: 3000,
       });
-      onRemoveClose();
       setMemberToRemove(null);
       await loadMembers();
     } catch (error: any) {
+      const errorMessage = error.message || 'No se pudo remover al miembro';
       toast({
         title: 'Error',
-        description: 'No se pudo remover al miembro',
+        description: errorMessage,
         status: 'error',
-        duration: 3000,
+        duration: 5000,
       });
+    } finally {
+      setIsLoading(false);
     }
   }
 

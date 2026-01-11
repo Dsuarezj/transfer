@@ -317,5 +317,102 @@ describe('companyService', () => {
       expect(localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE)).toBeNull();
     });
   });
+
+  describe('verifyActiveCompanyAccess', () => {
+    const company = {
+      id: 'mi-empresa',
+      name: 'Mi Empresa',
+      folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+      folderId: 'folder-id-123',
+      createdAt: '2024-01-01T00:00:00Z',
+      role: USER_ROLES.ADMIN,
+    };
+
+    beforeEach(() => {
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+    });
+
+    it('returns true when user has access to company folder (admin)', async () => {
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockResolvedValue({
+          result: {
+            '.tag': 'folder',
+            name: `${COMPANY_FOLDER_PREFIX}mi-empresa`,
+            path_lower: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+          },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      const result = await companyService.verifyActiveCompanyAccess();
+
+      expect(result).toBe(true);
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({
+        path: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+      });
+    });
+
+    it('returns true when user has access to workspace folder (employee)', async () => {
+      const employeeCompany = {
+        ...company,
+        folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`,
+        role: USER_ROLES.EMPLOYEE,
+      };
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([employeeCompany]));
+
+      const workspacePath = `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      const mockDbx = {
+        filesGetMetadata: vi.fn((args: { path: string }) => {
+          if (args.path === `/${COMPANY_FOLDER_PREFIX}mi-empresa`) {
+            return Promise.reject(new Error('Not found'));
+          }
+          if (args.path === workspacePath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                name: `${WORKSPACE_FOLDER_PREFIX}mi-empresa`,
+                path_lower: workspacePath,
+              },
+            });
+          }
+          return Promise.reject(new Error('Not found'));
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      const result = await companyService.verifyActiveCompanyAccess();
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when user has no access to any folder', async () => {
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockRejectedValue(new Error('Not found')),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      const result = await companyService.verifyActiveCompanyAccess();
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when no active company is set', async () => {
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_COMPANY);
+
+      const result = await companyService.verifyActiveCompanyAccess();
+
+      expect(result).toBe(false);
+    });
+
+    it('returns false when active company is not in cache', async () => {
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'nonexistent');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([]));
+
+      const result = await companyService.verifyActiveCompanyAccess();
+
+      expect(result).toBe(false);
+    });
+  });
 });
 

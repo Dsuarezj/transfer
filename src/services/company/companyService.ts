@@ -228,6 +228,25 @@ function clearActiveCompany(): void {
   localStorage.removeItem(STORAGE_KEYS.COMPANIES_CACHE);
 }
 
+async function verifyActiveCompanyAccess(): Promise<boolean> {
+  const activeCompany = getActiveCompany();
+  if (!activeCompany) {
+    return false;
+  }
+
+  const dbx = await getAuthenticatedClient();
+
+  try {
+    const metadataResponse = await dbx.filesGetMetadata({ path: activeCompany.folderPath });
+    if (metadataResponse.result['.tag'] === 'folder') {
+      return true;
+    }
+    return false;
+  } catch (error) {
+    return false;
+  }
+}
+
 export const companyService = {
   detectCompanies,
   createCompany,
@@ -235,5 +254,6 @@ export const companyService = {
   setActiveCompany,
   getCompanyMetadata,
   clearActiveCompany,
+  verifyActiveCompanyAccess,
 };
 

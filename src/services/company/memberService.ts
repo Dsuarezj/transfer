@@ -233,8 +233,65 @@ async function getCompanyMembers(params: GetCompanyMembersParams): Promise<Compa
   return companyMembers;
 }
 
+async function removeMember(companyId: string, accountId: string): Promise<void> {
+  const dbx = await getAuthenticatedClient();
+
+  const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
+  if (!cachedCompanies) {
+    throw new Error('Empresa no encontrada');
+  }
+
+  const companies: Company[] = JSON.parse(cachedCompanies);
+  const company = companies.find(c => c.id === companyId);
+
+  if (!company) {
+    throw new Error('Empresa no encontrada');
+  }
+
+  const mainFolderPath = company.folderPath;
+  const workspaceFolderPath = getWorkspaceFolderPath(company.name);
+
+  const mainFolderSharedId = await getSharedFolderId(dbx, mainFolderPath);
+  const workspaceFolderSharedId = await getSharedFolderId(dbx, workspaceFolderPath);
+
+  if (mainFolderSharedId) {
+    try {
+      await dbx.sharingRemoveFolderMember({
+        shared_folder_id: mainFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+    } catch (error) {
+    }
+  }
+
+  if (workspaceFolderSharedId) {
+    try {
+      await dbx.sharingRemoveFolderMember({
+        shared_folder_id: workspaceFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+    } catch (error) {
+    }
+  }
+}
+
+async function getSharedFolderId(dbx: Dropbox, folderPath: string): Promise<string | null> {
+  try {
+    const metadataResponse = await dbx.filesGetMetadata({ path: folderPath });
+    if (isFolderMetadata(metadataResponse.result) && metadataResponse.result.shared_folder_id) {
+      return metadataResponse.result.shared_folder_id;
+    }
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
 export const memberService = {
   addMember,
   getCompanyMembers,
+  removeMember,
 };
 

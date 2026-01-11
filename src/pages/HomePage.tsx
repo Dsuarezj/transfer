@@ -14,7 +14,21 @@ export default function HomePage() {
       try {
         const activeCompany = companyService.getActiveCompany();
         
-        if (!activeCompany) {
+        if (activeCompany) {
+          const hasAccess = await companyService.verifyActiveCompanyAccess();
+          if (!hasAccess) {
+            companyService.clearActiveCompany();
+            const companies = await companyService.detectCompanies(roleService.getUserRole);
+            
+            if (companies.length === 0) {
+              navigate('/create-company', { replace: true });
+              return;
+            }
+            
+            companyService.setActiveCompany(companies[0].id);
+            return;
+          }
+        } else {
           const companies = await companyService.detectCompanies(roleService.getUserRole);
           
           if (companies.length === 0) {

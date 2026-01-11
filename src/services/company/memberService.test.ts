@@ -402,5 +402,189 @@ describe('memberService', () => {
       expect(mockDbx.sharingListFolderMembers).not.toHaveBeenCalled();
     });
   });
+
+  describe('removeMember', () => {
+    const company = {
+      id: 'mi-empresa',
+      name: 'Mi Empresa',
+      folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+      folderId: 'folder-id-123',
+      createdAt: '2024-01-01T00:00:00Z',
+    };
+
+    beforeEach(() => {
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+    });
+
+    it('removes member from main folder when it has shared_folder_id', async () => {
+      const accountId = 'dbid:admin-to-remove';
+      const mainFolderSharedId = 'shared-main-123';
+      const workspacePath = `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      const mockDbx = {
+        filesGetMetadata: vi.fn((args: { path: string }) => {
+          if (args.path === company.folderPath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                shared_folder_id: mainFolderSharedId,
+              },
+            });
+          }
+          if (args.path === workspacePath) {
+            return Promise.reject(new Error('Not found'));
+          }
+          return Promise.reject(new Error('Not found'));
+        }),
+        sharingRemoveFolderMember: vi.fn().mockResolvedValue({}),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      await memberService.removeMember('mi-empresa', accountId);
+
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({
+        path: company.folderPath,
+      });
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({
+        path: workspacePath,
+      });
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledTimes(1);
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledWith({
+        shared_folder_id: mainFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+    });
+
+    it('removes member from workspace folder when it has shared_folder_id', async () => {
+      const accountId = 'dbid:employee-to-remove';
+      const workspacePath = `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      const workspaceFolderSharedId = 'shared-workspace-456';
+      const mockDbx = {
+        filesGetMetadata: vi.fn((args: { path: string }) => {
+          if (args.path === company.folderPath) {
+            return Promise.reject(new Error('Not found'));
+          }
+          if (args.path === workspacePath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                shared_folder_id: workspaceFolderSharedId,
+              },
+            });
+          }
+          return Promise.reject(new Error('Not found'));
+        }),
+        sharingRemoveFolderMember: vi.fn().mockResolvedValue({}),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      await memberService.removeMember('mi-empresa', accountId);
+
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({
+        path: company.folderPath,
+      });
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({
+        path: workspacePath,
+      });
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledTimes(1);
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledWith({
+        shared_folder_id: workspaceFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+    });
+
+    it('removes member from both folders when both have shared_folder_id', async () => {
+      const accountId = 'dbid:admin-with-both';
+      const mainFolderSharedId = 'shared-main-123';
+      const workspacePath = `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      const workspaceFolderSharedId = 'shared-workspace-456';
+      const mockDbx = {
+        filesGetMetadata: vi.fn((args: { path: string }) => {
+          if (args.path === company.folderPath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                shared_folder_id: mainFolderSharedId,
+              },
+            });
+          }
+          if (args.path === workspacePath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                shared_folder_id: workspaceFolderSharedId,
+              },
+            });
+          }
+          return Promise.reject(new Error('Not found'));
+        }),
+        sharingRemoveFolderMember: vi.fn().mockResolvedValue({}),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      await memberService.removeMember('mi-empresa', accountId);
+
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledTimes(2);
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledWith({
+        shared_folder_id: mainFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+      expect(mockDbx.sharingRemoveFolderMember).toHaveBeenCalledWith({
+        shared_folder_id: workspaceFolderSharedId,
+        member: { '.tag': 'dropbox_id', dropbox_id: accountId },
+        leave_a_copy: false,
+      });
+    });
+
+    it('handles errors gracefully when folders are not shared', async () => {
+      const accountId = 'dbid:user-to-remove';
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockRejectedValue(new Error('Not found')),
+        sharingRemoveFolderMember: vi.fn(),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      await expect(memberService.removeMember('mi-empresa', accountId)).resolves.not.toThrow();
+
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledTimes(2);
+      expect(mockDbx.sharingRemoveFolderMember).not.toHaveBeenCalled();
+    });
+
+    it('handles errors gracefully when removing member fails silently', async () => {
+      const accountId = 'dbid:user-to-remove';
+      const mainFolderSharedId = 'shared-main-123';
+      const workspacePath = `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      const mockDbx = {
+        filesGetMetadata: vi.fn((args: { path: string }) => {
+          if (args.path === company.folderPath) {
+            return Promise.resolve({
+              result: {
+                '.tag': 'folder',
+                shared_folder_id: mainFolderSharedId,
+              },
+            });
+          }
+          if (args.path === workspacePath) {
+            return Promise.reject(new Error('Not found'));
+          }
+          return Promise.reject(new Error('Not found'));
+        }),
+        sharingRemoveFolderMember: vi.fn().mockRejectedValue(new Error('Cannot remove')),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      await expect(memberService.removeMember('mi-empresa', accountId)).resolves.not.toThrow();
+    });
+
+    it('throws error when company does not exist', async () => {
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([]));
+
+      await expect(
+        memberService.removeMember('nonexistent', 'dbid:user')
+      ).rejects.toThrow('Empresa no encontrada');
+    });
+  });
 });
 
