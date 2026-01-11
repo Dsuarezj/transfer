@@ -25,15 +25,28 @@ async function getAll(): Promise<TransferIds> {
   try {
     const content = await fileService.get(IDS_PATH);
     return JSON.parse(content);
-  } catch {
-    return {};
+  } catch (error: any) {
+    if (error.message === 'File not found') {
+      return {};
+    }
+    throw error;
   }
 }
 
 async function save(ids: TransferIds): Promise<void> {
   const content = JSON.stringify(ids, null, 2);
   const blob = new Blob([content], { type: 'application/json' });
-  await fileService.update(IDS_PATH, blob);
+  
+  try {
+    await fileService.get(IDS_PATH);
+    await fileService.update(IDS_PATH, blob);
+  } catch (error: any) {
+    if (error.message === 'File not found') {
+      await fileService.save(IDS_PATH, blob);
+    } else {
+      throw error;
+    }
+  }
 }
 
 function checkDuplicate(ids: TransferIds, transferNumber: string): {

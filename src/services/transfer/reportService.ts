@@ -68,14 +68,23 @@ async function save(data: SaveData): Promise<void> {
   let existingContent = '';
   try {
     existingContent = await fileService.get(csvPath);
-  } catch {
-    existingContent = CSV_HEADER;
+  } catch (error: any) {
+    if (error.message === 'File not found') {
+      existingContent = CSV_HEADER;
+    } else {
+      throw error;
+    }
   }
 
   const newLine = `${date},${time},${data.invoiceNumber},${data.transferNumber},${data.imageUrl}\n`;
   const updatedContent = existingContent + newLine;
   const blob = new Blob([updatedContent], { type: 'text/csv' });
-  await fileService.update(csvPath, blob);
+  
+  if (existingContent === CSV_HEADER) {
+    await fileService.save(csvPath, blob);
+  } else {
+    await fileService.update(csvPath, blob);
+  }
 }
 
 async function getByMonth(yearMonth: string): Promise<Invoice[]> {
@@ -83,8 +92,11 @@ async function getByMonth(yearMonth: string): Promise<Invoice[]> {
     const csvPath = getCsvPath(yearMonth);
     const content = await fileService.get(csvPath);
     return parseCsv(content);
-  } catch {
-    return [];
+  } catch (error: any) {
+    if (error.message === 'File not found') {
+      return [];
+    }
+    throw error;
   }
 }
 

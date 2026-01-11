@@ -1,5 +1,5 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
-import { getWorkspaceFolderPath } from '../../constants/dropbox';
+import { getWorkspaceFolderPath, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { companyService } from '../company/companyService';
 
 class FileService {
@@ -11,16 +11,17 @@ class FileService {
     }
 
     const cleanRel = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+    const basePath = activeCompany.folderPath;
+    const isWorkspacePath = basePath.includes(`/${WORKSPACE_FOLDER_PREFIX}`);
     
     if (cleanRel.startsWith('/capturas') || cleanRel.startsWith('/reportes')) {
+      if (isWorkspacePath) {
+        return `${basePath}${cleanRel}`;
+      }
       const workspacePath = getWorkspaceFolderPath(activeCompany.name);
       return `${workspacePath}${cleanRel}`;
     }
 
-    const basePath = activeCompany.folderPath;
-    if (cleanRel === basePath || cleanRel.startsWith(`${basePath}/`)) {
-      return cleanRel;
-    }
     return `${basePath}${cleanRel}`;
   }
 

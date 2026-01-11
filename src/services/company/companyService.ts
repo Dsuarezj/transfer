@@ -1,5 +1,5 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
-import { getCompanyFolderPath, getWorkspaceFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
+import { getCompanyFolderPath, getWorkspaceFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { Company } from '../../types/company';
 
@@ -16,16 +16,26 @@ async function detectCompanies(): Promise<Company[]> {
 
     const companyFolders = result.result.entries.filter(
       (entry: any) =>
-        entry.name.startsWith(COMPANY_FOLDER_PREFIX) &&
+        (entry.name.startsWith(COMPANY_FOLDER_PREFIX) || entry.name.startsWith(WORKSPACE_FOLDER_PREFIX)) &&
         entry['.tag'] === 'folder'
     );
 
     const companies: Company[] = [];
+    const processedCompanyIds = new Set<string>();
 
     for (const folder of companyFolders) {
-      const company = await processCompanyFolder(folder);
-      if (company) {
-        companies.push(company);
+      if (folder.name.startsWith(COMPANY_FOLDER_PREFIX)) {
+        const company = await processCompanyFolder(folder);
+        if (company && !processedCompanyIds.has(company.id)) {
+          companies.push(company);
+          processedCompanyIds.add(company.id);
+        }
+      } else if (folder.name.startsWith(WORKSPACE_FOLDER_PREFIX)) {
+        const company = await processWorkspaceFolder(folder);
+        if (company && !processedCompanyIds.has(company.id)) {
+          companies.push(company);
+          processedCompanyIds.add(company.id);
+        }
       }
     }
 
@@ -50,6 +60,20 @@ async function processCompanyFolder(folder: any): Promise<Company | null> {
     id: sanitizeCompanyName(companyName),
     name: companyName,
     folderPath: folder.path_lower || `/${folder.name}`,
+    folderId: folder.id || '',
+    createdAt: new Date().toISOString(),
+  };
+}
+
+async function processWorkspaceFolder(folder: any): Promise<Company | null> {
+  const companyName = folder.name.replace(WORKSPACE_FOLDER_PREFIX, '');
+  const companyId = sanitizeCompanyName(companyName);
+  const workspacePath = folder.path_lower || `/${folder.name}`;
+
+  return {
+    id: companyId,
+    name: companyName,
+    folderPath: workspacePath,
     folderId: folder.id || '',
     createdAt: new Date().toISOString(),
   };

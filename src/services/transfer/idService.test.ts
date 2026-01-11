@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { idService } from './idService';
 import { fileService } from '../dropbox/fileService';
 
-vi.mock('../dropbox/fileService');
+vi.mock('../dropbox/fileService', () => ({
+  fileService: {
+    get: vi.fn(),
+    save: vi.fn(),
+    update: vi.fn(),
+  },
+}));
 
 describe('idService', () => {
   beforeEach(() => {
@@ -58,7 +64,7 @@ describe('idService', () => {
 
   describe('getAll', () => {
     it('returns empty object when file does not exist', async () => {
-      vi.mocked(fileService.get).mockRejectedValue(new Error('not found'));
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
 
       const result = await idService.getAll();
 
@@ -82,10 +88,25 @@ describe('idService', () => {
 
       await idService.add('new-id', '2026-01-15');
 
+      expect(fileService.get).toHaveBeenCalledWith('/transfer-ids.json');
       expect(fileService.update).toHaveBeenCalledWith(
         '/transfer-ids.json',
         expect.any(Blob)
       );
+    });
+
+    it('creates file using save when file does not exist', async () => {
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
+
+      await idService.add('new-id', '2026-01-15');
+
+      expect(fileService.get).toHaveBeenCalledWith('/transfer-ids.json');
+      expect(fileService.save).toHaveBeenCalledWith(
+        '/transfer-ids.json',
+        expect.any(Blob)
+      );
+      expect(fileService.update).not.toHaveBeenCalled();
     });
 
     it('normalizes ID to lowercase before saving', async () => {
@@ -95,19 +116,16 @@ describe('idService', () => {
       await idService.add('MY-NEW-ID', '2026-01-15');
 
       expect(fileService.update).toHaveBeenCalled();
-      vi.mocked(fileService.get).mockResolvedValue(JSON.stringify({ 'my-new-id': '2026-01-15' }));
-      const ids = await idService.getAll();
-      expect(ids['my-new-id']).toBe('2026-01-15');
     });
 
     it('preserves existing IDs when adding new one', async () => {
-      vi.mocked(fileService.get).mockResolvedValue(JSON.stringify({
-        'existing': '2026-01-01',
-      }));
+      const existingIds = { 'existing': '2026-01-01' };
+      vi.mocked(fileService.get).mockResolvedValue(JSON.stringify(existingIds));
       vi.mocked(fileService.update).mockResolvedValue(undefined);
 
       await idService.add('new-id', '2026-01-15');
 
+      expect(fileService.get).toHaveBeenCalledWith('/transfer-ids.json');
       expect(fileService.update).toHaveBeenCalledWith(
         '/transfer-ids.json',
         expect.any(Blob)
@@ -116,17 +134,34 @@ describe('idService', () => {
   });
 
   describe('addWithIds', () => {
-    it('saves using provided IDs object without fetching', async () => {
+    it('saves using provided IDs object and checks if file exists', async () => {
+      vi.mocked(fileService.get).mockResolvedValue(JSON.stringify({ 'old-id': '2026-01-01' }));
       vi.mocked(fileService.update).mockResolvedValue(undefined);
       const existingIds = { 'old-id': '2026-01-01' };
 
       await idService.addWithIds('new-id', '2026-01-15', existingIds);
 
-      expect(fileService.get).not.toHaveBeenCalled();
+      expect(fileService.get).toHaveBeenCalledWith('/transfer-ids.json');
       expect(fileService.update).toHaveBeenCalled();
     });
 
+    it('creates file using save when file does not exist', async () => {
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
+      const existingIds = { 'old-id': '2026-01-01' };
+
+      await idService.addWithIds('new-id', '2026-01-15', existingIds);
+
+      expect(fileService.get).toHaveBeenCalledWith('/transfer-ids.json');
+      expect(fileService.save).toHaveBeenCalledWith(
+        '/transfer-ids.json',
+        expect.any(Blob)
+      );
+      expect(fileService.update).not.toHaveBeenCalled();
+    });
+
     it('adds new ID to provided IDs object', async () => {
+      vi.mocked(fileService.get).mockResolvedValue(JSON.stringify({ 'old-id': '2026-01-01' }));
       vi.mocked(fileService.update).mockResolvedValue(undefined);
       const existingIds: Record<string, string> = { 'old-id': '2026-01-01' };
 

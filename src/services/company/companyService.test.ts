@@ -31,7 +31,7 @@ describe('companyService', () => {
       expect(result).toEqual([]);
     });
 
-    it('detects folders starting with company folder prefix', async () => {
+    it('detects folders starting with company folder prefix (admin)', async () => {
       const mockDbx = {
         filesListFolder: vi.fn().mockResolvedValue({
           result: {
@@ -50,7 +50,11 @@ describe('companyService', () => {
 
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('mi-empresa');
+      expect(result[0].folderPath).toBe(`/${COMPANY_FOLDER_PREFIX}mi-empresa`);
+      expect(result[0].folderId).toBe('id1');
       expect(result[1].name).toBe('otra-empresa');
+      expect(result[1].folderPath).toBe(`/${COMPANY_FOLDER_PREFIX}otra-empresa`);
+      expect(result[1].folderId).toBe('id3');
     });
 
     it('reads metadata from .empresa.json when available', async () => {
@@ -81,6 +85,53 @@ describe('companyService', () => {
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Mi Empresa');
       expect(result[0].id).toBe('mi-empresa');
+    });
+
+    it('detects workspace folders and uses workspace path directly (employee)', async () => {
+      const workspaceFolderName = `${WORKSPACE_FOLDER_PREFIX}test`;
+      const workspacePath = `/${workspaceFolderName}`;
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: {
+            entries: [
+              { name: workspaceFolderName, '.tag': 'folder', path_lower: workspacePath, id: 'id-workspace' },
+            ],
+          },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      const result = await companyService.detectCompanies();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('test');
+      expect(result[0].id).toBe('test');
+      expect(result[0].folderPath).toBe(workspacePath);
+      expect(result[0].folderId).toBe('id-workspace');
+    });
+
+    it('detects both company and workspace folders without duplicates (admin has both)', async () => {
+      const companyPath = `/${COMPANY_FOLDER_PREFIX}test`;
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: {
+            entries: [
+              { name: `${COMPANY_FOLDER_PREFIX}test`, '.tag': 'folder', path_lower: companyPath, id: 'id-company' },
+              { name: `${WORKSPACE_FOLDER_PREFIX}test`, '.tag': 'folder', path_lower: `/${WORKSPACE_FOLDER_PREFIX}test`, id: 'id-workspace' },
+            ],
+          },
+        }),
+        filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+
+      const result = await companyService.detectCompanies();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('test');
+      expect(result[0].id).toBe('test');
+      expect(result[0].folderPath).toBe(companyPath);
+      expect(result[0].folderId).toBe('id-company');
     });
   });
 

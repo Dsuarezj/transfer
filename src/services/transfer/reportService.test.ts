@@ -2,7 +2,13 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { reportService } from './reportService';
 import { fileService } from '../dropbox/fileService';
 
-vi.mock('../dropbox/fileService');
+vi.mock('../dropbox/fileService', () => ({
+  fileService: {
+    get: vi.fn(),
+    save: vi.fn(),
+    update: vi.fn(),
+  },
+}));
 
 describe('reportService', () => {
   beforeEach(() => {
@@ -17,8 +23,8 @@ describe('reportService', () => {
 
   describe('save', () => {
     it('saves to monthly CSV file based on current date', async () => {
-      vi.mocked(fileService.get).mockRejectedValue(new Error('not found'));
-      vi.mocked(fileService.update).mockResolvedValue(undefined);
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
 
       await reportService.save({
         invoiceNumber: 'FAC-001',
@@ -26,10 +32,28 @@ describe('reportService', () => {
         imageUrl: '/path/image.jpg',
       });
 
-      expect(fileService.update).toHaveBeenCalledWith(
+      expect(fileService.save).toHaveBeenCalledWith(
         '/reportes/transfers-2026-01.csv',
         expect.any(Blob)
       );
+    });
+
+    it('creates file using save when file does not exist', async () => {
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
+
+      await reportService.save({
+        invoiceNumber: 'FAC-001',
+        transferNumber: 'TRF-001',
+        imageUrl: '/path/image.jpg',
+      });
+
+      expect(fileService.get).toHaveBeenCalledWith('/reportes/transfers-2026-01.csv');
+      expect(fileService.save).toHaveBeenCalledWith(
+        '/reportes/transfers-2026-01.csv',
+        expect.any(Blob)
+      );
+      expect(fileService.update).not.toHaveBeenCalled();
     });
 
     it('appends to existing CSV content', async () => {
@@ -51,8 +75,8 @@ describe('reportService', () => {
     });
 
     it('creates CSV with headers when file does not exist', async () => {
-      vi.mocked(fileService.get).mockRejectedValue(new Error('not found'));
-      vi.mocked(fileService.update).mockResolvedValue(undefined);
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
 
       await reportService.save({
         invoiceNumber: 'FAC-001',
@@ -60,15 +84,15 @@ describe('reportService', () => {
         imageUrl: '/path.jpg',
       });
 
-      expect(fileService.update).toHaveBeenCalledWith(
+      expect(fileService.save).toHaveBeenCalledWith(
         '/reportes/transfers-2026-01.csv',
         expect.any(Blob)
       );
     });
 
     it('includes date and time in saved record', async () => {
-      vi.mocked(fileService.get).mockRejectedValue(new Error('not found'));
-      vi.mocked(fileService.update).mockResolvedValue(undefined);
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+      vi.mocked(fileService.save).mockResolvedValue(undefined);
 
       await reportService.save({
         invoiceNumber: 'FAC-001',
@@ -76,7 +100,7 @@ describe('reportService', () => {
         imageUrl: '/path.jpg',
       });
 
-      expect(fileService.update).toHaveBeenCalled();
+      expect(fileService.save).toHaveBeenCalled();
     });
   });
 
@@ -95,7 +119,7 @@ describe('reportService', () => {
     });
 
     it('returns empty array when month file does not exist', async () => {
-      vi.mocked(fileService.get).mockRejectedValue(new Error('not found'));
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
 
       const result = await reportService.getByMonth('2026-02');
 
@@ -122,7 +146,7 @@ describe('reportService', () => {
           return 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
             '2026-01-05,10:00:00,FAC-JAN,TRF-JAN,/jan.jpg\n';
         }
-        throw new Error('not found');
+        throw new Error('File not found');
       });
 
       const result = await reportService.getByDateRange(
@@ -161,7 +185,7 @@ describe('reportService', () => {
             '2026-01-15,10:00:00,FAC-JAN-15,TRF-2,/2.jpg\n' +
             '2026-01-10,10:00:00,FAC-JAN-10,TRF-3,/3.jpg\n';
         }
-        throw new Error('not found');
+        throw new Error('File not found');
       });
 
       const result = await reportService.getByDateRange(

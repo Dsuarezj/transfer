@@ -26,6 +26,7 @@ import {
   AlertDialogOverlay,
 } from '@chakra-ui/react';
 import { companyService } from '../services/company/companyService';
+import { memberService } from '../services/company/memberService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 interface CompanyMember {
@@ -107,13 +108,13 @@ export default function CompanyMembersPage() {
     setIsInviting(true);
 
     try {
-      // TODO: Implementar addMember en companyService
-      // await companyService.addMember(activeCompany.id, email.trim(), role);
+      await memberService.addMember(activeCompany.id, email.trim(), role);
       toast({
         title: 'Invitación enviada',
-        description: `Se ha invitado a ${email} como ${role === 'admin' ? 'administrador' : 'empleado'}`,
+        description: `Se ha invitado a ${email} como ${role === 'admin' ? 'administrador' : 'empleado'}. El usuario debe aceptar la invitación y añadir la carpeta compartida a su cuenta para poder pertenecer a la organización.`,
         status: 'success',
-        duration: 3000,
+        duration: 6000,
+        isClosable: true,
       });
       setEmail('');
       setRole('employee');
