@@ -2,12 +2,10 @@ import { useState, useEffect } from 'react';
 import {
   Box,
   Container,
-  Heading,
   VStack,
   HStack,
   Input,
   Text,
-  Button,
   SimpleGrid,
   Spinner,
   Center,
@@ -15,7 +13,6 @@ import {
   InputLeftElement,
   useToast,
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
 import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
@@ -24,7 +21,6 @@ import InvoiceCard from '../components/InvoiceCard';
 import PageHeader from '../components/PageHeader';
 
 export default function ReviewInvoicesPage() {
-  const navigate = useNavigate();
   const toast = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');

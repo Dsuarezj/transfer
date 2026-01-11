@@ -32,6 +32,7 @@ import { STORAGE_KEYS } from '../constants/storageKeys';
 import { USER_ROLES, UserRole } from '../constants/roles';
 import LoadingSpinner from '../components/LoadingSpinner';
 import PageHeader from '../components/PageHeader';
+import InstructionsModal from '../components/InstructionsModal';
 import type { files } from 'dropbox/types';
 
 interface CompanyMember {
@@ -45,6 +46,7 @@ export default function CompanyMembersPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const { isOpen: isRemoveOpen, onOpen: onRemoveOpen, onClose: onRemoveClose } = useDisclosure();
+  const { isOpen: isInstructionsOpen, onOpen: onInstructionsOpen, onClose: onInstructionsClose } = useDisclosure();
   const cancelRef = useRef<HTMLButtonElement>(null);
   
   const [email, setEmail] = useState('');
@@ -53,6 +55,8 @@ export default function CompanyMembersPage() {
   const [members, setMembers] = useState<CompanyMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [memberToRemove, setMemberToRemove] = useState<CompanyMember | null>(null);
+  const [invitedMemberEmail, setInvitedMemberEmail] = useState<string>('');
+  const [invitedMemberRole, setInvitedMemberRole] = useState<UserRole>(USER_ROLES.EMPLOYEE);
 
   const activeCompany = companyService.getActiveCompany();
 
@@ -246,16 +250,12 @@ export default function CompanyMembersPage() {
 
     try {
       await memberService.addMember(activeCompany.id, email.trim(), role);
-      toast({
-        title: 'Invitación enviada',
-        description: `Se ha invitado a ${email} como ${role === USER_ROLES.ADMIN ? 'administrador' : 'empleado'}. El usuario debe aceptar la invitación y añadir la carpeta compartida a su cuenta para poder pertenecer a la organización.`,
-        status: 'success',
-        duration: 6000,
-        isClosable: true,
-      });
+      setInvitedMemberEmail(email.trim());
+      setInvitedMemberRole(role);
       setEmail('');
       setRole(USER_ROLES.EMPLOYEE);
       await loadMembers();
+      onInstructionsOpen();
     } catch (error: any) {
       const errorMessage = error.message || 'Error al invitar al empleado';
       toast({
@@ -544,6 +544,31 @@ export default function CompanyMembersPage() {
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
+
+      <InstructionsModal
+        isOpen={isInstructionsOpen}
+        onClose={onInstructionsClose}
+        title="Invitación Enviada"
+        subtitle={`Se ha invitado a <strong>${invitedMemberEmail}</strong> como <strong>${invitedMemberRole === USER_ROLES.ADMIN ? 'administrador' : 'empleado'}</strong>`}
+        steps={[
+          {
+            number: 1,
+            text: 'El empleado debe entrar a su correo electrónico y buscar la invitación de Dropbox',
+          },
+          {
+            number: 2,
+            text: 'Debe aceptar la invitación y añadir la carpeta compartida a su Dropbox',
+          },
+          {
+            number: 3,
+            text: 'Luego debe hacer login en esta aplicación con su cuenta de Dropbox',
+          },
+          {
+            number: 4,
+            text: 'Una vez dentro, podrá empezar a subir las transferencias',
+          },
+        ]}
+      />
     </Box>
   );
 }
