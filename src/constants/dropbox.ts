@@ -1,5 +1,5 @@
-export const DROPBOX_APP_FOLDER_PATH = '/transferencias';
 export const COMPANY_FOLDER_PREFIX = 'transferencias-';
+export const WORKSPACE_FOLDER_PREFIX = 'workspace-';
 
 export function sanitizeCompanyName(name: string): string {
   return name
@@ -13,5 +13,11 @@ export function sanitizeCompanyName(name: string): string {
 export function getCompanyFolderPath(companyName: string): string {
   const sanitizedName = sanitizeCompanyName(companyName);
   return `/${COMPANY_FOLDER_PREFIX}${sanitizedName}`;
+}
+
+export function getWorkspaceFolderPath(companyName: string): string {
+  const sanitizedName = sanitizeCompanyName(companyName);
+  const companyPath = getCompanyFolderPath(companyName);
+  return `${companyPath}/${WORKSPACE_FOLDER_PREFIX}${sanitizedName}`;
 }
 

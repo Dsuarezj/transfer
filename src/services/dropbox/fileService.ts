@@ -1,13 +1,23 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
-import { DROPBOX_APP_FOLDER_PATH } from '../../constants/dropbox';
+import { getWorkspaceFolderPath } from '../../constants/dropbox';
 import { companyService } from '../company/companyService';
 
 class FileService {
   private buildPath(relativePath: string): string {
     const activeCompany = companyService.getActiveCompany();
-    const basePath = activeCompany ? activeCompany.folderPath : DROPBOX_APP_FOLDER_PATH;
     
+    if (!activeCompany) {
+      throw new Error('No hay empresa activa. Por favor crea una empresa primero.');
+    }
+
     const cleanRel = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+    
+    if (cleanRel.startsWith('/capturas') || cleanRel.startsWith('/reportes')) {
+      const workspacePath = getWorkspaceFolderPath(activeCompany.name);
+      return `${workspacePath}${cleanRel}`;
+    }
+
+    const basePath = activeCompany.folderPath;
     if (cleanRel === basePath || cleanRel.startsWith(`${basePath}/`)) {
       return cleanRel;
     }

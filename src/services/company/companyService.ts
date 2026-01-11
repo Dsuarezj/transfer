@@ -1,5 +1,5 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
-import { getCompanyFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
+import { getCompanyFolderPath, getWorkspaceFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { Company } from '../../types/company';
 
@@ -68,7 +68,7 @@ async function createCompany(name: string): Promise<Company> {
 
     const folderId = (createResult.result as any).id || '';
 
-    await createCompanySubfolders(dbx, folderPath);
+    await createCompanySubfolders(dbx, folderPath, name);
     const ownerInfo = await getCurrentUserInfo(dbx);
 
     const company: Company = {
@@ -93,15 +93,28 @@ async function createCompany(name: string): Promise<Company> {
   }
 }
 
-async function createCompanySubfolders(dbx: any, folderPath: string): Promise<void> {
-  const subfolders = ['capturas', 'reportes', 'config'];
+async function createCompanySubfolders(dbx: any, folderPath: string, companyName: string): Promise<void> {
+  const workspacePath = getWorkspaceFolderPath(companyName);
 
-  for (const subfolder of subfolders) {
-    await dbx.filesCreateFolderV2({
-      path: `${folderPath}/${subfolder}`,
-      autorename: false,
-    });
-  }
+  await dbx.filesCreateFolderV2({
+    path: workspacePath,
+    autorename: false,
+  });
+
+  await dbx.filesCreateFolderV2({
+    path: `${workspacePath}/capturas`,
+    autorename: false,
+  });
+
+  await dbx.filesCreateFolderV2({
+    path: `${workspacePath}/reportes`,
+    autorename: false,
+  });
+
+  await dbx.filesCreateFolderV2({
+    path: `${folderPath}/config`,
+    autorename: false,
+  });
 }
 
 async function getCurrentUserInfo(dbx: any): Promise<{ email: string; accountId: string }> {

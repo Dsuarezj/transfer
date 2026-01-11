@@ -12,23 +12,36 @@ export default function HomePage() {
 
   useEffect(() => {
     const checkCompany = async () => {
-      const activeCompany = companyService.getActiveCompany();
-      if (!activeCompany) {
-        try {
+      try {
+        const activeCompany = companyService.getActiveCompany();
+        
+        if (!activeCompany) {
           const companies = await companyService.detectCompanies();
+          
           if (companies.length === 0) {
             navigate('/create-company', { replace: true });
-          } else if (companies.length === 1) {
+            return;
+          }
+          
+          if (companies.length === 1) {
             companyService.setActiveCompany(companies[0].id);
           } else {
-            const activeCompany = companyService.getActiveCompany();
-            if (!activeCompany || !companies.find(c => c.id === activeCompany.id)) {
-              companyService.setActiveCompany(companies[0].id);
-            }
+            companyService.setActiveCompany(companies[0].id);
           }
-        } catch (error) {
-          navigate('/create-company', { replace: true });
+        } else {
+          const companies = await companyService.detectCompanies();
+          const companyStillExists = companies.find(c => c.id === activeCompany.id);
+          
+          if (!companyStillExists) {
+            if (companies.length === 0) {
+              navigate('/create-company', { replace: true });
+              return;
+            }
+            companyService.setActiveCompany(companies[0].id);
+          }
         }
+      } catch (error) {
+        navigate('/create-company', { replace: true });
       }
     };
 
@@ -159,3 +172,4 @@ export default function HomePage() {
     </Box>
   );
 }
+

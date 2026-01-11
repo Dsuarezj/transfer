@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { companyService } from './companyService';
 import { dropboxGateway } from '../../gateway/dropboxGateway';
-import { COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
+import { COMPANY_FOLDER_PREFIX, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
 
 vi.mock('../../gateway/dropboxGateway', () => ({
@@ -98,17 +98,22 @@ describe('companyService', () => {
       const result = await companyService.createCompany('Mi Empresa');
 
       const expectedFolderPath = `/${COMPANY_FOLDER_PREFIX}mi-empresa`;
-      expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledTimes(4);
+      const expectedWorkspacePath = `${expectedFolderPath}/${WORKSPACE_FOLDER_PREFIX}mi-empresa`;
+      expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledTimes(5);
       expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledWith({
         path: expectedFolderPath,
         autorename: false,
       });
       expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledWith({
-        path: `${expectedFolderPath}/capturas`,
+        path: expectedWorkspacePath,
         autorename: false,
       });
       expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledWith({
-        path: `${expectedFolderPath}/reportes`,
+        path: `${expectedWorkspacePath}/capturas`,
+        autorename: false,
+      });
+      expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledWith({
+        path: `${expectedWorkspacePath}/reportes`,
         autorename: false,
       });
       expect(mockDbx.filesCreateFolderV2).toHaveBeenCalledWith({

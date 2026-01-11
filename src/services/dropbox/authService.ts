@@ -60,7 +60,6 @@ class AuthService {
     }
 
     dropboxGateway.saveToken(tokenData);
-    await dropboxGateway.ensureAppFolders(tokenData.access_token);
     localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
 
     window.dispatchEvent(new Event('dropbox-auth-change'));
