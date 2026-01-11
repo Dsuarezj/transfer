@@ -24,6 +24,9 @@ import {
 import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { idService, TransferIds } from '../services/transfer/idService';
 import { useTransferSave } from '../hooks/useTransferSave';
+import { useTransferUpdate } from '../hooks/useTransferUpdate';
+import { fileService } from '../services/dropbox/fileService';
+import { Invoice } from '../types/dropbox';
 
 type ModalType = 'none' | 'duplicate' | 'success';
 
@@ -32,38 +35,70 @@ const isMobileDevice = () => {
   return window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 };
 
+interface LocationState {
+  imageUrl?: string;
+  photoBlob?: Blob;
+  preloadedIds?: TransferIds;
+  source?: 'camera' | 'file';
+  editTransfer?: Invoice;
+}
+
 export default function SaveTransferPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const toast = useToast();
   const { save } = useTransferSave();
+  const { update } = useTransferUpdate();
 
-  const { imageUrl, photoBlob, preloadedIds, source } = (location.state as {
-    imageUrl?: string;
-    photoBlob?: Blob;
-    preloadedIds?: TransferIds;
-    source?: 'camera' | 'file';
-  }) || {};
+  const { imageUrl, photoBlob, preloadedIds, source, editTransfer } = (location.state as LocationState) || {};
 
-  const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [transferNumber, setTransferNumber] = useState('');
+  const isEditMode = !!editTransfer;
+
+  const [invoiceNumber, setInvoiceNumber] = useState(editTransfer?.invoiceNumber === 'SIN-FACTURA' ? '' : (editTransfer?.invoiceNumber || ''));
+  const [transferNumber, setTransferNumber] = useState(editTransfer?.transferNumber || '');
   const [isUploading, setIsUploading] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('none');
   const [duplicateSuggestedId, setDuplicateSuggestedId] = useState('');
   const [savedTransferNumber, setSavedTransferNumber] = useState('');
   const [isMobile, setIsMobile] = useState(isMobileDevice());
   const [loadedIds, setLoadedIds] = useState<TransferIds | null>(preloadedIds || null);
+  const [temporaryImageUrl, setTemporaryImageUrl] = useState<string | null>(null);
+  const [isLoadingImage, setIsLoadingImage] = useState(isEditMode);
 
   const [bottomOffset, setBottomOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
+  const displayImageUrl = isEditMode ? temporaryImageUrl : imageUrl;
+
   useEffect(() => {
-    if (!imageUrl) {
+    if (isEditMode && editTransfer?.imageUrl) {
+      setIsLoadingImage(true);
+      fileService.getTemporaryLink(editTransfer.imageUrl)
+        .then((url) => {
+          setTemporaryImageUrl(url);
+        })
+        .catch(() => {
+          toast({
+            title: 'Error',
+            description: 'No se pudo cargar la imagen',
+            status: 'error',
+            duration: 3000,
+          });
+          navigate('/review', { replace: true });
+        })
+        .finally(() => {
+          setIsLoadingImage(false);
+        });
+    }
+  }, [isEditMode, editTransfer?.imageUrl, navigate, toast]);
+
+  useEffect(() => {
+    if (!isEditMode && !imageUrl) {
       const targetRoute = source === 'file' ? '/upload-file' : '/upload';
       navigate(targetRoute, { replace: true });
     }
-  }, [imageUrl, navigate]);
+  }, [imageUrl, navigate, isEditMode, source]);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(isMobileDevice());
@@ -94,6 +129,14 @@ export default function SaveTransferPage() {
   }, [isMobile]);
 
   const handleSubmit = async () => {
+    if (isEditMode) {
+      await handleUpdate();
+    } else {
+      await handleSave();
+    }
+  };
+
+  const handleSave = async () => {
     if (!photoBlob) {
       toast({ title: 'Error', description: 'No hay foto capturada', status: 'error', duration: 3000 });
       return;
@@ -111,6 +154,27 @@ export default function SaveTransferPage() {
     }
 
     await saveTransfer(ids, prepared.finalNumber);
+  };
+
+  const handleUpdate = async () => {
+    if (!editTransfer) return;
+
+    const ids = loadedIds || await idService.getAll();
+    setLoadedIds(ids);
+
+    const newTransferNumber = transferNumber.trim();
+    const originalNumber = editTransfer.transferNumber || '';
+
+    if (newTransferNumber && newTransferNumber !== originalNumber) {
+      const prepared = idService.prepare(ids, newTransferNumber);
+      if (prepared.isDuplicate) {
+        setDuplicateSuggestedId(prepared.finalNumber);
+        setModalType('duplicate');
+        return;
+      }
+    }
+
+    await updateTransfer(ids, newTransferNumber);
   };
 
   const saveTransfer = async (ids: TransferIds, finalTransferNumber: string) => {
@@ -135,20 +199,57 @@ export default function SaveTransferPage() {
     }
   };
 
+  const updateTransfer = async (ids: TransferIds, finalTransferNumber: string) => {
+    if (!editTransfer) return;
+
+    setIsUploading(true);
+
+    try {
+      await update({
+        date: editTransfer.date,
+        time: editTransfer.time,
+        imageUrl: editTransfer.imageUrl,
+        invoiceNumber: invoiceNumber.trim(),
+        transferNumber: finalTransferNumber,
+        originalTransferNumber: editTransfer.transferNumber || '',
+        loadedIds: ids,
+      });
+
+      setSavedTransferNumber(finalTransferNumber);
+      setModalType('success');
+    } catch {
+      toast({ title: 'Error', description: 'No se pudo actualizar la transferencia', status: 'error', duration: 3000 });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleRetake = () => {
-    const targetRoute = source === 'file' ? '/upload-file' : '/upload';
-    navigate(targetRoute, { replace: true });
+    if (isEditMode) {
+      navigate('/review', { replace: true });
+    } else {
+      const targetRoute = source === 'file' ? '/upload-file' : '/upload';
+      navigate(targetRoute, { replace: true });
+    }
   };
 
   const handleSuccessClose = () => {
     setModalType('none');
-    navigate('/');
+    if (isEditMode) {
+      navigate('/review');
+    } else {
+      navigate('/');
+    }
   };
 
   const handleDuplicateConfirm = async () => {
     setModalType('none');
     if (loadedIds) {
-      await saveTransfer(loadedIds, duplicateSuggestedId);
+      if (isEditMode) {
+        await updateTransfer(loadedIds, duplicateSuggestedId);
+      } else {
+        await saveTransfer(loadedIds, duplicateSuggestedId);
+      }
     }
   };
 
@@ -156,9 +257,33 @@ export default function SaveTransferPage() {
     setModalType('none');
   };
 
-  if (!imageUrl) return null;
+  if (isLoadingImage) {
+    return (
+      <Box h="100vh" display="flex" alignItems="center" justifyContent="center" bgGradient="linear(135deg, #4299E1, #2B6CB0)">
+        <VStack spacing={4}>
+          <Box
+            w="50px"
+            h="50px"
+            border="4px solid"
+            borderColor="white"
+            borderTopColor="transparent"
+            borderRadius="full"
+            animation="spin 1s linear infinite"
+            sx={{ '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }}
+          />
+          <Text color="white" fontSize="lg">Cargando imagen...</Text>
+        </VStack>
+      </Box>
+    );
+  }
 
-  const formHeight = 130;
+  if (!displayImageUrl) return null;
+
+  const formHeight = isEditMode ? 170 : 130;
+  const pageTitle = isEditMode ? 'Editar Transferencia' : 'Nueva Transferencia';
+  const successMessage = isEditMode ? 'Transferencia actualizada correctamente' : 'Transferencia guardada correctamente';
+  const buttonText = isEditMode ? 'Actualizar' : 'Guardar';
+  const loadingText = isEditMode ? 'Actualizando...' : 'Guardando...';
 
   if (isMobile) {
     return (
@@ -190,7 +315,7 @@ export default function SaveTransferPage() {
           borderRadius="full"
           _hover={{ bg: 'blackAlpha.700' }}
           _active={{ bg: 'blackAlpha.800' }}
-          onClick={() => navigate('/')}
+          onClick={() => navigate(isEditMode ? '/review' : '/')}
         />
 
         <Box
@@ -224,7 +349,7 @@ export default function SaveTransferPage() {
               }}
             >
               <img
-                src={imageUrl}
+                src={displayImageUrl}
                 alt="Transferencia"
                 style={{
                   width: '100%',
@@ -251,6 +376,17 @@ export default function SaveTransferPage() {
           boxShadow="0 -4px 20px rgba(0,0,0,0.3)"
           zIndex={100}
         >
+          {isEditMode && editTransfer && (
+            <HStack spacing={4} mb={2} px={1}>
+              <Text fontSize="xs" color="gray.500">
+                📅 {editTransfer.date}
+              </Text>
+              <Text fontSize="xs" color="gray.500">
+                🕐 {editTransfer.time}
+              </Text>
+            </HStack>
+          )}
+
           <HStack spacing={2} mb={3}>
             <Box flex={1}>
               <Text fontSize="xs" color="gray.500" mb={1}>Comprobante</Text>
@@ -290,17 +426,23 @@ export default function SaveTransferPage() {
               borderRadius="10px"
               onClick={handleSubmit}
               isLoading={isUploading}
-              loadingText="Guardando..."
+              loadingText={loadingText}
             >
-              Guardar
+              {buttonText}
             </Button>
             <IconButton
-              aria-label="Tomar otra foto"
+              aria-label={isEditMode ? 'Volver a transferencias' : 'Tomar otra foto'}
               icon={
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M1 4v6h6M23 20v-6h-6" />
-                  <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-                </svg>
+                isEditMode ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M1 4v6h6M23 20v-6h-6" />
+                    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                  </svg>
+                )
               }
               size="md"
               variant="outline"
@@ -322,7 +464,7 @@ export default function SaveTransferPage() {
               <HStack spacing={3}>
                 <Button variant="outline" onClick={handleDuplicateCancel}>Cancelar</Button>
                 <Button colorScheme="orange" onClick={handleDuplicateConfirm} isLoading={isUploading}>
-                  Guardar
+                  {buttonText}
                 </Button>
               </HStack>
             </ModalFooter>
@@ -332,9 +474,9 @@ export default function SaveTransferPage() {
         <Modal isOpen={modalType === 'success'} onClose={handleSuccessClose} isCentered>
           <ModalOverlay bg="blackAlpha.700" />
           <ModalContent borderRadius="20px" mx={4}>
-            <ModalHeader textAlign="center" pt={6}>✅ ¡Guardado!</ModalHeader>
+            <ModalHeader textAlign="center" pt={6}>✅ {isEditMode ? '¡Actualizado!' : '¡Guardado!'}</ModalHeader>
             <ModalBody textAlign="center">
-              <Text>Transferencia guardada correctamente</Text>
+              <Text>{successMessage}</Text>
               {savedTransferNumber && (
                 <Text mt={2} color="gray.600">Número: <strong>{savedTransferNumber}</strong></Text>
               )}
@@ -352,14 +494,14 @@ export default function SaveTransferPage() {
     <Box h="100vh" bgGradient="linear(135deg, #4299E1, #2B6CB0)">
       <Box bg="#1a365d" py={4} boxShadow="md">
         <Container maxW="5xl" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="white">Nueva Transferencia</Heading>
+          <Heading size="md" color="white">{pageTitle}</Heading>
           <Button
             size="sm"
             variant="outline"
             color="white"
             borderColor="white"
             _hover={{ bg: 'whiteAlpha.200' }}
-            onClick={() => navigate('/')}
+            onClick={() => navigate(isEditMode ? '/review' : '/')}
           >
             Cancelar
           </Button>
@@ -378,7 +520,7 @@ export default function SaveTransferPage() {
             justifyContent="center"
           >
             <img
-              src={imageUrl}
+              src={displayImageUrl}
               alt="Transferencia"
               style={{
                 maxWidth: '100%',
@@ -394,6 +536,17 @@ export default function SaveTransferPage() {
                 <Text fontSize="lg" fontWeight="semibold" color="gray.700">
                   Datos de la transferencia
                 </Text>
+
+                {isEditMode && editTransfer && (
+                  <HStack spacing={4} bg="gray.50" p={3} borderRadius="10px">
+                    <Text fontSize="sm" color="gray.600">
+                      📅 {editTransfer.date}
+                    </Text>
+                    <Text fontSize="sm" color="gray.600">
+                      🕐 {editTransfer.time}
+                    </Text>
+                  </HStack>
+                )}
 
                 <FormControl>
                   <FormLabel fontSize="sm" color="gray.600">Número de Comprobante</FormLabel>
@@ -425,17 +578,23 @@ export default function SaveTransferPage() {
                     borderRadius="12px"
                     onClick={handleSubmit}
                     isLoading={isUploading}
-                    loadingText="Guardando..."
+                    loadingText={loadingText}
                   >
-                    Guardar
+                    {buttonText}
                   </Button>
                   <IconButton
-                    aria-label="Tomar otra foto"
+                    aria-label={isEditMode ? 'Volver a transferencias' : 'Tomar otra foto'}
                     icon={
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 4v6h6M23 20v-6h-6" />
-                        <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
-                      </svg>
+                      isEditMode ? (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                      ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 4v6h6M23 20v-6h-6" />
+                          <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" />
+                        </svg>
+                      )
                     }
                     size="lg"
                     variant="outline"
@@ -464,7 +623,7 @@ export default function SaveTransferPage() {
             <HStack spacing={3}>
               <Button variant="outline" onClick={handleDuplicateCancel} size="lg">Cancelar</Button>
               <Button colorScheme="orange" onClick={handleDuplicateConfirm} isLoading={isUploading} size="lg">
-                Guardar
+                {buttonText}
               </Button>
             </HStack>
           </ModalFooter>
@@ -477,9 +636,9 @@ export default function SaveTransferPage() {
           <Box bg="green.50" textAlign="center" pt={8}>
             <Text fontSize="5xl">✅</Text>
           </Box>
-          <ModalHeader color="green.600" textAlign="center">¡Éxito!</ModalHeader>
+          <ModalHeader color="green.600" textAlign="center">{isEditMode ? '¡Actualizado!' : '¡Éxito!'}</ModalHeader>
           <ModalBody textAlign="center">
-            <Text>La transferencia se guardó correctamente</Text>
+            <Text>{successMessage}</Text>
             {savedTransferNumber && (
               <Text mt={2} color="gray.600">Número: <strong>{savedTransferNumber}</strong></Text>
             )}

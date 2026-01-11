@@ -1,4 +1,5 @@
-import { Box, VStack, HStack, Text, Badge, Link } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import { Box, VStack, HStack, Text, Badge } from '@chakra-ui/react';
 import { Invoice } from '../types/dropbox';
 
 interface TransferCardProps {
@@ -6,6 +7,16 @@ interface TransferCardProps {
 }
 
 export default function TransferCard({ transfer }: TransferCardProps) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/save', {
+      state: {
+        editTransfer: transfer,
+      },
+    });
+  };
+
   return (
     <Box
       bg="white"
@@ -15,10 +26,19 @@ export default function TransferCard({ transfer }: TransferCardProps) {
       _hover={{
         boxShadow: 'cardHover',
         transform: 'translateY(-2px)',
+        cursor: 'pointer',
       }}
       transition="all 0.2s"
       position="relative"
       overflow="hidden"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleClick();
+        }
+      }}
     >
       <Box
         position="absolute"
@@ -77,18 +97,14 @@ export default function TransferCard({ transfer }: TransferCardProps) {
           )}
         </VStack>
 
-        <Link
-          href={transfer.imageUrl}
-          isExternal
+        <Text
           color="accent.600"
           fontSize="xs"
           fontWeight="semibold"
-          _hover={{ color: 'accent.700', textDecoration: 'underline' }}
         >
-          🔗 Ver archivo
-        </Link>
+          ✏️ Toca para ver o editar
+        </Text>
       </VStack>
     </Box>
   );
 }
-

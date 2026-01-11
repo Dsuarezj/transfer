@@ -82,12 +82,33 @@ async function addWithIds(transferNumber: string, date: string, existingIds: Tra
   await save(existingIds);
 }
 
+async function remove(transferNumber: string): Promise<void> {
+  if (!transferNumber.trim()) return;
+  const ids = await getAll();
+  const normalized = normalize(transferNumber);
+  if (normalized in ids) {
+    delete ids[normalized];
+    await save(ids);
+  }
+}
+
+async function removeWithIds(transferNumber: string, existingIds: TransferIds): Promise<void> {
+  if (!transferNumber.trim()) return;
+  const normalized = normalize(transferNumber);
+  if (normalized in existingIds) {
+    delete existingIds[normalized];
+    await save(existingIds);
+  }
+}
+
 export const idService = {
   getAll,
   checkDuplicate,
   prepare,
   add,
   addWithIds,
+  remove,
+  removeWithIds,
 };
 
 export type { TransferIds };

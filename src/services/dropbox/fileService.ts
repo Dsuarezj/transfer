@@ -80,6 +80,19 @@ class FileService {
     const fullPath = this.getFullPath(path);
     return `https://www.dropbox.com/home${fullPath}`;
   }
+
+  async getTemporaryLink(dropboxHomeUrl: string): Promise<string> {
+    const dbx = await this.getClient();
+
+    const pathMatch = dropboxHomeUrl.match(/https:\/\/www\.dropbox\.com\/home(.+)/);
+    if (!pathMatch) {
+      throw new Error('Invalid Dropbox URL format');
+    }
+
+    const filePath = decodeURIComponent(pathMatch[1]);
+    const response = await dbx.filesGetTemporaryLink({ path: filePath });
+    return response.result.link;
+  }
 }
 
 export const fileService = new FileService();
