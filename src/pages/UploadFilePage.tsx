@@ -64,43 +64,57 @@ export default function UploadFilePage() {
 
   return (
     <Box
-      h="100%"
+      minH="100vh"
       w="100%"
-      bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      flexDirection="column"
-      overflow="hidden"
       position="relative"
+      overflow="hidden"
     >
       <Box
-        position="absolute"
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
         top="0"
         left="0"
         right="0"
         bottom="0"
         bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
+        zIndex={0}
       />
 
-      <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
-        <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="neutral.50">
-            Subir Archivo
-          </Heading>
-          <Button
-            size="sm"
-            variant="outline"
-            color="neutral.50"
-            borderColor="neutral.50"
-            _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
-            onClick={handleCancel}
-          >
-            Cancelar
-          </Button>
-        </Container>
-      </Box>
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0}>
+          <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
+            <Heading size="md" color="neutral.50">
+              Subir Archivo
+            </Heading>
+            <Button
+              size="sm"
+              variant="outline"
+              color="neutral.50"
+              borderColor="neutral.50"
+              _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
+              onClick={handleCancel}
+            >
+              Cancelar
+            </Button>
+          </Container>
+        </Box>
 
-      <Container maxW="md" flex="1" display="flex" alignItems="center" py={6} position="relative" zIndex={1}>
+        <Container maxW="md" flex="1" display="flex" alignItems="center" py={6}>
         <VStack spacing={6} w="full">
           <VStack spacing={4} w="full">
             <Box
@@ -155,6 +169,7 @@ export default function UploadFilePage() {
           </VStack>
         </VStack>
       </Container>
+      </Box>
     </Box>
   );
 }

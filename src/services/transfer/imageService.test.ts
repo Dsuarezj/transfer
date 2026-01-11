@@ -63,5 +63,40 @@ describe('imageService', () => {
       );
     });
   });
+
+  describe('delete', () => {
+    it('extracts full path from Dropbox URL and deletes image', async () => {
+      const dropboxUrl = 'https://www.dropbox.com/home/Apps/Transferido/workspace-company/capturas/2026-01/image.jpg';
+      vi.mocked(fileService.delete).mockResolvedValue(undefined);
+
+      await imageService.delete(dropboxUrl);
+
+      expect(fileService.delete).toHaveBeenCalledWith('/Apps/Transferido/workspace-company/capturas/2026-01/image.jpg');
+    });
+
+    it('handles URL-encoded paths', async () => {
+      const dropboxUrl = 'https://www.dropbox.com/home/Apps/Transferido/workspace-company/capturas/2026-01/FAC-001%20_20260115_103045.jpg';
+      vi.mocked(fileService.delete).mockResolvedValue(undefined);
+
+      await imageService.delete(dropboxUrl);
+
+      expect(fileService.delete).toHaveBeenCalledWith('/Apps/Transferido/workspace-company/capturas/2026-01/FAC-001 _20260115_103045.jpg');
+    });
+
+    it('extracts path with workspace prefix', async () => {
+      const dropboxUrl = 'https://www.dropbox.com/home/Apps/Transferido/transferencias-company/workspace-company/capturas/2026-01/image.jpg';
+      vi.mocked(fileService.delete).mockResolvedValue(undefined);
+
+      await imageService.delete(dropboxUrl);
+
+      expect(fileService.delete).toHaveBeenCalledWith('/Apps/Transferido/transferencias-company/workspace-company/capturas/2026-01/image.jpg');
+    });
+
+    it('throws error for invalid URL format', async () => {
+      const invalidUrl = 'https://example.com/path';
+
+      await expect(imageService.delete(invalidUrl)).rejects.toThrow('Invalid Dropbox URL format');
+    });
+  });
 });
 

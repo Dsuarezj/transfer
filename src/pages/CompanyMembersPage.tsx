@@ -313,27 +313,42 @@ export default function CompanyMembersPage() {
     <Box
       minH="100vh"
       w="100%"
-      bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      flexDirection="column"
       position="relative"
+      overflow="hidden"
     >
+      <Box
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
       {isLoading && (
         <LoadingSpinner message="Cargando miembros..." overlay />
       )}
       <Box
-        position="absolute"
+        position="fixed"
         top="0"
         left="0"
         right="0"
         bottom="0"
         bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
+        zIndex={0}
       />
 
-      <PageHeader title="Gestionar Empleados" backPath="/" />
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <PageHeader title="Gestionar Empleados" backPath="/" />
 
-      <Box flex="1" position="relative" zIndex={1} py={{ base: 4, md: 6 }} px={{ base: 4, sm: 6 }}>
+        <Box flex="1" py={{ base: 4, md: 6 }} px={{ base: 4, sm: 6 }}>
         <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
           <VStack spacing={{ base: 6, md: 8 }} align="stretch">
             <VStack spacing={{ base: 3, md: 5 }}>
@@ -568,6 +583,7 @@ export default function CompanyMembersPage() {
           },
         ]}
       />
+      </Box>
     </Box>
   );
 }

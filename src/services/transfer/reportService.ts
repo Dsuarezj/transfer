@@ -15,6 +15,12 @@ interface UpdateData {
   transferNumber: string;
 }
 
+interface DeleteData {
+  date: string;
+  time: string;
+  imageUrl: string;
+}
+
 interface Invoice {
   date: string;
   time: string;
@@ -169,11 +175,49 @@ async function update(data: UpdateData): Promise<void> {
   await fileService.update(csvPath, blob);
 }
 
+async function remove(data: DeleteData): Promise<void> {
+  const yearMonth = data.date.substring(0, 7);
+  const csvPath = getCsvPath(yearMonth);
+
+  let existingContent = '';
+  try {
+    existingContent = await fileService.get(csvPath);
+  } catch (error: any) {
+    if (error.message === 'File not found') {
+      throw new Error('Transfer not found');
+    }
+    throw error;
+  }
+
+  const lines = existingContent.split('\n');
+  let found = false;
+
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+
+    const [date, time, , , imageUrl] = lines[i].split(',');
+    if (date === data.date && time === data.time && imageUrl === data.imageUrl) {
+      lines.splice(i, 1);
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    throw new Error('Transfer not found');
+  }
+
+  const updatedContent = lines.join('\n');
+  const blob = new Blob([updatedContent], { type: 'text/csv' });
+  await fileService.update(csvPath, blob);
+}
+
 export const reportService = {
   save,
   update,
+  remove,
   getByMonth,
   getByDateRange,
 };
 
-export type { Invoice, SaveData, UpdateData };
+export type { Invoice, SaveData, UpdateData, DeleteData };

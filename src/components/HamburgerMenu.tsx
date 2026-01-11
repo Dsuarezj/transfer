@@ -1,12 +1,14 @@
-import { Box, IconButton, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, useDisclosure, Button, Divider, VStack } from '@chakra-ui/react';
+import { Box, IconButton, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, useDisclosure, Button, Divider, VStack, Text } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useDropboxAuth } from '../hooks/useDropboxAuth';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 import { companyService } from '../services/company/companyService';
 import { USER_ROLES } from '../constants/roles';
 
 export default function HamburgerMenu() {
   const navigate = useNavigate();
   const { logout } = useDropboxAuth();
+  const { email } = useCurrentUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const activeCompany = companyService.getActiveCompany();
   const isAdmin = activeCompany?.role === USER_ROLES.ADMIN;
@@ -33,7 +35,16 @@ export default function HamburgerMenu() {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader borderBottomWidth="1px">Menú</DrawerHeader>
+          <DrawerHeader borderBottomWidth="1px">
+            <VStack align="start" spacing={1}>
+              <Text fontSize="lg" fontWeight="semibold">Menú</Text>
+              {email && (
+                <Text fontSize="sm" color="gray.600" fontWeight="normal">
+                  {email}
+                </Text>
+              )}
+            </VStack>
+          </DrawerHeader>
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
               {isAdmin && (

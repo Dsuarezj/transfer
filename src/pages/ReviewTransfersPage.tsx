@@ -17,12 +17,21 @@ import {
   MenuList,
   MenuItem,
   IconButton,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Button,
 } from '@chakra-ui/react';
 import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
 import { dateRangeService } from '../services/transfer/dateRangeService';
 import { exportService } from '../services/transfer/exportService';
+import { useTransferDelete } from '../hooks/useTransferDelete';
+import { idService } from '../services/transfer/idService';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import TransferCard from '../components/TransferCard';
 import PageHeader from '../components/PageHeader';
@@ -43,12 +52,15 @@ const getInitialDateRange = () => {
 
 export default function ReviewTransfersPage() {
   const toast = useToast();
+  const { deleteTransfer } = useTransferDelete();
   const [transfers, setTransfers] = useState<Invoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<string>(() => getInitialDateRange().startDate);
   const [endDate, setEndDate] = useState<string>(() => getInitialDateRange().endDate);
+  const [transferToDelete, setTransferToDelete] = useState<Invoice | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleStartDateChange = (newStartDate: string) => {
     setStartDate(newStartDate);
@@ -133,6 +145,53 @@ export default function ReviewTransfersPage() {
     return `${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`;
   };
 
+  const handleDelete = (transfer: Invoice) => {
+    setTransferToDelete(transfer);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!transferToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const loadedIds = await idService.getAll();
+      await deleteTransfer({
+        date: transferToDelete.date,
+        time: transferToDelete.time,
+        imageUrl: transferToDelete.imageUrl,
+        transferNumber: transferToDelete.transferNumber,
+        loadedIds,
+      });
+
+      setTransfers(transfers.filter(t =>
+        !(t.date === transferToDelete.date &&
+          t.time === transferToDelete.time &&
+          t.imageUrl === transferToDelete.imageUrl)
+      ));
+
+      setTransferToDelete(null);
+      toast({
+        title: 'Eliminado',
+        description: 'Transferencia eliminada correctamente',
+        status: 'success',
+        duration: 2000,
+      });
+    } catch (err) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo eliminar la transferencia',
+        status: 'error',
+        duration: 3000,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setTransferToDelete(null);
+  };
+
   const downloadCSV = () => {
     if (filteredTransfers.length === 0) {
       toast({ title: 'Sin datos', description: 'No hay transferencias para exportar', status: 'warning', duration: 3000 });
@@ -177,20 +236,37 @@ export default function ReviewTransfersPage() {
   };
 
   return (
-    <Box minH="100vh" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" position="relative">
+    <Box minH="100vh" w="100%" position="relative" overflow="hidden">
       <Box
-        position="absolute"
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
         top="0"
         left="0"
         right="0"
         bottom="0"
         bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
+        zIndex={0}
       />
 
-      <PageHeader title="Transferencias" backPath="/" />
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <PageHeader title="Transferencias" backPath="/" />
 
-      <Box flex="1" position="relative" zIndex={1}>
+        <Box flex="1">
         <Container maxW="md" py={4}>
           <VStack spacing={4} align="stretch">
             <Box bg="white" borderRadius="16px" boxShadow="card" p={3}>
@@ -340,13 +416,66 @@ export default function ReviewTransfersPage() {
           {!isLoading && filteredTransfers.length > 0 && (
             <SimpleGrid columns={1} spacing={4}>
               {filteredTransfers.map((transfer, index) => (
-                <TransferCard key={index} transfer={transfer} />
+                <TransferCard key={index} transfer={transfer} onDelete={handleDelete} />
               ))}
             </SimpleGrid>
           )}
           </VStack>
         </Container>
+        </Box>
       </Box>
+
+      <Modal isOpen={!!transferToDelete} onClose={handleDeleteCancel} isCentered>
+        <ModalOverlay bg="blackAlpha.700" />
+        <ModalContent borderRadius="20px" mx={4}>
+          <ModalHeader textAlign="center" pt={6} color="red.600">
+            ⚠️ Eliminar Transferencia
+          </ModalHeader>
+          <ModalBody textAlign="center">
+            <VStack spacing={3}>
+              <Text>¿Estás seguro de que deseas eliminar esta transferencia?</Text>
+              {transferToDelete && (
+                <Box bg="gray.50" p={4} borderRadius="12px" w="100%">
+                  <VStack align="stretch" spacing={2}>
+                    <HStack>
+                      <Text fontSize="sm" color="gray.600" fontWeight="medium">Comprobante:</Text>
+                      <Text fontSize="sm" fontWeight="semibold">{transferToDelete.invoiceNumber}</Text>
+                    </HStack>
+                    <HStack>
+                      <Text fontSize="sm" color="gray.600" fontWeight="medium">Fecha:</Text>
+                      <Text fontSize="sm" fontWeight="semibold">{transferToDelete.date} {transferToDelete.time}</Text>
+                    </HStack>
+                    {transferToDelete.transferNumber && (
+                      <HStack>
+                        <Text fontSize="sm" color="gray.600" fontWeight="medium">N° Transferencia:</Text>
+                        <Text fontSize="sm" fontWeight="semibold">{transferToDelete.transferNumber}</Text>
+                      </HStack>
+                    )}
+                  </VStack>
+                </Box>
+              )}
+              <Text fontSize="xs" color="gray.500">
+                Esta acción no se puede deshacer. Se eliminará el registro, la imagen y el número de transferencia.
+              </Text>
+            </VStack>
+          </ModalBody>
+          <ModalFooter justifyContent="center" pb={6}>
+            <HStack spacing={3}>
+              <Button variant="outline" onClick={handleDeleteCancel} isDisabled={isDeleting}>
+                Cancelar
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleDeleteConfirm}
+                isLoading={isDeleting}
+                loadingText="Eliminando..."
+              >
+                Eliminar
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

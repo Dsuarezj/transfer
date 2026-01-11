@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
-import { Box, VStack, HStack, Text, Badge } from '@chakra-ui/react';
+import { Box, VStack, HStack, Text, Badge, IconButton } from '@chakra-ui/react';
 import { Invoice } from '../types/dropbox';
 
 interface TransferCardProps {
   transfer: Invoice;
+  onDelete?: (transfer: Invoice) => void;
 }
 
-export default function TransferCard({ transfer }: TransferCardProps) {
+export default function TransferCard({ transfer, onDelete }: TransferCardProps) {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -15,6 +16,13 @@ export default function TransferCard({ transfer }: TransferCardProps) {
         editTransfer: transfer,
       },
     });
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(transfer);
+    }
   };
 
   return (
@@ -53,17 +61,34 @@ export default function TransferCard({ transfer }: TransferCardProps) {
           <Text fontWeight="bold" fontSize="lg" color="primary.700">
             {transfer.invoiceNumber}
           </Text>
-          <Badge
-            bg="accent.100"
-            color="primary.700"
-            px={3}
-            py={1}
-            borderRadius="full"
-            fontSize="xs"
-            fontWeight="semibold"
-          >
-            ✓ Registrada
-          </Badge>
+          <HStack spacing={2}>
+            <Badge
+              bg="accent.100"
+              color="primary.700"
+              px={3}
+              py={1}
+              borderRadius="full"
+              fontSize="xs"
+              fontWeight="semibold"
+            >
+              ✓ Registrada
+            </Badge>
+            {onDelete && (
+              <IconButton
+                aria-label="Eliminar transferencia"
+                icon={
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                }
+                size="xs"
+                variant="ghost"
+                colorScheme="red"
+                onClick={handleDeleteClick}
+                _hover={{ bg: 'red.50', color: 'red.600' }}
+              />
+            )}
+          </HStack>
         </HStack>
 
         <VStack align="stretch" spacing={1} bg="accent.50" p={3} borderRadius="12px">

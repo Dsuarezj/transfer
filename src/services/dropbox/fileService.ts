@@ -56,7 +56,9 @@ class FileService {
 
   async delete(path: string): Promise<void> {
     const dbx = await this.getClient();
-    await dbx.filesDeleteV2({ path: this.buildPath(path) });
+    const isRelativePath = path.startsWith('/capturas') || path.startsWith('/reportes');
+    const fullPath = isRelativePath ? this.buildPath(path) : path;
+    await dbx.filesDeleteV2({ path: fullPath });
   }
 
   async get(path: string): Promise<string> {

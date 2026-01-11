@@ -30,31 +30,46 @@ export default function HomePage() {
     <Box
       minH="100vh"
       w="100%"
-      bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      flexDirection="column"
       position="relative"
+      overflow="hidden"
     >
       <Box
-        position="absolute"
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
         top="0"
         left="0"
         right="0"
         bottom="0"
         bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
+        zIndex={0}
       />
 
-      <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
-        <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="neutral.50" noOfLines={1} title={activeCompany?.name || 'Transferencias'}>
-            {activeCompany?.name || 'Transferencias'}
-          </Heading>
-          <HamburgerMenu />
-        </Container>
-      </Box>
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0}>
+          <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
+            <Heading size="md" color="neutral.50" noOfLines={1} title={activeCompany?.name || 'Transferencias'}>
+              {activeCompany?.name || 'Transferencias'}
+            </Heading>
+            <HamburgerMenu />
+          </Container>
+        </Box>
 
-      <Box flex="1" position="relative" zIndex={1} display="flex" alignItems="center">
+        <Box flex="1" display="flex" alignItems="center">
         <Container maxW="md" w="full" py={{ base: 4, md: 8 }}>
           <VStack
             spacing={{ base: 6, md: 8 }}
@@ -89,6 +104,7 @@ export default function HomePage() {
             </SimpleGrid>
           </VStack>
         </Container>
+        </Box>
       </Box>
     </Box>
   );

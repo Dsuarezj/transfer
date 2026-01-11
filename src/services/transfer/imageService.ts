@@ -12,6 +12,21 @@ async function upload(blob: Blob, name: string): Promise<string> {
   return fileService.getDropboxUrl(path);
 }
 
+function extractPathFromDropboxUrl(dropboxUrl: string): string {
+  const pathMatch = dropboxUrl.match(/https:\/\/www\.dropbox\.com\/home(.+)/);
+  if (!pathMatch) {
+    throw new Error('Invalid Dropbox URL format');
+  }
+  const extractedPath = decodeURIComponent(pathMatch[1]);
+  return extractedPath;
+}
+
+async function deleteImage(dropboxUrl: string): Promise<void> {
+  const fullPath = extractPathFromDropboxUrl(dropboxUrl);
+  await fileService.delete(fullPath);
+}
+
 export const imageService = {
   upload,
+  delete: deleteImage,
 };

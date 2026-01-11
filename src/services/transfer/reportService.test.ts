@@ -199,5 +199,93 @@ describe('reportService', () => {
       expect(result[2].invoiceNumber).toBe('FAC-JAN-01');
     });
   });
+
+  describe('remove', () => {
+    it('removes transfer from CSV by date, time and imageUrl', async () => {
+      const existingCsv = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
+        '2026-01-10,10:30:00,FAC-001,TRF-001,/capturas/2026-01/image1.jpg\n' +
+        '2026-01-11,14:20:00,FAC-002,TRF-002,/capturas/2026-01/image2.jpg\n';
+      vi.mocked(fileService.get).mockResolvedValue(existingCsv);
+      vi.mocked(fileService.update).mockResolvedValue(undefined);
+
+      await reportService.remove({
+        date: '2026-01-10',
+        time: '10:30:00',
+        imageUrl: '/capturas/2026-01/image1.jpg',
+      });
+
+      expect(fileService.update).toHaveBeenCalledWith(
+        '/reportes/transfers-2026-01.csv',
+        expect.any(Blob)
+      );
+    });
+
+    it('removes correct line from CSV', async () => {
+      const existingCsv = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
+        '2026-01-10,10:30:00,FAC-001,TRF-001,/capturas/2026-01/image1.jpg\n' +
+        '2026-01-11,14:20:00,FAC-002,TRF-002,/capturas/2026-01/image2.jpg\n';
+      vi.mocked(fileService.get).mockResolvedValue(existingCsv);
+      vi.mocked(fileService.update).mockResolvedValue(undefined);
+
+      await reportService.remove({
+        date: '2026-01-10',
+        time: '10:30:00',
+        imageUrl: '/capturas/2026-01/image1.jpg',
+      });
+
+      const updateCall = vi.mocked(fileService.update).mock.calls[0];
+      const blob = updateCall[1] as Blob;
+      const content = await blob.text();
+      const lines = content.split('\n').filter(line => line.trim());
+
+      expect(lines.length).toBe(2);
+      expect(lines[0]).toContain('Fecha,Hora,Numero_Factura');
+      expect(lines[1]).toContain('2026-01-11,14:20:00,FAC-002');
+      expect(content).not.toContain('2026-01-10,10:30:00,FAC-001');
+    });
+
+    it('throws error when transfer not found', async () => {
+      const existingCsv = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
+        '2026-01-10,10:30:00,FAC-001,TRF-001,/capturas/2026-01/image1.jpg\n';
+      vi.mocked(fileService.get).mockResolvedValue(existingCsv);
+
+      await expect(
+        reportService.remove({
+          date: '2026-01-10',
+          time: '10:30:00',
+          imageUrl: '/capturas/2026-01/wrong.jpg',
+        })
+      ).rejects.toThrow('Transfer not found');
+    });
+
+    it('throws error when CSV file does not exist', async () => {
+      vi.mocked(fileService.get).mockRejectedValue(new Error('File not found'));
+
+      await expect(
+        reportService.remove({
+          date: '2026-01-10',
+          time: '10:30:00',
+          imageUrl: '/capturas/2026-01/image1.jpg',
+        })
+      ).rejects.toThrow('File not found');
+    });
+
+    it('handles empty lines in CSV', async () => {
+      const existingCsv = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
+        '2026-01-10,10:30:00,FAC-001,TRF-001,/capturas/2026-01/image1.jpg\n' +
+        '\n' +
+        '2026-01-11,14:20:00,FAC-002,TRF-002,/capturas/2026-01/image2.jpg\n';
+      vi.mocked(fileService.get).mockResolvedValue(existingCsv);
+      vi.mocked(fileService.update).mockResolvedValue(undefined);
+
+      await reportService.remove({
+        date: '2026-01-10',
+        time: '10:30:00',
+        imageUrl: '/capturas/2026-01/image1.jpg',
+      });
+
+      expect(fileService.update).toHaveBeenCalled();
+    });
+  });
 });
 

@@ -259,20 +259,38 @@ export default function SaveTransferPage() {
 
   if (isLoadingImage) {
     return (
-      <Box h="100vh" display="flex" alignItems="center" justifyContent="center" bgGradient="linear(135deg, #4299E1, #2B6CB0)">
-        <VStack spacing={4}>
-          <Box
-            w="50px"
-            h="50px"
-            border="4px solid"
-            borderColor="white"
-            borderTopColor="transparent"
-            borderRadius="full"
-            animation="spin 1s linear infinite"
-            sx={{ '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }}
-          />
-          <Text color="white" fontSize="lg">Cargando imagen...</Text>
-        </VStack>
+      <Box minH="100vh" w="100%" position="relative" overflow="hidden">
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bgGradient="linear(135deg, #4299E1, #2B6CB0)"
+          zIndex={0}
+        />
+        <Box
+          position="relative"
+          zIndex={1}
+          minH="100vh"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <VStack spacing={4}>
+            <Box
+              w="50px"
+              h="50px"
+              border="4px solid"
+              borderColor="white"
+              borderTopColor="transparent"
+              borderRadius="full"
+              animation="spin 1s linear infinite"
+              sx={{ '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } } }}
+            />
+            <Text color="white" fontSize="lg">Cargando imagen...</Text>
+          </VStack>
+        </Box>
       </Box>
     );
   }
@@ -491,24 +509,40 @@ export default function SaveTransferPage() {
   }
 
   return (
-    <Box h="100vh" bgGradient="linear(135deg, #4299E1, #2B6CB0)">
-      <Box bg="#1a365d" py={4} boxShadow="md">
-        <Container maxW="5xl" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="white">{pageTitle}</Heading>
-          <Button
-            size="sm"
-            variant="outline"
-            color="white"
-            borderColor="white"
-            _hover={{ bg: 'whiteAlpha.200' }}
-            onClick={() => navigate(isEditMode ? '/review' : '/')}
-          >
-            Cancelar
-          </Button>
-        </Container>
-      </Box>
+    <Box minH="100vh" w="100%" position="relative" overflow="hidden">
+      <Box
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, #4299E1, #2B6CB0)"
+        zIndex={0}
+      />
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <Box bg="#1a365d" py={4} boxShadow="md" flexShrink={0}>
+          <Container maxW="5xl" display="flex" justifyContent="space-between" alignItems="center">
+            <Heading size="md" color="white">{pageTitle}</Heading>
+            <Button
+              size="sm"
+              variant="outline"
+              color="white"
+              borderColor="white"
+              _hover={{ bg: 'whiteAlpha.200' }}
+              onClick={() => navigate(isEditMode ? '/review' : '/')}
+            >
+              Cancelar
+            </Button>
+          </Container>
+        </Box>
 
-      <Container maxW="5xl" py={6} h="calc(100vh - 72px)">
+        <Container maxW="5xl" py={6} flex="1" overflowY="auto">
         <Flex h="100%" gap={6}>
           <Box
             flex={1}
@@ -648,6 +682,7 @@ export default function SaveTransferPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      </Box>
     </Box>
   );
 }

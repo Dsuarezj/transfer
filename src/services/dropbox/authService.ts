@@ -62,6 +62,16 @@ class AuthService {
     dropboxGateway.saveToken(tokenData);
     localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
 
+    try {
+      await dropboxGateway.refreshTokenIfNeeded();
+      const dbx = dropboxGateway.getClient();
+      const currentUser = await dbx.usersGetCurrentAccount();
+      if (currentUser.result.email) {
+        localStorage.setItem(STORAGE_KEYS.DROPBOX_USER_EMAIL, currentUser.result.email);
+      }
+    } catch (error) {
+    }
+
     window.dispatchEvent(new Event('dropbox-auth-change'));
 
     return true;
