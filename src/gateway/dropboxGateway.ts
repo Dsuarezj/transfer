@@ -41,10 +41,7 @@ class DropboxGateway {
   clearToken() {
     this.tokenData = null;
     this.dbx = null;
-    localStorage.removeItem(STORAGE_KEYS.DROPBOX_ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.DROPBOX_REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.DROPBOX_EXPIRES_AT);
-    localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
+    localStorage.clear();
   }
 
   getTokenData(): TokenData | null {
