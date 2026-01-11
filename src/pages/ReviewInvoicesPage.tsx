@@ -21,6 +21,7 @@ import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
 import { dateRangeService } from '../services/transfer/dateRangeService';
 import InvoiceCard from '../components/InvoiceCard';
+import PageHeader from '../components/PageHeader';
 
 export default function ReviewInvoicesPage() {
   const navigate = useNavigate();
@@ -118,23 +119,7 @@ export default function ReviewInvoicesPage() {
         pointerEvents="none"
       />
 
-      <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
-        <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="neutral.50">
-            Facturas
-          </Heading>
-          <Button
-            size="sm"
-            variant="outline"
-            color="neutral.50"
-            borderColor="neutral.50"
-            _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
-            onClick={() => navigate('/')}
-          >
-            Volver
-          </Button>
-        </Container>
-      </Box>
+      <PageHeader title="Facturas" backPath="/" />
 
       <Box flex="1" position="relative" zIndex={1}>
         <Container maxW="md" py={4}>

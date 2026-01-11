@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Container,
-  Heading,
   Text,
   VStack,
   Input,
@@ -32,6 +31,7 @@ import { getCompanyFolderPath, getWorkspaceFolderPath } from '../constants/dropb
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { USER_ROLES, UserRole } from '../constants/roles';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
 import type { files } from 'dropbox/types';
 
 interface CompanyMember {
@@ -318,54 +318,35 @@ export default function CompanyMembersPage() {
       minH="100vh"
       w="100%"
       bgGradient="linear(135deg, accent.500, primary.500)"
-      py={{ base: 4, md: 6 }}
-      px={{ base: 4, sm: 6 }}
+      display="flex"
+      flexDirection="column"
       position="relative"
     >
       <Box
-        position="fixed"
-        top="-120px"
-        left="-80px"
-        w="260px"
-        h="260px"
-        bg="whiteAlpha.200"
-        rounded="full"
-        filter="blur(80px)"
-        pointerEvents="none"
-      />
-      <Box
-        position="fixed"
-        bottom="-140px"
-        right="-100px"
-        w="300px"
-        h="300px"
-        bg="blackAlpha.300"
-        rounded="full"
-        filter="blur(90px)"
+        position="absolute"
+        top="0"
+        left="0"
+        right="0"
+        bottom="0"
+        bgGradient="radial(circle at 20% 50%, rgba(255, 255, 255, 0.1), transparent)"
         pointerEvents="none"
       />
 
-      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1} py={2}>
-        <VStack spacing={{ base: 6, md: 8 }} align="stretch">
-          <VStack spacing={{ base: 3, md: 5 }}>
-            <Heading
-              as="h1"
-              fontSize={{ base: '2xl', md: '3xl' }}
-              color="white"
-              textAlign="center"
-              fontWeight="bold"
-            >
-              Gestionar Empleados
-            </Heading>
-            <Text
-              color="whiteAlpha.900"
-              textAlign="center"
-              fontSize={{ base: 'md', md: 'lg' }}
-              maxW="md"
-            >
-              Invita y gestiona los miembros de tu empresa
-            </Text>
-          </VStack>
+      <PageHeader title="Gestionar Empleados" backPath="/" />
+
+      <Box flex="1" position="relative" zIndex={1} py={{ base: 4, md: 6 }} px={{ base: 4, sm: 6 }}>
+        <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
+          <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+            <VStack spacing={{ base: 3, md: 5 }}>
+              <Text
+                color="whiteAlpha.900"
+                textAlign="center"
+                fontSize={{ base: 'md', md: 'lg' }}
+                maxW="md"
+              >
+                Invita y gestiona los miembros de tu empresa
+              </Text>
+            </VStack>
 
           <Box
             bg="white"
@@ -534,23 +515,9 @@ export default function CompanyMembersPage() {
               )}
             </VStack>
           </Box>
-
-          <Button
-            onClick={() => navigate('/')}
-            variant="outline"
-            color="white"
-            borderColor="whiteAlpha.500"
-            _hover={{
-              bg: 'whiteAlpha.200',
-              borderColor: 'white',
-            }}
-            size="lg"
-            borderRadius="14px"
-          >
-            Volver
-          </Button>
         </VStack>
       </Container>
+      </Box>
 
       <AlertDialog
         isOpen={isRemoveOpen}

@@ -4,7 +4,6 @@ import {
   Box,
   Button,
   Container,
-  Heading,
   Text,
   VStack,
   Input,
@@ -16,6 +15,7 @@ import { companyService } from '../services/company/companyService';
 import { roleService } from '../services/roles/roleService';
 import { COMPANY_FOLDER_PREFIX } from '../constants/dropbox';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PageHeader from '../components/PageHeader';
 
 export default function CompanyCreatePage() {
   const navigate = useNavigate();
@@ -152,23 +152,7 @@ export default function CompanyCreatePage() {
         display="flex"
         flexDirection="column"
       >
-        <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0}>
-          <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-            <Heading size="md" color="neutral.50">
-              Crear Empresa
-            </Heading>
-            <Button
-              size="sm"
-              variant="outline"
-              color="neutral.50"
-              borderColor="neutral.50"
-              _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
-              onClick={handleBack}
-            >
-              Volver
-            </Button>
-          </Container>
-        </Box>
+        <PageHeader title="Crear Empresa" onBack={handleBack} />
 
         <Box
           flex="1"
