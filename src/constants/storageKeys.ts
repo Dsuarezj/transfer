@@ -5,5 +5,6 @@ export const STORAGE_KEYS = {
   DROPBOX_CODE_VERIFIER: 'dropbox_code_verifier',
   ACTIVE_COMPANY: 'active_company',
   COMPANIES_CACHE: 'companies_cache',
+  REVIEW_DATE_RANGE: 'review_date_range',
 } as const;
 

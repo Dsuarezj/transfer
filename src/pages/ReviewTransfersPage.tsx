@@ -17,8 +17,23 @@ import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
 import { dateRangeService } from '../services/transfer/dateRangeService';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 import TransferCard from '../components/TransferCard';
 import PageHeader from '../components/PageHeader';
+
+const getInitialDateRange = () => {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEYS.REVIEW_DATE_RANGE);
+    if (saved) {
+      const { startDate, endDate } = JSON.parse(saved);
+      if (startDate && endDate) {
+        return { startDate, endDate };
+      }
+    }
+  } catch {}
+  const today = format(new Date(), 'yyyy-MM-dd');
+  return { startDate: today, endDate: today };
+};
 
 export default function ReviewTransfersPage() {
   const toast = useToast();
@@ -26,8 +41,8 @@ export default function ReviewTransfersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [startDate, setStartDate] = useState<string>(() => format(new Date(), 'yyyy-MM-dd'));
-  const [endDate, setEndDate] = useState<string>(() => format(new Date(), 'yyyy-MM-dd'));
+  const [startDate, setStartDate] = useState<string>(() => getInitialDateRange().startDate);
+  const [endDate, setEndDate] = useState<string>(() => getInitialDateRange().endDate);
 
   const handleStartDateChange = (newStartDate: string) => {
     setStartDate(newStartDate);
@@ -44,6 +59,15 @@ export default function ReviewTransfersPage() {
       setStartDate(adjustment.adjustedDate);
     }
   };
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      sessionStorage.setItem(
+        STORAGE_KEYS.REVIEW_DATE_RANGE,
+        JSON.stringify({ startDate, endDate })
+      );
+    }
+  }, [startDate, endDate]);
 
   useEffect(() => {
     if (!startDate || !endDate) {
