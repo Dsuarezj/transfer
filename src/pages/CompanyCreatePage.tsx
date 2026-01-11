@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -13,6 +13,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { companyService } from '../services/company/companyService';
+import { roleService } from '../services/roles/roleService';
 import { COMPANY_FOLDER_PREFIX } from '../constants/dropbox';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -21,6 +22,39 @@ export default function CompanyCreatePage() {
   const toast = useToast();
   const [companyName, setCompanyName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [hasExistingCompany, setHasExistingCompany] = useState(false);
+  const [isCheckingCompany, setIsCheckingCompany] = useState(true);
+
+  useEffect(() => {
+    const checkExistingCompany = async () => {
+      try {
+        const companies = await companyService.detectCompanies(roleService.getUserRole);
+        if (companies.length > 0) {
+          setHasExistingCompany(true);
+          companyService.setActiveCompany(companies[0].id);
+        }
+      } catch {
+      } finally {
+        setIsCheckingCompany(false);
+      }
+    };
+
+    checkExistingCompany();
+  }, []);
+
+  const handleBack = () => {
+    if (hasExistingCompany) {
+      navigate('/', { replace: true });
+    } else {
+      toast({
+        title: 'Sin empresa',
+        description: 'Aún no tienes una empresa, crea una para empezar',
+        status: 'info',
+        duration: 4000,
+        isClosable: true,
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,24 +102,28 @@ export default function CompanyCreatePage() {
     }
   };
 
-  if (isCreating) {
-    return <LoadingSpinner message="Creando empresa..." fullScreen />;
+  if (isCreating || isCheckingCompany) {
+    return <LoadingSpinner message={isCreating ? "Creando empresa..." : "Verificando..."} fullScreen />;
   }
 
   return (
     <Box
       minH="100vh"
       w="100%"
-      bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      py={{ base: 4, md: 6 }}
-      px={{ base: 4, sm: 6 }}
       position="relative"
+      overflow="hidden"
     >
       <Box
-        position="absolute"
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
         top="-120px"
         left="-80px"
         w="260px"
@@ -93,9 +131,10 @@ export default function CompanyCreatePage() {
         bg="whiteAlpha.200"
         rounded="full"
         filter="blur(80px)"
+        zIndex={0}
       />
       <Box
-        position="absolute"
+        position="fixed"
         bottom="-140px"
         right="-100px"
         w="300px"
@@ -103,30 +142,54 @@ export default function CompanyCreatePage() {
         bg="blackAlpha.300"
         rounded="full"
         filter="blur(90px)"
+        zIndex={0}
       />
 
-      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
-        <VStack spacing={{ base: 8, md: 12 }} align="stretch">
-          <VStack spacing={{ base: 3, md: 5 }}>
-            <Heading
-              as="h1"
-              fontSize={{ base: '2xl', md: '3xl' }}
-              color="white"
-              textAlign="center"
-              fontWeight="bold"
-            >
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        flexDirection="column"
+      >
+        <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0}>
+          <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
+            <Heading size="md" color="neutral.50">
               Crear Empresa
             </Heading>
-
-            <Text
-              color="whiteAlpha.900"
-              textAlign="center"
-              fontSize={{ base: 'md', md: 'lg' }}
-              maxW="md"
+            <Button
+              size="sm"
+              variant="outline"
+              color="neutral.50"
+              borderColor="neutral.50"
+              _hover={{ bg: 'rgba(255, 255, 255, 0.1)' }}
+              onClick={handleBack}
             >
-              Ingresa el nombre de tu empresa para comenzar
-            </Text>
-          </VStack>
+              Volver
+            </Button>
+          </Container>
+        </Box>
+
+        <Box
+          flex="1"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          py={{ base: 4, md: 6 }}
+          px={{ base: 4, sm: 6 }}
+        >
+          <Container maxW={{ base: 'md', md: 'lg' }}>
+            <VStack spacing={{ base: 8, md: 12 }} align="stretch">
+              <VStack spacing={{ base: 3, md: 5 }}>
+                <Text
+                  color="whiteAlpha.900"
+                  textAlign="center"
+                  fontSize={{ base: 'md', md: 'lg' }}
+                  maxW="md"
+                >
+                  Ingresa el nombre de tu empresa para comenzar
+                </Text>
+              </VStack>
 
           <Box
             bg="white"
@@ -248,6 +311,8 @@ export default function CompanyCreatePage() {
           </Box>
         </VStack>
       </Container>
+        </Box>
+      </Box>
     </Box>
   );
 }
