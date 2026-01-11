@@ -1,11 +1,11 @@
 import { Box, VStack, HStack, Text, Badge, Link } from '@chakra-ui/react';
 import { Invoice } from '../types/dropbox';
 
-interface InvoiceCardProps {
-  invoice: Invoice;
+interface TransferCardProps {
+  transfer: Invoice;
 }
 
-export default function InvoiceCard({ invoice }: InvoiceCardProps) {
+export default function TransferCard({ transfer }: TransferCardProps) {
   return (
     <Box
       bg="white"
@@ -31,7 +31,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
       <VStack align="stretch" spacing={3} pl={2}>
         <HStack justify="space-between" flexWrap="wrap" gap={2}>
           <Text fontWeight="bold" fontSize="lg" color="primary.700">
-            {invoice.invoiceNumber}
+            {transfer.invoiceNumber}
           </Text>
           <Badge
             bg="accent.100"
@@ -52,7 +52,7 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
               📅 Fecha:
             </Text>
             <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
-              {invoice.date}
+              {transfer.date}
             </Text>
           </HStack>
 
@@ -61,24 +61,24 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
               🕐 Hora:
             </Text>
             <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
-              {invoice.time}
+              {transfer.time}
             </Text>
           </HStack>
 
-          {invoice.transferNumber && (
+          {transfer.transferNumber && (
             <HStack>
               <Text fontSize="sm" color="neutral.600" minW="80px" fontWeight="medium">
                 🔢 N° Transf:
               </Text>
               <Text fontSize="sm" color="neutral.700" fontWeight="semibold">
-                {invoice.transferNumber}
+                {transfer.transferNumber}
               </Text>
             </HStack>
           )}
         </VStack>
 
         <Link
-          href={invoice.imageUrl}
+          href={transfer.imageUrl}
           isExternal
           color="accent.600"
           fontSize="xs"
@@ -91,3 +91,4 @@ export default function InvoiceCard({ invoice }: InvoiceCardProps) {
     </Box>
   );
 }
+

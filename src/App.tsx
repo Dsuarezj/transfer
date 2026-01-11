@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 import UploadTransferPage from './pages/UploadTransferPage';
 import UploadFilePage from './pages/UploadFilePage';
 import SaveTransferPage from './pages/SaveTransferPage';
-import ReviewInvoicesPage from './pages/ReviewInvoicesPage';
+import ReviewTransfersPage from './pages/ReviewTransfersPage';
 import PrivacyPage from './pages/PrivacyPage';
 import CompanyCreatePage from './pages/CompanyCreatePage';
 import CompanyMembersPage from './pages/CompanyMembersPage';
@@ -36,7 +36,7 @@ function App() {
         <Route path="/upload" element={<UploadTransferPage />} />
         <Route path="/upload-file" element={<UploadFilePage />} />
         <Route path="/save" element={<SaveTransferPage />} />
-        <Route path="/review" element={<ReviewInvoicesPage />} />
+        <Route path="/review" element={<ReviewTransfersPage />} />
       </Route>
     </Routes>
   );

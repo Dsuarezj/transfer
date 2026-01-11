@@ -17,12 +17,12 @@ import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
 import { dateRangeService } from '../services/transfer/dateRangeService';
-import InvoiceCard from '../components/InvoiceCard';
+import TransferCard from '../components/TransferCard';
 import PageHeader from '../components/PageHeader';
 
-export default function ReviewInvoicesPage() {
+export default function ReviewTransfersPage() {
   const toast = useToast();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [transfers, setTransfers] = useState<Invoice[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export default function ReviewInvoicesPage() {
       return;
     }
 
-    const loadInvoices = async () => {
+    const loadTransfers = async () => {
       try {
         setIsLoading(true);
         setError(null);
@@ -73,25 +73,25 @@ export default function ReviewInvoicesPage() {
         const { start, end } = dateRangeService.getDateRangeFromStrings(startDate, endDate);
         const data = await reportService.getByDateRange(start, end);
 
-        setInvoices(data);
+        setTransfers(data);
       } catch (err) {
-        setError('No se pudieron cargar las facturas');
+        setError('No se pudieron cargar las transferencias');
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadInvoices();
+    loadTransfers();
   }, [startDate, endDate, toast]);
 
-  const filteredInvoices = !searchQuery.trim()
-    ? invoices
-    : invoices.filter((invoice: Invoice) => {
+  const filteredTransfers = !searchQuery.trim()
+    ? transfers
+    : transfers.filter((transfer: Invoice) => {
         const query = searchQuery.toLowerCase();
         return (
-          invoice.invoiceNumber.toLowerCase().includes(query) ||
-          invoice.date.includes(query) ||
-          (invoice.transferNumber && invoice.transferNumber.toLowerCase().includes(query))
+          transfer.invoiceNumber.toLowerCase().includes(query) ||
+          transfer.date.includes(query) ||
+          (transfer.transferNumber && transfer.transferNumber.toLowerCase().includes(query))
         );
       });
 
@@ -115,7 +115,7 @@ export default function ReviewInvoicesPage() {
         pointerEvents="none"
       />
 
-      <PageHeader title="Facturas" backPath="/" />
+      <PageHeader title="Transferencias" backPath="/" />
 
       <Box flex="1" position="relative" zIndex={1}>
         <Container maxW="md" py={4}>
@@ -187,7 +187,7 @@ export default function ReviewInvoicesPage() {
                 </HStack>
                 {!isLoading && !error && (
                   <Text color="gray.500" fontSize="xs" textAlign="center">
-                    {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'} · {getDateRangeLabel()}
+                    {filteredTransfers.length} {filteredTransfers.length === 1 ? 'transferencia' : 'transferencias'} · {getDateRangeLabel()}
                   </Text>
                 )}
               </VStack>
@@ -205,21 +205,21 @@ export default function ReviewInvoicesPage() {
             </Box>
           )}
 
-          {!isLoading && !error && filteredInvoices.length === 0 && (
+          {!isLoading && !error && filteredTransfers.length === 0 && (
             <Center py={12}>
               <VStack spacing={2}>
                 <Text fontSize="4xl">📭</Text>
                 <Text color="neutral.100" fontSize="lg" textAlign="center">
-                  {searchQuery ? 'No se encontraron resultados' : 'No hay facturas en este periodo'}
+                  {searchQuery ? 'No se encontraron resultados' : 'No hay transferencias en este periodo'}
                 </Text>
               </VStack>
             </Center>
           )}
 
-          {!isLoading && filteredInvoices.length > 0 && (
+          {!isLoading && filteredTransfers.length > 0 && (
             <SimpleGrid columns={1} spacing={4}>
-              {filteredInvoices.map((invoice, index) => (
-                <InvoiceCard key={index} invoice={invoice} />
+              {filteredTransfers.map((transfer, index) => (
+                <TransferCard key={index} transfer={transfer} />
               ))}
             </SimpleGrid>
           )}
@@ -229,3 +229,4 @@ export default function ReviewInvoicesPage() {
     </Box>
   );
 }
+
