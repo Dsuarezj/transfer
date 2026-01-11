@@ -68,7 +68,6 @@ export function PWAProvider({ children }: PWAProviderProps) {
       setHasInstallCapability(false);
       setDeferredPrompt(null);
       localStorage.removeItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED);
-      localStorage.removeItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`);
       setIsInstallDismissed(false);
     };
 

@@ -16,16 +16,9 @@ export default function InstallPromptBanner() {
     }
 
     const bannerDismissed = localStorage.getItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED) === 'true';
-    const bannerDismissedTime = localStorage.getItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`);
-    
-    if (bannerDismissed && bannerDismissedTime) {
-      const dismissedDate = new Date(bannerDismissedTime);
-      const daysSinceDismissed = (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
-      
-      if (daysSinceDismissed < 7) {
-        setShowBanner(false);
-        return;
-      }
+    if (bannerDismissed) {
+      setShowBanner(false);
+      return;
     }
 
     const timer = setTimeout(() => {
@@ -40,26 +33,21 @@ export default function InstallPromptBanner() {
   }
 
   const handleInstall = async () => {
+    setShowBanner(false);
+    localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
+    
     if (isIOS) {
       onOpen();
-      setShowBanner(false);
-      localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-      localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
     } else if (deferredPrompt) {
       await install();
-      setShowBanner(false);
     } else {
       onOpen();
-      setShowBanner(false);
-      localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-      localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
     }
   };
 
   const handleDismiss = () => {
     setShowBanner(false);
     localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-    localStorage.setItem(`${STORAGE_KEYS.PWA_INSTALL_DISMISSED}_time`, new Date().toISOString());
   };
 
   return (
