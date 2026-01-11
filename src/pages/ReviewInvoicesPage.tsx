@@ -137,71 +137,80 @@ export default function ReviewInvoicesPage() {
       </Box>
 
       <Box flex="1" position="relative" zIndex={1}>
-        <Container maxW="md" py={6}>
+        <Container maxW="md" py={4}>
           <VStack spacing={4} align="stretch">
-            <InputGroup flex={1}>
-              <InputLeftElement pointerEvents="none" color="neutral.400">
-                🔍
-              </InputLeftElement>
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar..."
-                size="lg"
-                bg="white"
-                borderRadius="16px"
-                border="none"
-                boxShadow="card"
-                _focus={{
-                  borderColor: 'accent.500',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
-                }}
-              />
-            </InputGroup>
-
-            <HStack spacing={3}>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => handleStartDateChange(e.target.value)}
-                size="lg"
-                bg="white"
-                borderRadius="16px"
-                border="none"
-                boxShadow="card"
-                min={dateRangeService.getMinStartDateString(endDate)}
-                max={format(new Date(), 'yyyy-MM-dd')}
-                _focus={{
-                  borderColor: 'accent.500',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
-                }}
-              />
-              <Text color="neutral.100" fontSize="sm" opacity={0.8}>
-                hasta
-              </Text>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => handleEndDateChange(e.target.value)}
-                size="lg"
-                bg="white"
-                borderRadius="16px"
-                border="none"
-                boxShadow="card"
-                min={startDate ? format(parse(startDate, 'yyyy-MM-dd', new Date()), 'yyyy-MM-dd') : ''}
-                max={dateRangeService.getMaxEndDateString(startDate)}
-                _focus={{
-                  borderColor: 'accent.500',
-                  boxShadow: '0 0 0 2px var(--chakra-colors-accent-500)',
-                }}
-              />
-            </HStack>
-
-            {!isLoading && !error && (
-              <Text color="neutral.100" fontSize="sm" opacity={0.8}>
-                {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'} · {getDateRangeLabel()}
-              </Text>
-            )}
+            <Box bg="white" borderRadius="16px" boxShadow="card" p={3}>
+              <VStack spacing={2} align="stretch">
+                <InputGroup size="sm">
+                  <InputLeftElement pointerEvents="none" color="gray.400" h="32px">
+                    🔍
+                  </InputLeftElement>
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar..."
+                    bg="gray.50"
+                    borderRadius="8px"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    h="32px"
+                    _focus={{
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+                      bg: 'white',
+                    }}
+                  />
+                </InputGroup>
+                <HStack spacing={2}>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => handleStartDateChange(e.target.value)}
+                    size="sm"
+                    bg="gray.50"
+                    borderRadius="8px"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    h="32px"
+                    flex={1}
+                    min={dateRangeService.getMinStartDateString(endDate)}
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                    _focus={{
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+                      bg: 'white',
+                    }}
+                  />
+                  <Text color="gray.400" fontSize="xs" flexShrink={0}>
+                    →
+                  </Text>
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => handleEndDateChange(e.target.value)}
+                    size="sm"
+                    bg="gray.50"
+                    borderRadius="8px"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    h="32px"
+                    flex={1}
+                    min={startDate ? format(parse(startDate, 'yyyy-MM-dd', new Date()), 'yyyy-MM-dd') : ''}
+                    max={dateRangeService.getMaxEndDateString(startDate)}
+                    _focus={{
+                      borderColor: 'accent.500',
+                      boxShadow: '0 0 0 1px var(--chakra-colors-accent-500)',
+                      bg: 'white',
+                    }}
+                  />
+                </HStack>
+                {!isLoading && !error && (
+                  <Text color="gray.500" fontSize="xs" textAlign="center">
+                    {filteredInvoices.length} {filteredInvoices.length === 1 ? 'factura' : 'facturas'} · {getDateRangeLabel()}
+                  </Text>
+                )}
+              </VStack>
+            </Box>
 
           {isLoading && (
             <Center py={12}>
