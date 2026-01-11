@@ -12,11 +12,17 @@ import {
   InputGroup,
   InputLeftElement,
   useToast,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  IconButton,
 } from '@chakra-ui/react';
 import { format, parse } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { reportService, Invoice } from '../services/transfer/reportService';
 import { dateRangeService } from '../services/transfer/dateRangeService';
+import { exportService } from '../services/transfer/exportService';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import TransferCard from '../components/TransferCard';
 import PageHeader from '../components/PageHeader';
@@ -127,6 +133,49 @@ export default function ReviewTransfersPage() {
     return `${format(start, 'd MMM', { locale: es })} - ${format(end, 'd MMM', { locale: es })}`;
   };
 
+  const downloadCSV = () => {
+    if (filteredTransfers.length === 0) {
+      toast({ title: 'Sin datos', description: 'No hay transferencias para exportar', status: 'warning', duration: 3000 });
+      return;
+    }
+
+    const content = exportService.generateCSV(filteredTransfers);
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `transferencias_${startDate}_${endDate}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+
+    toast({ title: 'Descargado', description: 'Reporte CSV descargado', status: 'success', duration: 2000 });
+  };
+
+  const downloadPDF = () => {
+    if (filteredTransfers.length === 0) {
+      toast({ title: 'Sin datos', description: 'No hay transferencias para exportar', status: 'warning', duration: 3000 });
+      return;
+    }
+
+    const html = exportService.generatePDFHTML(filteredTransfers, getDateRangeLabel());
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+    
+    if (printWindow) {
+      const cleanup = () => {
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      };
+      
+      printWindow.addEventListener('load', () => {
+        printWindow.print();
+        cleanup();
+      });
+      
+      printWindow.addEventListener('beforeunload', cleanup);
+    }
+  };
+
   return (
     <Box minH="100vh" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" position="relative">
       <Box
@@ -208,6 +257,54 @@ export default function ReviewTransfersPage() {
                       bg: 'white',
                     }}
                   />
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Descargar reporte"
+                      icon={
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="7 10 12 15 17 10" />
+                          <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                      }
+                      size="sm"
+                      h="32px"
+                      w="32px"
+                      minW="32px"
+                      bg="accent.500"
+                      color="white"
+                      borderRadius="8px"
+                      _hover={{ bg: 'accent.600' }}
+                      _active={{ bg: 'accent.700' }}
+                      isDisabled={filteredTransfers.length === 0}
+                    />
+                    <MenuList w="max-content" minW="auto" borderRadius="12px" boxShadow="lg" py={2} px={1}>
+                      <Text px={3} py={1} fontSize="xs" color="gray.500" fontWeight="medium">
+                        Descargar reporte
+                      </Text>
+                      <MenuItem
+                        onClick={downloadCSV}
+                        borderRadius="8px"
+                        _hover={{ bg: 'gray.100' }}
+                      >
+                        <HStack spacing={2}>
+                          <Text>📊</Text>
+                          <Text>CSV (Excel)</Text>
+                        </HStack>
+                      </MenuItem>
+                      <MenuItem
+                        onClick={downloadPDF}
+                        borderRadius="8px"
+                        _hover={{ bg: 'gray.100' }}
+                      >
+                        <HStack spacing={2}>
+                          <Text>📄</Text>
+                          <Text>PDF (Imprimir)</Text>
+                        </HStack>
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
                 </HStack>
                 {!isLoading && !error && (
                   <Text color="gray.500" fontSize="xs" textAlign="center">
