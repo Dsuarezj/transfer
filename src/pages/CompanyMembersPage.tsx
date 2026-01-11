@@ -27,10 +27,12 @@ import {
 } from '@chakra-ui/react';
 import { companyService } from '../services/company/companyService';
 import { memberService } from '../services/company/memberService';
-import { roleService } from '../services/roles/roleService';
+import { dropboxGateway } from '../gateway/dropboxGateway';
+import { getCompanyFolderPath, getWorkspaceFolderPath } from '../constants/dropbox';
 import { STORAGE_KEYS } from '../constants/storageKeys';
 import { USER_ROLES, UserRole } from '../constants/roles';
 import LoadingSpinner from '../components/LoadingSpinner';
+import type { files } from 'dropbox/types';
 
 interface CompanyMember {
   email: string;
@@ -55,15 +57,39 @@ export default function CompanyMembersPage() {
   const activeCompany = companyService.getActiveCompany();
 
   useEffect(() => {
-    const validateAccess = async () => {
-      if (!activeCompany) {
-        navigate('/', { replace: true });
-        return;
-      }
+    if (!activeCompany) {
+      navigate('/', { replace: true });
+      return;
+    }
 
+    let isMounted = true;
+
+    const initialize = async () => {
       try {
-        await roleService.requireAdmin(activeCompany.name);
-        
+        await dropboxGateway.refreshTokenIfNeeded();
+        const dbx = dropboxGateway.getClient();
+
+        const mainFolderPath = getCompanyFolderPath(activeCompany.name);
+        const workspaceFolderPath = getWorkspaceFolderPath(activeCompany.name);
+
+        const [mainFolderMetadata, workspaceFolderMetadata] = await Promise.all([
+          dbx.filesGetMetadata({ path: mainFolderPath }).catch(() => null),
+          dbx.filesGetMetadata({ path: workspaceFolderPath }).catch(() => null),
+        ]);
+
+        const mainFolderResult = mainFolderMetadata?.result;
+        if (!mainFolderResult || mainFolderResult['.tag'] !== 'folder') {
+          throw new Error('No tienes permisos de administrador');
+        }
+
+        const mainFolderSharedId = (mainFolderResult as files.FolderMetadataReference).shared_folder_id || null;
+
+        let workspaceFolderSharedId: string | null = null;
+        const workspaceFolderResult = workspaceFolderMetadata?.result;
+        if (workspaceFolderResult && workspaceFolderResult['.tag'] === 'folder') {
+          workspaceFolderSharedId = (workspaceFolderResult as files.FolderMetadataReference).shared_folder_id || null;
+        }
+
         if (activeCompany.role !== USER_ROLES.ADMIN) {
           const updatedCompany = { ...activeCompany, role: USER_ROLES.ADMIN };
           const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
@@ -77,22 +103,90 @@ export default function CompanyMembersPage() {
           }
         }
 
-        loadMembers();
-      } catch (error) {
-        navigate('/', { replace: true });
+        if (isMounted) {
+          setIsLoading(true);
+          try {
+            const companyMembers = await memberService.getCompanyMembers({
+              companyId: activeCompany.id,
+              mainFolderSharedId,
+              workspaceFolderSharedId,
+            });
+            if (isMounted) {
+              setMembers(companyMembers);
+            }
+          } catch (error: any) {
+            if (isMounted) {
+              toast({
+                title: 'Error',
+                description: 'No se pudieron cargar los miembros',
+                status: 'error',
+                duration: 3000,
+              });
+            }
+          } finally {
+            if (isMounted) {
+              setIsLoading(false);
+            }
+          }
+        }
+      } catch (error: any) {
+        if (isMounted) {
+          if (error.message === 'No tienes permisos de administrador') {
+            navigate('/', { replace: true });
+          } else {
+            toast({
+              title: 'Error',
+              description: 'No se pudieron cargar los miembros',
+              status: 'error',
+              duration: 3000,
+            });
+          }
+        }
       }
     };
 
-    validateAccess();
-  }, [navigate, activeCompany]);
+    initialize();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate]);
 
   async function loadMembers() {
+    if (!activeCompany) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // TODO: Implementar getCompanyMembers en companyService
-      // const companyMembers = await companyService.getCompanyMembers(activeCompany!.id);
-      // setMembers(companyMembers);
-      setMembers([]);
+      await dropboxGateway.refreshTokenIfNeeded();
+      const dbx = dropboxGateway.getClient();
+
+      const mainFolderPath = getCompanyFolderPath(activeCompany.name);
+      const workspaceFolderPath = getWorkspaceFolderPath(activeCompany.name);
+
+      const [mainFolderMetadata, workspaceFolderMetadata] = await Promise.all([
+        dbx.filesGetMetadata({ path: mainFolderPath }).catch(() => null),
+        dbx.filesGetMetadata({ path: workspaceFolderPath }).catch(() => null),
+      ]);
+
+      const mainFolderResult = mainFolderMetadata?.result;
+      const mainFolderSharedId = mainFolderResult && mainFolderResult['.tag'] === 'folder'
+        ? (mainFolderResult as files.FolderMetadataReference).shared_folder_id || null
+        : null;
+
+      let workspaceFolderSharedId: string | null = null;
+      const workspaceFolderResult = workspaceFolderMetadata?.result;
+      if (workspaceFolderResult && workspaceFolderResult['.tag'] === 'folder') {
+        workspaceFolderSharedId = (workspaceFolderResult as files.FolderMetadataReference).shared_folder_id || null;
+      }
+
+      const companyMembers = await memberService.getCompanyMembers({
+        companyId: activeCompany.id,
+        mainFolderSharedId,
+        workspaceFolderSharedId,
+      });
+      setMembers(companyMembers);
     } catch (error: any) {
       toast({
         title: 'Error',

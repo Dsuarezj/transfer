@@ -44,8 +44,18 @@ async function getUserRole(companyName: string, currentFolderPath?: string): Pro
 }
 
 async function requireAdmin(companyName: string): Promise<void> {
-  const role = await getUserRole(companyName);
-  if (role !== USER_ROLES.ADMIN) {
+  const dbx = await getAuthenticatedClient();
+  const companyPath = getCompanyFolderPath(companyName);
+
+  try {
+    const companyResult = await dbx.filesGetMetadata({ path: companyPath });
+    if (!isFolderMetadata(companyResult.result)) {
+      throw new Error('No tienes permisos de administrador');
+    }
+  } catch (error: any) {
+    if (error.message === 'No tienes permisos de administrador') {
+      throw error;
+    }
     throw new Error('No tienes permisos de administrador');
   }
 }

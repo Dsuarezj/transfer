@@ -163,6 +163,8 @@ describe('roleService', () => {
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
 
       await expect(roleService.requireAdmin(companyName)).resolves.not.toThrow();
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledTimes(1);
+      expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({ path: companyPath });
     });
 
     it('throws error when user is employee', async () => {
@@ -180,6 +182,7 @@ describe('roleService', () => {
                 '.tag': 'folder',
                 name: 'workspace-test-company',
                 path_lower: workspacePath,
+                shared_folder_id: 'shared-workspace-456',
               },
             });
           }

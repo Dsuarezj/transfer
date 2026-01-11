@@ -128,7 +128,113 @@ async function addMember(companyId: string, email: string, role: UserRole): Prom
   return member;
 }
 
+function getUserEmail(user: sharing.UserInfo | sharing.InviteeInfo): string | null {
+  if ('email' in user && user.email) {
+    return user.email;
+  }
+  return null;
+}
+
+function getUserAccountId(user: sharing.UserInfo | sharing.InviteeInfo): string | null {
+  if ('account_id' in user && user.account_id) {
+    return user.account_id;
+  }
+  return null;
+}
+
+export interface GetCompanyMembersParams {
+  companyId: string;
+  mainFolderSharedId: string | null;
+  workspaceFolderSharedId: string | null;
+}
+
+async function getCompanyMembers(params: GetCompanyMembersParams): Promise<CompanyMember[]> {
+  const { companyId, mainFolderSharedId, workspaceFolderSharedId } = params;
+  const dbx = await getAuthenticatedClient();
+
+  const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
+  if (!cachedCompanies) {
+    throw new Error('Empresa no encontrada');
+  }
+
+  const companies: Company[] = JSON.parse(cachedCompanies);
+  const company = companies.find(c => c.id === companyId);
+
+  if (!company) {
+    throw new Error('Empresa no encontrada');
+  }
+
+  const mainFolderMembers: Map<string, { email: string; accountId: string }> = new Map();
+  const workspaceFolderMembers: Map<string, { email: string; accountId: string }> = new Map();
+
+  if (mainFolderSharedId) {
+    try {
+      const mainMembersResponse = await dbx.sharingListFolderMembers({
+        shared_folder_id: mainFolderSharedId,
+      });
+      const mainMembers = mainMembersResponse.result.users || [];
+      mainMembers.forEach((member) => {
+        if (member.user) {
+          const email = getUserEmail(member.user);
+          const accountId = getUserAccountId(member.user);
+          if (email && accountId) {
+            mainFolderMembers.set(accountId, { email, accountId });
+          }
+        }
+      });
+    } catch (error) {
+    }
+  }
+
+  if (workspaceFolderSharedId) {
+    try {
+      const workspaceMembersResponse = await dbx.sharingListFolderMembers({
+        shared_folder_id: workspaceFolderSharedId,
+      });
+      const workspaceMembers = workspaceMembersResponse.result.users || [];
+      workspaceMembers.forEach((member) => {
+        if (member.user) {
+          const email = getUserEmail(member.user);
+          const accountId = getUserAccountId(member.user);
+          if (email && accountId) {
+            workspaceFolderMembers.set(accountId, { email, accountId });
+          }
+        }
+      });
+    } catch (error) {
+    }
+  }
+
+  const allAccountIds = new Set([
+    ...Array.from(mainFolderMembers.keys()),
+    ...Array.from(workspaceFolderMembers.keys()),
+  ]);
+
+  const companyMembers: CompanyMember[] = [];
+
+  allAccountIds.forEach((accountId) => {
+    const isInMainFolder = mainFolderMembers.has(accountId);
+
+    const memberInfo = isInMainFolder
+      ? mainFolderMembers.get(accountId)
+      : workspaceFolderMembers.get(accountId);
+
+    if (memberInfo) {
+      const role: UserRole = isInMainFolder ? USER_ROLES.ADMIN : USER_ROLES.EMPLOYEE;
+      companyMembers.push({
+        email: memberInfo.email,
+        accountId: memberInfo.accountId,
+        role,
+        joinedAt: new Date().toISOString(),
+      });
+    }
+  });
+
+  return companyMembers;
+}
+
 export const memberService = {
   addMember,
+  getCompanyMembers,
 };
 
