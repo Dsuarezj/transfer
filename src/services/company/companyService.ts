@@ -1,9 +1,7 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { getCompanyFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
+import { STORAGE_KEYS } from '../../constants/storageKeys';
 import { Company } from '../../types/company';
-
-const ACTIVE_COMPANY_KEY = 'active_company';
-const COMPANIES_CACHE_KEY = 'companies_cache';
 
 async function getAuthenticatedClient() {
   await dropboxGateway.refreshTokenIfNeeded();
@@ -31,7 +29,7 @@ async function detectCompanies(): Promise<Company[]> {
       }
     }
 
-    localStorage.setItem(COMPANIES_CACHE_KEY, JSON.stringify(companies));
+    localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify(companies));
     return companies;
   } catch (error) {
     return [];
@@ -128,10 +126,10 @@ async function saveCompanyMetadata(dbx: any, folderPath: string, company: Compan
 }
 
 function getActiveCompany(): Company | null {
-  const activeCompanyId = localStorage.getItem(ACTIVE_COMPANY_KEY);
+  const activeCompanyId = localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY);
   if (!activeCompanyId) return null;
 
-  const cachedCompanies = localStorage.getItem(COMPANIES_CACHE_KEY);
+  const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
   if (cachedCompanies) {
     const companies: Company[] = JSON.parse(cachedCompanies);
     return companies.find(c => c.id === activeCompanyId) || null;
@@ -141,7 +139,7 @@ function getActiveCompany(): Company | null {
 }
 
 function setActiveCompany(companyId: string): void {
-  localStorage.setItem(ACTIVE_COMPANY_KEY, companyId);
+  localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, companyId);
 }
 
 async function getCompanyMetadata(folderPath: string): Promise<Company | null> {
@@ -162,8 +160,8 @@ async function getCompanyMetadata(folderPath: string): Promise<Company | null> {
 }
 
 function clearActiveCompany(): void {
-  localStorage.removeItem(ACTIVE_COMPANY_KEY);
-  localStorage.removeItem(COMPANIES_CACHE_KEY);
+  localStorage.removeItem(STORAGE_KEYS.ACTIVE_COMPANY);
+  localStorage.removeItem(STORAGE_KEYS.COMPANIES_CACHE);
 }
 
 export const companyService = {

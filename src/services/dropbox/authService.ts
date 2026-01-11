@@ -1,4 +1,5 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
+import { STORAGE_KEYS } from '../../constants/storageKeys';
 
 class AuthService {
   private generateCodeVerifier(): string {
@@ -24,7 +25,7 @@ class AuthService {
     const codeVerifier = this.generateCodeVerifier();
     const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
-    localStorage.setItem('dropbox_code_verifier', codeVerifier);
+    localStorage.setItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER, codeVerifier);
     
     const params = new URLSearchParams({
       client_id: dropboxGateway.getClientId(),
@@ -47,20 +48,20 @@ class AuthService {
       return !!(tokenData && tokenData.access_token);
     }
 
-    const codeVerifier = localStorage.getItem('dropbox_code_verifier');
+    const codeVerifier = localStorage.getItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
     if (!codeVerifier) {
       return false;
     }
 
     const tokenData = await dropboxGateway.exchangeCodeForToken(code, codeVerifier);
     if (!tokenData) {
-      localStorage.removeItem('dropbox_code_verifier');
+      localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
       return false;
     }
 
     dropboxGateway.saveToken(tokenData);
     await dropboxGateway.ensureAppFolders(tokenData.access_token);
-    localStorage.removeItem('dropbox_code_verifier');
+    localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
 
     window.dispatchEvent(new Event('dropbox-auth-change'));
 

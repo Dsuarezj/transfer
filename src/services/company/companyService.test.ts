@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { companyService } from './companyService';
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { COMPANY_FOLDER_PREFIX } from '../../constants/dropbox';
+import { STORAGE_KEYS } from '../../constants/storageKeys';
 
 vi.mock('../../gateway/dropboxGateway', () => ({
   dropboxGateway: {
@@ -180,8 +181,8 @@ describe('companyService', () => {
         folderId: 'id1',
         createdAt: '2024-01-01T00:00:00Z',
       };
-      localStorage.setItem('companies_cache', JSON.stringify([company]));
-      localStorage.setItem('active_company', 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
 
       const result = companyService.getActiveCompany();
 
@@ -193,7 +194,7 @@ describe('companyService', () => {
     it('saves active company id to localStorage', () => {
       companyService.setActiveCompany('mi-empresa');
 
-      expect(localStorage.getItem('active_company')).toBe('mi-empresa');
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBe('mi-empresa');
     });
   });
 
@@ -234,13 +235,13 @@ describe('companyService', () => {
 
   describe('clearActiveCompany', () => {
     it('removes active company from localStorage', () => {
-      localStorage.setItem('active_company', 'mi-empresa');
-      localStorage.setItem('companies_cache', JSON.stringify([]));
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([]));
 
       companyService.clearActiveCompany();
 
-      expect(localStorage.getItem('active_company')).toBeNull();
-      expect(localStorage.getItem('companies_cache')).toBeNull();
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBeNull();
+      expect(localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE)).toBeNull();
     });
   });
 });

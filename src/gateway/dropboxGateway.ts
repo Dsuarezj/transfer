@@ -1,6 +1,7 @@
 import { Dropbox } from 'dropbox';
 import { TokenData } from '../types/dropbox';
 import { DROPBOX_APP_FOLDER_PATH } from '../constants/dropbox';
+import { STORAGE_KEYS } from '../constants/storageKeys';
 
 const CLIENT_ID = import.meta.env.VITE_DROPBOX_CLIENT_ID || 'YOUR_DROPBOX_CLIENT_ID';
 const REDIRECT_URI = window.location.origin + '/callback';
@@ -14,9 +15,9 @@ class DropboxGateway {
   }
 
   private loadTokenFromStorage() {
-    const accessToken = localStorage.getItem('dropbox_access_token');
-    const refreshToken = localStorage.getItem('dropbox_refresh_token');
-    const expiresAt = localStorage.getItem('dropbox_expires_at');
+    const accessToken = localStorage.getItem(STORAGE_KEYS.DROPBOX_ACCESS_TOKEN);
+    const refreshToken = localStorage.getItem(STORAGE_KEYS.DROPBOX_REFRESH_TOKEN);
+    const expiresAt = localStorage.getItem(STORAGE_KEYS.DROPBOX_EXPIRES_AT);
     
     if (accessToken && expiresAt) {
       this.tokenData = {
@@ -30,10 +31,10 @@ class DropboxGateway {
 
   saveToken(tokenData: TokenData) {
     this.tokenData = tokenData;
-    localStorage.setItem('dropbox_access_token', tokenData.access_token);
-    localStorage.setItem('dropbox_expires_at', tokenData.expires_at.toString());
+    localStorage.setItem(STORAGE_KEYS.DROPBOX_ACCESS_TOKEN, tokenData.access_token);
+    localStorage.setItem(STORAGE_KEYS.DROPBOX_EXPIRES_AT, tokenData.expires_at.toString());
     if (tokenData.refresh_token) {
-      localStorage.setItem('dropbox_refresh_token', tokenData.refresh_token);
+      localStorage.setItem(STORAGE_KEYS.DROPBOX_REFRESH_TOKEN, tokenData.refresh_token);
     }
     this.dbx = new Dropbox({ accessToken: tokenData.access_token });
   }
@@ -41,10 +42,10 @@ class DropboxGateway {
   clearToken() {
     this.tokenData = null;
     this.dbx = null;
-    localStorage.removeItem('dropbox_access_token');
-    localStorage.removeItem('dropbox_refresh_token');
-    localStorage.removeItem('dropbox_expires_at');
-    localStorage.removeItem('dropbox_code_verifier');
+    localStorage.removeItem(STORAGE_KEYS.DROPBOX_ACCESS_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.DROPBOX_REFRESH_TOKEN);
+    localStorage.removeItem(STORAGE_KEYS.DROPBOX_EXPIRES_AT);
+    localStorage.removeItem(STORAGE_KEYS.DROPBOX_CODE_VERIFIER);
   }
 
   getTokenData(): TokenData | null {
