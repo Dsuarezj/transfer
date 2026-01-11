@@ -9,6 +9,7 @@ import SaveTransferPage from './pages/SaveTransferPage';
 import ReviewInvoicesPage from './pages/ReviewInvoicesPage';
 import PrivacyPage from './pages/PrivacyPage';
 import CompanyCreatePage from './pages/CompanyCreatePage';
+import CompanyMembersPage from './pages/CompanyMembersPage';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useDropboxAuth();
@@ -29,6 +30,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/create-company" element={<CompanyCreatePage />} />
+        <Route path="/company/members" element={<CompanyMembersPage />} />
         <Route path="/upload" element={<UploadTransferPage />} />
         <Route path="/upload-file" element={<UploadFilePage />} />
         <Route path="/save" element={<SaveTransferPage />} />
