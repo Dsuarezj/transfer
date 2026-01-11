@@ -63,6 +63,21 @@ export default function HamburgerMenu() {
                 borderRadius={0}
                 onClick={() => {
                   onClose();
+                  navigate('/select-company');
+                }}
+                _hover={{ bg: 'neutral.50' }}
+              >
+                Cambiar empresa
+              </Button>
+              <Divider />
+              <Button
+                variant="ghost"
+                justifyContent="flex-start"
+                h="60px"
+                px={6}
+                borderRadius={0}
+                onClick={() => {
+                  onClose();
                   navigate('/privacy');
                 }}
                 _hover={{ bg: 'neutral.50' }}

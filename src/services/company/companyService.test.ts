@@ -414,5 +414,249 @@ describe('companyService', () => {
       expect(result).toBe(false);
     });
   });
+
+  describe('ensureActiveCompany', () => {
+    it('returns action none with company when active company has valid access', async () => {
+      const company = {
+        id: 'mi-empresa',
+        name: 'Mi Empresa',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+        folderId: 'folder-id-123',
+        createdAt: '2024-01-01T00:00:00Z',
+        role: USER_ROLES.ADMIN,
+      };
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockResolvedValue({
+          result: {
+            '.tag': 'folder',
+            name: `${COMPANY_FOLDER_PREFIX}mi-empresa`,
+            path_lower: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+          },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn();
+
+      const result = await companyService.ensureActiveCompany(mockGetRole);
+
+      expect(result.action).toBe('none');
+      expect(result.company).toEqual(company);
+      expect(mockGetRole).not.toHaveBeenCalled();
+    });
+
+    it('returns action redirect when no companies are detected', async () => {
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_COMPANY);
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: { entries: [] },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn();
+
+      const result = await companyService.ensureActiveCompany(mockGetRole);
+
+      expect(result.action).toBe('redirect');
+      expect(result.company).toBeUndefined();
+    });
+
+    it('sets first company as active when companies exist but no active company', async () => {
+      localStorage.removeItem(STORAGE_KEYS.ACTIVE_COMPANY);
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: {
+            entries: [
+              { name: `${COMPANY_FOLDER_PREFIX}empresa-1`, '.tag': 'folder', path_lower: `/${COMPANY_FOLDER_PREFIX}empresa-1`, id: 'id1' },
+              { name: `${COMPANY_FOLDER_PREFIX}empresa-2`, '.tag': 'folder', path_lower: `/${COMPANY_FOLDER_PREFIX}empresa-2`, id: 'id2' },
+            ],
+          },
+        }),
+        filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
+
+      const result = await companyService.ensureActiveCompany(mockGetRole);
+
+      expect(result.action).toBe('none');
+      expect(result.company).toBeDefined();
+      expect(result.company?.id).toBe('empresa-1');
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBe('empresa-1');
+    });
+
+    it('clears active company if no access and sets first available', async () => {
+      const company = {
+        id: 'mi-empresa',
+        name: 'Mi Empresa',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+        folderId: 'folder-id-123',
+        createdAt: '2024-01-01T00:00:00Z',
+        role: USER_ROLES.ADMIN,
+      };
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockRejectedValue(new Error('No access')), // verifyActiveCompanyAccess fails
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: {
+            entries: [
+              { name: `${COMPANY_FOLDER_PREFIX}otra-empresa`, '.tag': 'folder', path_lower: `/${COMPANY_FOLDER_PREFIX}otra-empresa`, id: 'id2' },
+            ],
+          },
+        }),
+        filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
+
+      const result = await companyService.ensureActiveCompany(mockGetRole);
+
+      expect(result.action).toBe('none');
+      expect(result.company).toBeDefined();
+      expect(result.company?.id).toBe('otra-empresa');
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBe('otra-empresa');
+    });
+
+    it('returns action none when active company has valid access without calling detectCompanies', async () => {
+      const company = {
+        id: 'mi-empresa',
+        name: 'Mi Empresa',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+        folderId: 'folder-id-123',
+        createdAt: '2024-01-01T00:00:00Z',
+        role: USER_ROLES.ADMIN,
+      };
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'mi-empresa');
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company]));
+
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockResolvedValue({
+          result: {
+            '.tag': 'folder',
+            name: `${COMPANY_FOLDER_PREFIX}mi-empresa`,
+            path_lower: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
+          },
+        }),
+        filesListFolder: vi.fn(), // Should not be called
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn();
+
+      const result = await companyService.ensureActiveCompany(mockGetRole);
+
+      expect(result.action).toBe('none');
+      expect(result.company).toEqual(company);
+      expect(mockDbx.filesListFolder).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('switchActiveCompany', () => {
+    it('switches active company when it exists in cache', async () => {
+      const company1 = {
+        id: 'empresa-1',
+        name: 'Empresa 1',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}empresa-1`,
+        folderId: 'id1',
+        createdAt: '2024-01-01T00:00:00Z',
+        role: USER_ROLES.ADMIN,
+      };
+      const company2 = {
+        id: 'empresa-2',
+        name: 'Empresa 2',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}empresa-2`,
+        folderId: 'id2',
+        createdAt: '2024-01-02T00:00:00Z',
+        role: USER_ROLES.EMPLOYEE,
+      };
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company1, company2]));
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, 'empresa-1');
+
+      const result = await companyService.switchActiveCompany('empresa-2');
+
+      expect(result).toEqual(company2);
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBe('empresa-2');
+    });
+
+    it('detects companies if not in cache', async () => {
+      localStorage.removeItem(STORAGE_KEYS.COMPANIES_CACHE);
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: {
+            entries: [
+              { name: `${COMPANY_FOLDER_PREFIX}empresa-1`, '.tag': 'folder', path_lower: `/${COMPANY_FOLDER_PREFIX}empresa-1`, id: 'id1' },
+              { name: `${COMPANY_FOLDER_PREFIX}empresa-2`, '.tag': 'folder', path_lower: `/${COMPANY_FOLDER_PREFIX}empresa-2`, id: 'id2' },
+            ],
+          },
+        }),
+        filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
+
+      const result = await companyService.switchActiveCompany('empresa-2', mockGetRole);
+
+      expect(result.id).toBe('empresa-2');
+      expect(localStorage.getItem(STORAGE_KEYS.ACTIVE_COMPANY)).toBe('empresa-2');
+    });
+
+    it('verifies and caches role of new active company if missing', async () => {
+      const company1 = {
+        id: 'empresa-1',
+        name: 'Empresa 1',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}empresa-1`,
+        folderId: 'id1',
+        createdAt: '2024-01-01T00:00:00Z',
+        role: USER_ROLES.ADMIN,
+      };
+      const company2 = {
+        id: 'empresa-2',
+        name: 'Empresa 2',
+        folderPath: `/${COMPANY_FOLDER_PREFIX}empresa-2`,
+        folderId: 'id2',
+        createdAt: '2024-01-02T00:00:00Z',
+        role: undefined,
+      };
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([company1, company2]));
+
+      const mockDbx = {
+        filesGetMetadata: vi.fn().mockResolvedValue({
+          result: {
+            '.tag': 'folder',
+            name: `${COMPANY_FOLDER_PREFIX}empresa-2`,
+            path_lower: `/${COMPANY_FOLDER_PREFIX}empresa-2`,
+          },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.EMPLOYEE);
+
+      const result = await companyService.switchActiveCompany('empresa-2', mockGetRole);
+
+      expect(result.role).toBe(USER_ROLES.EMPLOYEE);
+      expect(mockGetRole).toHaveBeenCalledWith('Empresa 2', `/${COMPANY_FOLDER_PREFIX}empresa-2`);
+      const cachedCompanies = JSON.parse(localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE) || '[]');
+      const cachedCompany2 = cachedCompanies.find((c: any) => c.id === 'empresa-2');
+      expect(cachedCompany2.role).toBe(USER_ROLES.EMPLOYEE);
+    });
+
+    it('throws error if company does not exist', async () => {
+      localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([]));
+      const mockDbx = {
+        filesListFolder: vi.fn().mockResolvedValue({
+          result: { entries: [] },
+        }),
+      };
+      vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn();
+
+      await expect(
+        companyService.switchActiveCompany('nonexistent', mockGetRole)
+      ).rejects.toThrow('Empresa no encontrada');
+    });
+  });
 });
 

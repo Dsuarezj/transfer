@@ -8,35 +8,15 @@ import HamburgerMenu from '../components/HamburgerMenu';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const activeCompany = companyService.getActiveCompany();
 
   useEffect(() => {
     const checkCompany = async () => {
       try {
-        const activeCompany = companyService.getActiveCompany();
+        const result = await companyService.ensureActiveCompany(roleService.getUserRole);
         
-        if (activeCompany) {
-          const hasAccess = await companyService.verifyActiveCompanyAccess();
-          if (!hasAccess) {
-            companyService.clearActiveCompany();
-            const companies = await companyService.detectCompanies(roleService.getUserRole);
-            
-            if (companies.length === 0) {
-              navigate('/create-company', { replace: true });
-              return;
-            }
-            
-            companyService.setActiveCompany(companies[0].id);
-            return;
-          }
-        } else {
-          const companies = await companyService.detectCompanies(roleService.getUserRole);
-          
-          if (companies.length === 0) {
-            navigate('/create-company', { replace: true });
-            return;
-          }
-          
-          companyService.setActiveCompany(companies[0].id);
+        if (result.action === 'redirect') {
+          navigate('/create-company', { replace: true });
         }
       } catch (error) {
         navigate('/create-company', { replace: true });
@@ -67,8 +47,8 @@ export default function HomePage() {
 
       <Box bg="primary.700" boxShadow="md" py={4} flexShrink={0} position="relative" zIndex={1}>
         <Container maxW="md" display="flex" justifyContent="space-between" alignItems="center">
-          <Heading size="md" color="neutral.50">
-            Transferencias
+          <Heading size="md" color="neutral.50" noOfLines={1} title={activeCompany?.name || 'Transferencias'}>
+            {activeCompany?.name || 'Transferencias'}
           </Heading>
           <HamburgerMenu />
         </Container>

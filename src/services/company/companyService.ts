@@ -241,10 +241,61 @@ async function verifyActiveCompanyAccess(): Promise<boolean> {
     if (metadataResponse.result['.tag'] === 'folder') {
       return true;
     }
+    if (activeCompany.folderPath.includes(`/${WORKSPACE_FOLDER_PREFIX}`)) {
+      const workspaceRootPath = getWorkspaceFolderPath(activeCompany.name);
+      const workspaceMetadataResponse = await dbx.filesGetMetadata({ path: workspaceRootPath });
+      if (workspaceMetadataResponse.result['.tag'] === 'folder') {
+        return true;
+      }
+    }
     return false;
   } catch (error) {
     return false;
   }
+}
+
+async function ensureActiveCompany(getRole?: GetRoleFn): Promise<{ action: 'redirect' | 'none', company?: Company }> {
+  const activeCompany = getActiveCompany();
+
+  if (activeCompany) {
+    const hasAccess = await verifyActiveCompanyAccess();
+    if (hasAccess) {
+      return { action: 'none', company: activeCompany };
+    }
+    clearActiveCompany();
+  }
+
+  const companies = await detectCompanies(getRole);
+
+  if (companies.length === 0) {
+    return { action: 'redirect' };
+  }
+
+  setActiveCompany(companies[0].id);
+  return { action: 'none', company: companies[0] };
+}
+
+async function switchActiveCompany(companyId: string, getRole?: GetRoleFn): Promise<Company> {
+  const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
+  let companies: Company[] = cachedCompanies ? JSON.parse(cachedCompanies) : [];
+
+  let company = companies.find(c => c.id === companyId);
+
+  if (!company) {
+    companies = await detectCompanies(getRole);
+    company = companies.find(c => c.id === companyId);
+    if (!company) {
+      throw new Error('Empresa no encontrada');
+    }
+  }
+
+  if (!company.role && getRole) {
+    company.role = await getRole(company.name, company.folderPath) || undefined;
+    addCompanyToCache(company);
+  }
+
+  setActiveCompany(companyId);
+  return company;
 }
 
 export const companyService = {
@@ -255,5 +306,7 @@ export const companyService = {
   getCompanyMetadata,
   clearActiveCompany,
   verifyActiveCompanyAccess,
+  ensureActiveCompany,
+  switchActiveCompany,
 };
 
