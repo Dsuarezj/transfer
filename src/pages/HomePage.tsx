@@ -3,12 +3,13 @@ import { Box, Container, Heading, SimpleGrid, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { companyService } from '../services/company/companyService';
 import { roleService } from '../services/roles/roleService';
+import { useActiveCompany } from '../hooks/useActiveCompany';
 import ActionCard from '../components/ActionCard';
 import HamburgerMenu from '../components/HamburgerMenu';
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const activeCompany = companyService.getActiveCompany();
+  const activeCompany = useActiveCompany();
 
   useEffect(() => {
     const checkCompany = async () => {

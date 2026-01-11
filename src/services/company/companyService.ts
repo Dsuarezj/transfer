@@ -192,6 +192,7 @@ function getActiveCompany(): Company | null {
 
 function setActiveCompany(companyId: string): void {
   localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, companyId);
+  window.dispatchEvent(new Event('company-change'));
 }
 
 function addCompanyToCache(company: Company): void {

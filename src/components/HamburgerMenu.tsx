@@ -4,6 +4,7 @@ import { useDropboxAuth } from '../hooks/useDropboxAuth';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { companyService } from '../services/company/companyService';
 import { USER_ROLES } from '../constants/roles';
+import InstallButton from './InstallButton';
 
 export default function HamburgerMenu() {
   const navigate = useNavigate();
@@ -47,6 +48,10 @@ export default function HamburgerMenu() {
           </DrawerHeader>
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
+              <Box px={6} py={4}>
+                <InstallButton variant="solid" size="md" fullWidth />
+              </Box>
+              <Divider />
               {isAdmin && (
                 <>
                   <Button

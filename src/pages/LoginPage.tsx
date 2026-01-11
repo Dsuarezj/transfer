@@ -19,17 +19,20 @@ export default function LoginPage() {
     <Box
       minH="100vh"
       w="100%"
-      bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      py={{ base: 4, md: 6 }}
-      px={{ base: 4, sm: 6 }}
       position="relative"
+      overflow="hidden"
     >
-      {/* Fondos decorativos */}
       <Box
-        position="absolute"
+        position="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        bgGradient="linear(135deg, accent.500, primary.500)"
+        zIndex={0}
+      />
+      <Box
+        position="fixed"
         top="-120px"
         left="-80px"
         w="260px"
@@ -37,9 +40,10 @@ export default function LoginPage() {
         bg="whiteAlpha.200"
         rounded="full"
         filter="blur(80px)"
+        zIndex={0}
       />
       <Box
-        position="absolute"
+        position="fixed"
         bottom="-140px"
         right="-100px"
         w="300px"
@@ -47,9 +51,20 @@ export default function LoginPage() {
         bg="blackAlpha.300"
         rounded="full"
         filter="blur(90px)"
+        zIndex={0}
       />
 
-      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
+      <Box
+        position="relative"
+        zIndex={1}
+        minH="100vh"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        py={{ base: 4, md: 6 }}
+        px={{ base: 4, sm: 6 }}
+      >
+        <Container maxW={{ base: 'md', md: 'lg' }}>
         <VStack spacing={{ base: 8, md: 12 }} align="stretch">
           {/* Header */}
           <VStack spacing={{ base: 3, md: 5 }}>
@@ -165,6 +180,7 @@ export default function LoginPage() {
           </VStack>
         </VStack>
       </Container>
+      </Box>
     </Box>
   );
 }

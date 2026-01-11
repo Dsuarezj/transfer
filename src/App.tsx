@@ -11,6 +11,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import CompanyCreatePage from './pages/CompanyCreatePage';
 import CompanyMembersPage from './pages/CompanyMembersPage';
 import CompanySelectPage from './pages/CompanySelectPage';
+import InstallPromptBanner from './components/InstallPromptBanner';
 
 function ProtectedRoute() {
   const { isAuthenticated } = useDropboxAuth();
@@ -24,21 +25,24 @@ function LoginRoute() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/callback" element={<CallbackPage />} />
-      <Route path="/login" element={<LoginRoute />} />
-      <Route path="/privacy" element={<PrivacyPage />} />
-      <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/create-company" element={<CompanyCreatePage />} />
-        <Route path="/select-company" element={<CompanySelectPage />} />
-        <Route path="/company/members" element={<CompanyMembersPage />} />
-        <Route path="/upload" element={<UploadTransferPage />} />
-        <Route path="/upload-file" element={<UploadFilePage />} />
-        <Route path="/save" element={<SaveTransferPage />} />
-        <Route path="/review" element={<ReviewTransfersPage />} />
-      </Route>
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/callback" element={<CallbackPage />} />
+        <Route path="/login" element={<LoginRoute />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/create-company" element={<CompanyCreatePage />} />
+          <Route path="/select-company" element={<CompanySelectPage />} />
+          <Route path="/company/members" element={<CompanyMembersPage />} />
+          <Route path="/upload" element={<UploadTransferPage />} />
+          <Route path="/upload-file" element={<UploadFilePage />} />
+          <Route path="/save" element={<SaveTransferPage />} />
+          <Route path="/review" element={<ReviewTransfersPage />} />
+        </Route>
+      </Routes>
+      <InstallPromptBanner />
+    </>
   );
 }
 

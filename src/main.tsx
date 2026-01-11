@@ -5,13 +5,16 @@ import { BrowserRouter } from 'react-router-dom';
 import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import theme from './theme';
+import { PWAProvider } from './contexts/PWAContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <App />
-        <Analytics />
+        <PWAProvider>
+          <App />
+          <Analytics />
+        </PWAProvider>
       </BrowserRouter>
     </ChakraProvider>
   </React.StrictMode>
