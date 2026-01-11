@@ -176,15 +176,12 @@ export default function CompanyMembersPage() {
       minH="100vh"
       w="100%"
       bgGradient="linear(135deg, accent.500, primary.500)"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
       py={{ base: 4, md: 6 }}
       px={{ base: 4, sm: 6 }}
       position="relative"
     >
       <Box
-        position="absolute"
+        position="fixed"
         top="-120px"
         left="-80px"
         w="260px"
@@ -192,9 +189,10 @@ export default function CompanyMembersPage() {
         bg="whiteAlpha.200"
         rounded="full"
         filter="blur(80px)"
+        pointerEvents="none"
       />
       <Box
-        position="absolute"
+        position="fixed"
         bottom="-140px"
         right="-100px"
         w="300px"
@@ -202,9 +200,10 @@ export default function CompanyMembersPage() {
         bg="blackAlpha.300"
         rounded="full"
         filter="blur(90px)"
+        pointerEvents="none"
       />
 
-      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1}>
+      <Container maxW={{ base: 'md', md: 'lg' }} position="relative" zIndex={1} py={2}>
         <VStack spacing={{ base: 6, md: 8 }} align="stretch">
           <VStack spacing={{ base: 3, md: 5 }}>
             <Heading
