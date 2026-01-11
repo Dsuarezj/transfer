@@ -226,6 +226,22 @@ export default function CompanyMembersPage() {
       return;
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingMember = members.find(
+      (member) => member.email.toLowerCase() === normalizedEmail
+    );
+
+    if (existingMember) {
+      toast({
+        title: 'Usuario ya existe',
+        description: `${existingMember.email} ya está en la lista de miembros. Primero debes eliminarlo para poder asignarle un nuevo rol.`,
+        status: 'warning',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
     setIsInviting(true);
 
     try {
