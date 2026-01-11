@@ -305,10 +305,6 @@ export default function CompanyMembersPage() {
     onRemoveOpen();
   }
 
-  if (isLoading) {
-    return <LoadingSpinner message="Cargando miembros..." fullScreen />;
-  }
-
   if (!activeCompany) {
     return null;
   }
@@ -322,6 +318,9 @@ export default function CompanyMembersPage() {
       flexDirection="column"
       position="relative"
     >
+      {isLoading && (
+        <LoadingSpinner message="Cargando miembros..." overlay />
+      )}
       <Box
         position="absolute"
         top="0"
