@@ -27,12 +27,15 @@ import {
 } from '@chakra-ui/react';
 import { companyService } from '../services/company/companyService';
 import { memberService } from '../services/company/memberService';
+import { roleService } from '../services/roles/roleService';
+import { STORAGE_KEYS } from '../constants/storageKeys';
+import { USER_ROLES, UserRole } from '../constants/roles';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 interface CompanyMember {
   email: string;
   accountId: string;
-  role: 'admin' | 'employee';
+  role: UserRole;
   joinedAt: string;
 }
 
@@ -43,7 +46,7 @@ export default function CompanyMembersPage() {
   const cancelRef = useRef<HTMLButtonElement>(null);
   
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<'admin' | 'employee'>('employee');
+  const [role, setRole] = useState<UserRole>(USER_ROLES.EMPLOYEE);
   const [isInviting, setIsInviting] = useState(false);
   const [members, setMembers] = useState<CompanyMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,12 +55,36 @@ export default function CompanyMembersPage() {
   const activeCompany = companyService.getActiveCompany();
 
   useEffect(() => {
-    if (!activeCompany) {
-      navigate('/', { replace: true });
-      return;
-    }
-    loadMembers();
-  }, [navigate]);
+    const validateAccess = async () => {
+      if (!activeCompany) {
+        navigate('/', { replace: true });
+        return;
+      }
+
+      try {
+        await roleService.requireAdmin(activeCompany.name);
+        
+        if (activeCompany.role !== USER_ROLES.ADMIN) {
+          const updatedCompany = { ...activeCompany, role: USER_ROLES.ADMIN };
+          const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
+          if (cachedCompanies) {
+            const companies = JSON.parse(cachedCompanies);
+            const index = companies.findIndex((c: any) => c.id === activeCompany.id);
+            if (index >= 0) {
+              companies[index] = updatedCompany;
+              localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify(companies));
+            }
+          }
+        }
+
+        loadMembers();
+      } catch (error) {
+        navigate('/', { replace: true });
+      }
+    };
+
+    validateAccess();
+  }, [navigate, activeCompany]);
 
   async function loadMembers() {
     setIsLoading(true);
@@ -111,13 +138,13 @@ export default function CompanyMembersPage() {
       await memberService.addMember(activeCompany.id, email.trim(), role);
       toast({
         title: 'Invitación enviada',
-        description: `Se ha invitado a ${email} como ${role === 'admin' ? 'administrador' : 'empleado'}. El usuario debe aceptar la invitación y añadir la carpeta compartida a su cuenta para poder pertenecer a la organización.`,
+        description: `Se ha invitado a ${email} como ${role === USER_ROLES.ADMIN ? 'administrador' : 'empleado'}. El usuario debe aceptar la invitación y añadir la carpeta compartida a su cuenta para poder pertenecer a la organización.`,
         status: 'success',
         duration: 6000,
         isClosable: true,
       });
       setEmail('');
-      setRole('employee');
+      setRole(USER_ROLES.EMPLOYEE);
       await loadMembers();
     } catch (error: any) {
       const errorMessage = error.message || 'Error al invitar al empleado';
@@ -274,7 +301,7 @@ export default function CompanyMembersPage() {
                     </FormLabel>
                     <Select
                       value={role}
-                      onChange={(e) => setRole(e.target.value as 'admin' | 'employee')}
+                      onChange={(e) => setRole(e.target.value as UserRole)}
                       size="lg"
                       borderRadius="12px"
                       borderColor="gray.300"
@@ -284,8 +311,8 @@ export default function CompanyMembersPage() {
                       }}
                       disabled={isInviting}
                     >
-                      <option value="employee">Empleado</option>
-                      <option value="admin">Administrador</option>
+                      <option value={USER_ROLES.EMPLOYEE}>Empleado</option>
+                      <option value={USER_ROLES.ADMIN}>Administrador</option>
                     </Select>
                     <Text fontSize="xs" color="gray.500" mt={2}>
                       Los administradores pueden gestionar empleados y configurar la empresa
@@ -365,10 +392,10 @@ export default function CompanyMembersPage() {
                           </Text>
                           <HStack>
                             <Badge
-                              colorScheme={member.role === 'admin' ? 'purple' : 'blue'}
+                              colorScheme={member.role === USER_ROLES.ADMIN ? 'purple' : 'blue'}
                               borderRadius="6px"
                             >
-                              {member.role === 'admin' ? 'Administrador' : 'Empleado'}
+                              {member.role === USER_ROLES.ADMIN ? 'Administrador' : 'Empleado'}
                             </Badge>
                             {activeCompany.ownerAccountId === member.accountId && (
                               <Badge colorScheme="orange" borderRadius="6px">

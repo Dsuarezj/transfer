@@ -1,11 +1,15 @@
 import { Box, IconButton, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, useDisclosure, Button, Divider, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useDropboxAuth } from '../hooks/useDropboxAuth';
+import { companyService } from '../services/company/companyService';
+import { USER_ROLES } from '../constants/roles';
 
 export default function HamburgerMenu() {
   const navigate = useNavigate();
   const { logout } = useDropboxAuth();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const activeCompany = companyService.getActiveCompany();
+  const isAdmin = activeCompany?.role === USER_ROLES.ADMIN;
 
   return (
     <>
@@ -32,21 +36,25 @@ export default function HamburgerMenu() {
           <DrawerHeader borderBottomWidth="1px">Menú</DrawerHeader>
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
-              <Button
-                variant="ghost"
-                justifyContent="flex-start"
-                h="60px"
-                px={6}
-                borderRadius={0}
-                onClick={() => {
-                  onClose();
-                  navigate('/company/members');
-                }}
-                _hover={{ bg: 'neutral.50' }}
-              >
-                Añadir empleado
-              </Button>
-              <Divider />
+              {isAdmin && (
+                <>
+                  <Button
+                    variant="ghost"
+                    justifyContent="flex-start"
+                    h="60px"
+                    px={6}
+                    borderRadius={0}
+                    onClick={() => {
+                      onClose();
+                      navigate('/company/members');
+                    }}
+                    _hover={{ bg: 'neutral.50' }}
+                  >
+                    Añadir empleado
+                  </Button>
+                  <Divider />
+                </>
+              )}
               <Button
                 variant="ghost"
                 justifyContent="flex-start"

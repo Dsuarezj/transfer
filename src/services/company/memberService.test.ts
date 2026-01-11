@@ -3,6 +3,7 @@ import { memberService } from './memberService';
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { COMPANY_FOLDER_PREFIX, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
+import { USER_ROLES } from '../../constants/roles';
 
 vi.mock('../../gateway/dropboxGateway', () => ({
   dropboxGateway: {
@@ -54,7 +55,7 @@ describe('memberService', () => {
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
 
-      const result = await memberService.addMember('mi-empresa', 'admin@test.com', 'admin');
+      const result = await memberService.addMember('mi-empresa', 'admin@test.com', USER_ROLES.ADMIN);
 
       expect(mockDbx.sharingShareFolder).toHaveBeenCalledWith({
         path: `/${COMPANY_FOLDER_PREFIX}mi-empresa`,
@@ -72,7 +73,7 @@ describe('memberService', () => {
       });
       expect(result.email).toBe('admin@test.com');
       expect(result.accountId).toBe('dbid:new-admin-123');
-      expect(result.role).toBe('admin');
+      expect(result.role).toBe(USER_ROLES.ADMIN);
     });
 
     it('shares workspace folder when adding employee member', async () => {
@@ -99,7 +100,7 @@ describe('memberService', () => {
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
 
-      const result = await memberService.addMember('mi-empresa', 'employee@test.com', 'employee');
+      const result = await memberService.addMember('mi-empresa', 'employee@test.com', USER_ROLES.EMPLOYEE);
 
       expect(mockDbx.sharingShareFolder).toHaveBeenCalledWith({
         path: `/${COMPANY_FOLDER_PREFIX}mi-empresa/${WORKSPACE_FOLDER_PREFIX}mi-empresa`,
@@ -107,14 +108,14 @@ describe('memberService', () => {
       });
       expect(result.email).toBe('employee@test.com');
       expect(result.accountId).toBe('dbid:new-employee-456');
-      expect(result.role).toBe('employee');
+      expect(result.role).toBe(USER_ROLES.EMPLOYEE);
     });
 
     it('throws error when company does not exist', async () => {
       localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify([]));
 
       await expect(
-        memberService.addMember('nonexistent', 'user@test.com', 'employee')
+            memberService.addMember('nonexistent', 'user@test.com', USER_ROLES.EMPLOYEE)
       ).rejects.toThrow('Empresa no encontrada');
     });
 
@@ -143,7 +144,7 @@ describe('memberService', () => {
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
 
-      const result = await memberService.addMember('mi-empresa', 'user@test.com', 'admin');
+      const result = await memberService.addMember('mi-empresa', 'user@test.com', USER_ROLES.ADMIN);
 
       expect(mockDbx.sharingShareFolder).toHaveBeenCalled();
       expect(mockDbx.filesGetMetadata).toHaveBeenCalledWith({

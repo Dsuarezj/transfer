@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Box, Container, Heading, SimpleGrid, VStack } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { companyService } from '../services/company/companyService';
+import { roleService } from '../services/roles/roleService';
 import ActionCard from '../components/ActionCard';
 import HamburgerMenu from '../components/HamburgerMenu';
 
@@ -14,29 +15,14 @@ export default function HomePage() {
         const activeCompany = companyService.getActiveCompany();
         
         if (!activeCompany) {
-          const companies = await companyService.detectCompanies();
+          const companies = await companyService.detectCompanies(roleService.getUserRole);
           
           if (companies.length === 0) {
             navigate('/create-company', { replace: true });
             return;
           }
           
-          if (companies.length === 1) {
-            companyService.setActiveCompany(companies[0].id);
-          } else {
-            companyService.setActiveCompany(companies[0].id);
-          }
-        } else {
-          const companies = await companyService.detectCompanies();
-          const companyStillExists = companies.find(c => c.id === activeCompany.id);
-          
-          if (!companyStillExists) {
-            if (companies.length === 0) {
-              navigate('/create-company', { replace: true });
-              return;
-            }
-            companyService.setActiveCompany(companies[0].id);
-          }
+          companyService.setActiveCompany(companies[0].id);
         }
       } catch (error) {
         navigate('/create-company', { replace: true });

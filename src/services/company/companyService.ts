@@ -1,14 +1,17 @@
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { getCompanyFolderPath, getWorkspaceFolderPath, sanitizeCompanyName, COMPANY_FOLDER_PREFIX, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
+import { USER_ROLES, UserRole } from '../../constants/roles';
 import { Company } from '../../types/company';
+
+type GetRoleFn = (companyName: string, folderPath?: string) => Promise<UserRole | null>;
 
 async function getAuthenticatedClient() {
   await dropboxGateway.refreshTokenIfNeeded();
   return dropboxGateway.getClient();
 }
 
-async function detectCompanies(): Promise<Company[]> {
+async function detectCompanies(getRole?: GetRoleFn): Promise<Company[]> {
   const dbx = await getAuthenticatedClient();
 
   try {
@@ -25,13 +28,13 @@ async function detectCompanies(): Promise<Company[]> {
 
     for (const folder of companyFolders) {
       if (folder.name.startsWith(COMPANY_FOLDER_PREFIX)) {
-        const company = await processCompanyFolder(folder);
+        const company = await processCompanyFolder(folder, getRole);
         if (company && !processedCompanyIds.has(company.id)) {
           companies.push(company);
           processedCompanyIds.add(company.id);
         }
       } else if (folder.name.startsWith(WORKSPACE_FOLDER_PREFIX)) {
-        const company = await processWorkspaceFolder(folder);
+        const company = await processWorkspaceFolder(folder, getRole);
         if (company && !processedCompanyIds.has(company.id)) {
           companies.push(company);
           processedCompanyIds.add(company.id);
@@ -46,29 +49,38 @@ async function detectCompanies(): Promise<Company[]> {
   }
 }
 
-async function processCompanyFolder(folder: any): Promise<Company | null> {
+async function processCompanyFolder(folder: any, getRole?: GetRoleFn): Promise<Company | null> {
+  const companyName = folder.name.replace(COMPANY_FOLDER_PREFIX, '');
+  const folderPath = folder.path_lower || `/${folder.name}`;
+
   try {
-    const metadata = await getCompanyMetadata(folder.path_lower || `/${folder.name}`);
+    const metadata = await getCompanyMetadata(folderPath);
     if (metadata) {
+      if (!metadata.role && getRole) {
+        const role = await getRole(metadata.name, metadata.folderPath);
+        metadata.role = role || undefined;
+      }
       return metadata;
     }
   } catch (error) {
   }
 
-  const companyName = folder.name.replace(COMPANY_FOLDER_PREFIX, '');
+  const role = getRole ? await getRole(companyName, folderPath) : null;
   return {
     id: sanitizeCompanyName(companyName),
     name: companyName,
-    folderPath: folder.path_lower || `/${folder.name}`,
+    folderPath: folderPath,
     folderId: folder.id || '',
     createdAt: new Date().toISOString(),
+    role: role || undefined,
   };
 }
 
-async function processWorkspaceFolder(folder: any): Promise<Company | null> {
+async function processWorkspaceFolder(folder: any, getRole?: GetRoleFn): Promise<Company | null> {
   const companyName = folder.name.replace(WORKSPACE_FOLDER_PREFIX, '');
   const companyId = sanitizeCompanyName(companyName);
   const workspacePath = folder.path_lower || `/${folder.name}`;
+  const role = getRole ? await getRole(companyName, workspacePath) : null;
 
   return {
     id: companyId,
@@ -76,6 +88,7 @@ async function processWorkspaceFolder(folder: any): Promise<Company | null> {
     folderPath: workspacePath,
     folderId: folder.id || '',
     createdAt: new Date().toISOString(),
+    role: role || undefined,
   };
 }
 
@@ -103,6 +116,7 @@ async function createCompany(name: string): Promise<Company> {
       createdAt: new Date().toISOString(),
       ownerEmail: ownerInfo.email || undefined,
       ownerAccountId: ownerInfo.accountId || undefined,
+      role: USER_ROLES.ADMIN,
     };
 
     await saveCompanyMetadata(dbx, folderPath, company);

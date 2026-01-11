@@ -3,6 +3,7 @@ import type { files, sharing } from 'dropbox/types';
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { getWorkspaceFolderPath } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
+import { USER_ROLES, UserRole } from '../../constants/roles';
 import { Company, CompanyMember } from '../../types/company';
 
 async function getAuthenticatedClient(): Promise<Dropbox> {
@@ -76,7 +77,7 @@ async function shareFolder(dbx: Dropbox, folderPath: string, email: string): Pro
   }
 }
 
-async function addMember(companyId: string, email: string, role: 'admin' | 'employee'): Promise<CompanyMember> {
+async function addMember(companyId: string, email: string, role: UserRole): Promise<CompanyMember> {
   const dbx = await getAuthenticatedClient();
 
   const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
@@ -91,7 +92,7 @@ async function addMember(companyId: string, email: string, role: 'admin' | 'empl
     throw new Error('Empresa no encontrada');
   }
 
-  const folderPath = role === 'admin'
+  const folderPath = role === USER_ROLES.ADMIN
     ? company.folderPath
     : getWorkspaceFolderPath(company.name);
 

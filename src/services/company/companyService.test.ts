@@ -3,6 +3,7 @@ import { companyService } from './companyService';
 import { dropboxGateway } from '../../gateway/dropboxGateway';
 import { COMPANY_FOLDER_PREFIX, WORKSPACE_FOLDER_PREFIX } from '../../constants/dropbox';
 import { STORAGE_KEYS } from '../../constants/storageKeys';
+import { USER_ROLES } from '../../constants/roles';
 
 vi.mock('../../gateway/dropboxGateway', () => ({
   dropboxGateway: {
@@ -25,10 +26,12 @@ describe('companyService', () => {
         }),
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn();
 
-      const result = await companyService.detectCompanies();
+      const result = await companyService.detectCompanies(mockGetRole);
 
       expect(result).toEqual([]);
+      expect(mockGetRole).not.toHaveBeenCalled();
     });
 
     it('detects folders starting with company folder prefix (admin)', async () => {
@@ -45,16 +48,20 @@ describe('companyService', () => {
         filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
 
-      const result = await companyService.detectCompanies();
+      const result = await companyService.detectCompanies(mockGetRole);
 
       expect(result).toHaveLength(2);
       expect(result[0].name).toBe('mi-empresa');
       expect(result[0].folderPath).toBe(`/${COMPANY_FOLDER_PREFIX}mi-empresa`);
       expect(result[0].folderId).toBe('id1');
+      expect(result[0].role).toBe(USER_ROLES.ADMIN);
       expect(result[1].name).toBe('otra-empresa');
       expect(result[1].folderPath).toBe(`/${COMPANY_FOLDER_PREFIX}otra-empresa`);
       expect(result[1].folderId).toBe('id3');
+      expect(result[1].role).toBe(USER_ROLES.ADMIN);
+      expect(mockGetRole).toHaveBeenCalledTimes(2);
     });
 
     it('reads metadata from .empresa.json when available', async () => {
@@ -79,12 +86,15 @@ describe('companyService', () => {
         }),
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
 
-      const result = await companyService.detectCompanies();
+      const result = await companyService.detectCompanies(mockGetRole);
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('Mi Empresa');
       expect(result[0].id).toBe('mi-empresa');
+      expect(result[0].role).toBe(USER_ROLES.ADMIN);
+      expect(mockGetRole).toHaveBeenCalledTimes(1);
     });
 
     it('detects workspace folders and uses workspace path directly (employee)', async () => {
@@ -100,14 +110,17 @@ describe('companyService', () => {
         }),
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.EMPLOYEE);
 
-      const result = await companyService.detectCompanies();
+      const result = await companyService.detectCompanies(mockGetRole);
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('test');
       expect(result[0].id).toBe('test');
       expect(result[0].folderPath).toBe(workspacePath);
       expect(result[0].folderId).toBe('id-workspace');
+      expect(result[0].role).toBe(USER_ROLES.EMPLOYEE);
+      expect(mockGetRole).toHaveBeenCalledTimes(1);
     });
 
     it('detects both company and workspace folders without duplicates (admin has both)', async () => {
@@ -124,14 +137,17 @@ describe('companyService', () => {
         filesDownload: vi.fn().mockRejectedValue({ status: 409 }),
       };
       vi.mocked(dropboxGateway.getClient).mockReturnValue(mockDbx as any);
+      const mockGetRole = vi.fn().mockResolvedValue(USER_ROLES.ADMIN);
 
-      const result = await companyService.detectCompanies();
+      const result = await companyService.detectCompanies(mockGetRole);
 
       expect(result).toHaveLength(1);
       expect(result[0].name).toBe('test');
       expect(result[0].id).toBe('test');
       expect(result[0].folderPath).toBe(companyPath);
       expect(result[0].folderId).toBe('id-company');
+      expect(result[0].role).toBe(USER_ROLES.ADMIN);
+      expect(mockGetRole).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -173,6 +189,7 @@ describe('companyService', () => {
       });
       expect(result.name).toBe('Mi Empresa');
       expect(result.id).toBe('mi-empresa');
+      expect(result.role).toBe(USER_ROLES.ADMIN);
     });
 
     it('saves company metadata to .empresa.json', async () => {
