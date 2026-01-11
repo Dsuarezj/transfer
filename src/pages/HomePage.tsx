@@ -48,12 +48,11 @@ export default function HomePage() {
 
   return (
     <Box
-      h="100%"
+      minH="100vh"
       w="100%"
       bgGradient="linear(135deg, accent.500, primary.500)"
       display="flex"
       flexDirection="column"
-      overflow="hidden"
       position="relative"
     >
       <Box
@@ -75,7 +74,7 @@ export default function HomePage() {
         </Container>
       </Box>
 
-      <Box flex="1" overflow="auto" position="relative" zIndex={1} display="flex" alignItems="center">
+      <Box flex="1" position="relative" zIndex={1} display="flex" alignItems="center">
         <Container maxW="md" w="full" py={{ base: 4, md: 8 }}>
           <VStack
             spacing={{ base: 6, md: 8 }}

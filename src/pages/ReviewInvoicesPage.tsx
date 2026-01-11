@@ -107,7 +107,7 @@ export default function ReviewInvoicesPage() {
   };
 
   return (
-    <Box h="100%" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" overflow="hidden" position="relative">
+    <Box minH="100vh" w="100%" bgGradient="linear(135deg, accent.500, primary.500)" display="flex" flexDirection="column" position="relative">
       <Box
         position="absolute"
         top="0"
@@ -136,7 +136,7 @@ export default function ReviewInvoicesPage() {
         </Container>
       </Box>
 
-      <Box flex="1" overflow="auto" position="relative" zIndex={1}>
+      <Box flex="1" position="relative" zIndex={1}>
         <Container maxW="md" py={6}>
           <VStack spacing={4} align="stretch">
             <InputGroup flex={1}>

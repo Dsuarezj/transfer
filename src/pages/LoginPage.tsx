@@ -26,7 +26,6 @@ export default function LoginPage() {
       py={{ base: 4, md: 6 }}
       px={{ base: 4, sm: 6 }}
       position="relative"
-      overflow="hidden"
     >
       {/* Fondos decorativos */}
       <Box
