@@ -82,6 +82,7 @@ async function createCompany(name: string): Promise<Company> {
     };
 
     await saveCompanyMetadata(dbx, folderPath, company);
+    addCompanyToCache(company);
     setActiveCompany(company.id);
 
     return company;
@@ -153,6 +154,18 @@ function getActiveCompany(): Company | null {
 
 function setActiveCompany(companyId: string): void {
   localStorage.setItem(STORAGE_KEYS.ACTIVE_COMPANY, companyId);
+}
+
+function addCompanyToCache(company: Company): void {
+  const cachedCompanies = localStorage.getItem(STORAGE_KEYS.COMPANIES_CACHE);
+  const companies: Company[] = cachedCompanies ? JSON.parse(cachedCompanies) : [];
+  const existingIndex = companies.findIndex(c => c.id === company.id);
+  if (existingIndex >= 0) {
+    companies[existingIndex] = company;
+  } else {
+    companies.push(company);
+  }
+  localStorage.setItem(STORAGE_KEYS.COMPANIES_CACHE, JSON.stringify(companies));
 }
 
 async function getCompanyMetadata(folderPath: string): Promise<Company | null> {

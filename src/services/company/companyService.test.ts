@@ -139,7 +139,7 @@ describe('companyService', () => {
       const expectedFolderPath = `/${COMPANY_FOLDER_PREFIX}mi-empresa`;
       expect(mockDbx.filesUpload).toHaveBeenCalledWith({
         path: `${expectedFolderPath}/.empresa.json`,
-        contents: expect.stringContaining('"name":"Mi Empresa"'),
+        contents: expect.stringContaining('"name": "Mi Empresa"'),
         mode: { '.tag': 'overwrite' },
       });
     });

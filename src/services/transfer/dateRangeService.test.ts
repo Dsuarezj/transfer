@@ -82,8 +82,8 @@ describe('dateRangeService', () => {
     });
 
     it('returns start date + 3 months when within today', () => {
-      const result = dateRangeService.getMaxEndDateString('2025-12-15');
-      expect(result).toBe('2026-03-15');
+      const result = dateRangeService.getMaxEndDateString('2025-10-14');
+      expect(result).toBe('2026-01-14');
     });
 
     it('returns today when start date + 3 months exceeds today', () => {
@@ -122,9 +122,9 @@ describe('dateRangeService', () => {
     });
 
     it('returns adjusted end date when end exceeds 3 months from start', () => {
-      const result = dateRangeService.adjustDateRangeOnStartChange('2025-12-15', '2026-04-15');
+      const result = dateRangeService.adjustDateRangeOnStartChange('2025-10-01', '2026-01-10');
       expect(result.needsAdjustment).toBe(true);
-      expect(result.adjustedDate).toBe('2026-03-15');
+      expect(result.adjustedDate).toBe('2026-01-01');
     });
 
     it('returns no adjustment when start date is empty', () => {
