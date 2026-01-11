@@ -221,6 +221,7 @@ describe('reportService', () => {
     });
 
     it('removes correct line from CSV', async () => {
+      vi.useRealTimers();
       const existingCsv = 'Fecha,Hora,Numero_Factura,Numero_Transferencia,Ruta_Imagen\n' +
         '2026-01-10,10:30:00,FAC-001,TRF-001,/capturas/2026-01/image1.jpg\n' +
         '2026-01-11,14:20:00,FAC-002,TRF-002,/capturas/2026-01/image2.jpg\n';
@@ -242,6 +243,7 @@ describe('reportService', () => {
       expect(lines[0]).toContain('Fecha,Hora,Numero_Factura');
       expect(lines[1]).toContain('2026-01-11,14:20:00,FAC-002');
       expect(content).not.toContain('2026-01-10,10:30:00,FAC-001');
+      vi.useFakeTimers();
     });
 
     it('throws error when transfer not found', async () => {
@@ -267,7 +269,7 @@ describe('reportService', () => {
           time: '10:30:00',
           imageUrl: '/capturas/2026-01/image1.jpg',
         })
-      ).rejects.toThrow('File not found');
+      ).rejects.toThrow('Transfer not found');
     });
 
     it('handles empty lines in CSV', async () => {

@@ -96,18 +96,17 @@ describe('useTransferDelete', () => {
     vi.mocked(idService.removeWithIds).mockRejectedValue(new Error('ID not found'));
     vi.mocked(imageService.delete).mockResolvedValue(undefined);
 
-    await expect(
-      deleteTransfer({
-        date: '2026-01-10',
-        time: '10:30:00',
-        imageUrl: 'https://www.dropbox.com/home/path/image.jpg',
-        transferNumber: 'TRF-001',
-        loadedIds: mockIds,
-      })
-    ).rejects.toThrow('ID not found');
+    await deleteTransfer({
+      date: '2026-01-10',
+      time: '10:30:00',
+      imageUrl: 'https://www.dropbox.com/home/path/image.jpg',
+      transferNumber: 'TRF-001',
+      loadedIds: mockIds,
+    });
 
     expect(reportService.remove).toHaveBeenCalled();
     expect(imageService.delete).toHaveBeenCalled();
+    expect(idService.removeWithIds).toHaveBeenCalled();
   });
 });
 
