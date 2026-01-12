@@ -55,22 +55,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
+        manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
-              return 'react-vendor';
-            }
-            if (id.includes('@chakra-ui') || id.includes('@emotion') || id.includes('framer-motion')) {
-              return 'chakra-vendor';
-            }
             if (id.includes('dropbox')) {
               return 'dropbox-vendor';
             }
-            if (id.includes('date-fns') || id.includes('react-zoom-pan-pinch')) {
+            if (id.includes('date-fns')) {
               return 'utils-vendor';
-            }
-            if (id.includes('@vercel/analytics')) {
-              return 'analytics-vendor';
             }
             return 'vendor';
           }
@@ -80,11 +71,19 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash].[ext]'
       }
     },
-    chunkSizeWarningLimit: 1000
+    chunkSizeWarningLimit: 1000,
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true
+    }
   },
   resolve: {
     alias: {
       '@': '/src'
     }
+  },
+  preview: {
+    port: 4173,
+    strictPort: false
   }
 });
