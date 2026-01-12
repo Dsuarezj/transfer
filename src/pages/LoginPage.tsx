@@ -83,6 +83,8 @@ export default function LoginPage() {
                 maxW={{ base: '120px', md: '150px' }}
                 h="auto"
                 objectFit="contain"
+                loading="eager"
+                decoding="async"
               />
             </Box>
 
