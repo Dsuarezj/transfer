@@ -8,7 +8,13 @@ export function useActiveCompany() {
 
   useEffect(() => {
     const updateActiveCompany = () => {
-      setActiveCompany(companyService.getActiveCompany());
+      const newCompany = companyService.getActiveCompany();
+      setActiveCompany(prevCompany => {
+        if (prevCompany?.id === newCompany?.id) {
+          return prevCompany;
+        }
+        return newCompany;
+      });
     };
 
     const handleStorageChange = (e: StorageEvent) => {
@@ -17,22 +23,15 @@ export function useActiveCompany() {
       }
     };
 
-    const handleCompanyChange = () => {
-      updateActiveCompany();
-    };
-
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('company-change', handleCompanyChange);
+    window.addEventListener('company-change', updateActiveCompany);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('company-change', handleCompanyChange);
+      window.removeEventListener('company-change', updateActiveCompany);
     };
   }, []);
 
   return activeCompany;
 }
-
-
-
 

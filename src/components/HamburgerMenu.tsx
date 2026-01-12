@@ -2,7 +2,7 @@ import { Box, IconButton, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, Drawe
 import { useNavigate } from 'react-router-dom';
 import { useDropboxAuth } from '../hooks/useDropboxAuth';
 import { useCurrentUser } from '../hooks/useCurrentUser';
-import { companyService } from '../services/company/companyService';
+import { useActiveCompany } from '../hooks/useActiveCompany';
 import { USER_ROLES } from '../constants/roles';
 import { usePWA } from '../hooks/usePWA';
 import { useCallback } from 'react';
@@ -11,9 +11,9 @@ export default function HamburgerMenu() {
   const navigate = useNavigate();
   const { logout } = useDropboxAuth();
   const { email } = useCurrentUser();
+  const activeCompany = useActiveCompany();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { canInstall, canShowAppleInstructions, showInstallPrompt } = usePWA();
-  const activeCompany = companyService.getActiveCompany();
   const isAdmin = activeCompany?.role === USER_ROLES.ADMIN;
 
   const handleInstallAppClick = useCallback(() => {

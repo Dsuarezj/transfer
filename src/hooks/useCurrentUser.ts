@@ -7,28 +7,26 @@ export function useCurrentUser() {
   });
 
   useEffect(() => {
-    const handleStorageChange = () => {
+    const updateEmail = () => {
       const storedEmail = localStorage.getItem(STORAGE_KEYS.DROPBOX_USER_EMAIL);
-      setEmail(storedEmail);
+      setEmail(prevEmail => prevEmail !== storedEmail ? storedEmail : prevEmail);
     };
 
-    const handleAuthChange = () => {
-      const storedEmail = localStorage.getItem(STORAGE_KEYS.DROPBOX_USER_EMAIL);
-      setEmail(storedEmail);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.DROPBOX_USER_EMAIL) {
+        updateEmail();
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('dropbox-auth-change', handleAuthChange);
+    window.addEventListener('dropbox-auth-change', updateEmail);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('dropbox-auth-change', handleAuthChange);
+      window.removeEventListener('dropbox-auth-change', updateEmail);
     };
   }, []);
 
   return { email };
 }
-
-
-
 
