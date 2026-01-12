@@ -6,15 +6,20 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+export enum PWAInstallState {
+  INSTALLED = 'INSTALLED',
+  AVAILABLE = 'AVAILABLE',
+  DISMISSED = 'DISMISSED',
+}
+
 interface PWAContextType {
-  isInstalled: boolean;
+  installState: PWAInstallState;
   canInstall: boolean;
   isOnline: boolean;
   isServiceWorkerRegistered: boolean;
-  install: () => Promise<void>;
-  deferredPrompt: BeforeInstallPromptEvent | null;
+  install: () => Promise<boolean>;
   isIOS: boolean;
-  isInstallDismissed: boolean;
+  dismissInstall: () => void;
 }
 
 const PWAContext = createContext<PWAContextType | undefined>(undefined);
@@ -24,13 +29,20 @@ interface PWAProviderProps {
 }
 
 export function PWAProvider({ children }: PWAProviderProps) {
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [installState, setInstallState] = useState<PWAInstallState>(PWAInstallState.AVAILABLE);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isServiceWorkerRegistered, setIsServiceWorkerRegistered] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isIOS, setIsIOS] = useState(false);
   const [hasInstallCapability, setHasInstallCapability] = useState(false);
-  const [isInstallDismissed, setIsInstallDismissed] = useState(false);
+
+  const markAsInstalled = () => {
+    setInstallState(PWAInstallState.INSTALLED);
+    setHasInstallCapability(false);
+    setDeferredPrompt(null);
+    localStorage.setItem(STORAGE_KEYS.PWA_INSTALLED, 'true');
+    localStorage.removeItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED);
+  };
 
   useEffect(() => {
     const userAgent = window.navigator.userAgent.toLowerCase();
@@ -43,15 +55,19 @@ export function PWAProvider({ children }: PWAProviderProps) {
     const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
     const hasServiceWorker = 'serviceWorker' in navigator;
 
-    const installed = isStandalone || isIOSStandalone;
-    setIsInstalled(installed);
+    const installedFromDisplayMode = isStandalone || isIOSStandalone;
+    const installedFromStorage = localStorage.getItem(STORAGE_KEYS.PWA_INSTALLED) === 'true';
+    const installed = installedFromDisplayMode || installedFromStorage;
 
     if (installed) {
+      if (!installedFromStorage && installedFromDisplayMode) {
+        localStorage.setItem(STORAGE_KEYS.PWA_INSTALLED, 'true');
+      }
+      setInstallState(PWAInstallState.INSTALLED);
       localStorage.removeItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED);
-      setIsInstallDismissed(false);
     } else {
       const dismissed = localStorage.getItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED) === 'true';
-      setIsInstallDismissed(dismissed);
+      setInstallState(dismissed ? PWAInstallState.DISMISSED : PWAInstallState.AVAILABLE);
     }
 
     setIsIOS(isIOSDevice && !isIOSStandalone);
@@ -64,11 +80,7 @@ export function PWAProvider({ children }: PWAProviderProps) {
     };
 
     const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setHasInstallCapability(false);
-      setDeferredPrompt(null);
-      localStorage.removeItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED);
-      setIsInstallDismissed(false);
+      markAsInstalled();
     };
 
     const handleOnline = () => setIsOnline(true);
@@ -97,31 +109,35 @@ export function PWAProvider({ children }: PWAProviderProps) {
     };
   }, []);
 
-  const install = async () => {
+  const dismissInstall = () => {
+    setInstallState(PWAInstallState.DISMISSED);
+    localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
+  };
+
+  const install = async (): Promise<boolean> => {
     if (deferredPrompt) {
       await deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
       if (choiceResult.outcome === 'accepted') {
-        setDeferredPrompt(null);
-        localStorage.removeItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED);
-        setIsInstallDismissed(false);
+        markAsInstalled();
+        return false;
       } else if (choiceResult.outcome === 'dismissed') {
         setDeferredPrompt(null);
-        localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-        setIsInstallDismissed(true);
+        dismissInstall();
+        return false;
       }
     }
+    return true;
   };
 
   const value: PWAContextType = {
-    isInstalled,
-    canInstall: hasInstallCapability && !isInstalled,
+    installState,
+    canInstall: hasInstallCapability && installState !== PWAInstallState.INSTALLED,
     isOnline,
     isServiceWorkerRegistered,
     install,
-    deferredPrompt,
     isIOS,
-    isInstallDismissed,
+    dismissInstall,
   };
 
   return <PWAContext.Provider value={value}>{children}</PWAContext.Provider>;

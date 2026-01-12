@@ -1,22 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, IconButton, HStack, VStack, Text, useDisclosure } from '@chakra-ui/react';
 import { usePWA } from '../hooks/usePWA';
+import { PWAInstallState } from '../contexts/PWAContext';
 import InstallInstructionsModal from './InstallInstructionsModal';
-import { STORAGE_KEYS } from '../constants/storageKeys';
 
 export default function InstallPromptBanner() {
-  const { isInstalled, canInstall, isIOS, install, deferredPrompt } = usePWA();
+  const { installState, canInstall, isIOS, install, dismissInstall } = usePWA();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    if (isInstalled || !canInstall) {
-      setShowBanner(false);
-      return;
-    }
-
-    const bannerDismissed = localStorage.getItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED) === 'true';
-    if (bannerDismissed) {
+    if (installState !== PWAInstallState.AVAILABLE || !canInstall) {
       setShowBanner(false);
       return;
     }
@@ -26,7 +20,7 @@ export default function InstallPromptBanner() {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [isInstalled, canInstall]);
+  }, [installState, canInstall]);
 
   if (!showBanner) {
     return null;
@@ -34,20 +28,22 @@ export default function InstallPromptBanner() {
 
   const handleInstall = async () => {
     setShowBanner(false);
-    localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
-    
+
     if (isIOS) {
+      dismissInstall();
       onOpen();
-    } else if (deferredPrompt) {
-      await install();
     } else {
-      onOpen();
+      const shouldShowModal = await install();
+      if (shouldShowModal) {
+        dismissInstall();
+        onOpen();
+      }
     }
   };
 
   const handleDismiss = () => {
     setShowBanner(false);
-    localStorage.setItem(STORAGE_KEYS.PWA_INSTALL_DISMISSED, 'true');
+    dismissInstall();
   };
 
   return (

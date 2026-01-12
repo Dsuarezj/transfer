@@ -1,5 +1,6 @@
 import { Button, useDisclosure } from '@chakra-ui/react';
 import { usePWA } from '../hooks/usePWA';
+import { PWAInstallState } from '../contexts/PWAContext';
 import InstallInstructionsModal from './InstallInstructionsModal';
 
 interface InstallButtonProps {
@@ -9,24 +10,21 @@ interface InstallButtonProps {
 }
 
 export default function InstallButton({ variant = 'solid', size = 'md', fullWidth = false }: InstallButtonProps) {
-  const { isInstalled, canInstall, isIOS, install, deferredPrompt } = usePWA();
+  const { installState, canInstall, isIOS, install } = usePWA();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  if (isInstalled) {
-    return null;
-  }
-
-  if (!canInstall) {
+  if (installState === PWAInstallState.INSTALLED || !canInstall) {
     return null;
   }
 
   const handleClick = async () => {
     if (isIOS) {
       onOpen();
-    } else if (deferredPrompt) {
-      await install();
     } else {
-      onOpen();
+      const shouldShowModal = await install();
+      if (shouldShowModal) {
+        onOpen();
+      }
     }
   };
 

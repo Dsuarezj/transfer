@@ -8,5 +8,6 @@ export const STORAGE_KEYS = {
   COMPANIES_CACHE: 'companies_cache',
   REVIEW_DATE_RANGE: 'review_date_range',
   PWA_INSTALL_DISMISSED: 'pwa_install_dismissed',
+  PWA_INSTALLED: 'pwa_installed',
 } as const;
 
