@@ -4,15 +4,24 @@ import { useDropboxAuth } from '../hooks/useDropboxAuth';
 import { useCurrentUser } from '../hooks/useCurrentUser';
 import { companyService } from '../services/company/companyService';
 import { USER_ROLES } from '../constants/roles';
-import InstallButton from './InstallButton';
+import { usePWA } from '../hooks/usePWA';
+import { useCallback } from 'react';
 
 export default function HamburgerMenu() {
   const navigate = useNavigate();
   const { logout } = useDropboxAuth();
   const { email } = useCurrentUser();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { canInstall, canShowAppleInstructions, showInstallPrompt } = usePWA();
   const activeCompany = companyService.getActiveCompany();
   const isAdmin = activeCompany?.role === USER_ROLES.ADMIN;
+
+  const handleInstallAppClick = useCallback(() => {
+    onClose();
+    setTimeout(() => {
+      showInstallPrompt();
+    }, 150);
+  }, [onClose, showInstallPrompt]);
 
   return (
     <>
@@ -48,10 +57,22 @@ export default function HamburgerMenu() {
           </DrawerHeader>
           <DrawerBody p={0}>
             <VStack spacing={0} align="stretch">
-              <Box px={6} py={4}>
-                <InstallButton variant="solid" size="md" fullWidth />
-              </Box>
-              <Divider />
+              {(canInstall || canShowAppleInstructions) && (
+                <>
+                  <Box px={6} py={4}>
+                    <Button
+                      variant="solid"
+                      size="md"
+                      w="full"
+                      leftIcon={<span>📱</span>}
+                      onClick={handleInstallAppClick}
+                    >
+                      Instalar aplicación
+                    </Button>
+                  </Box>
+                  <Divider />
+                </>
+              )}
               {isAdmin && (
                 <>
                   <Button
