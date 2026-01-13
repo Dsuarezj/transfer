@@ -8,6 +8,7 @@ import {
   Image,
 } from '@chakra-ui/react';
 import { authService } from '../services/dropbox/authService';
+import { APP_VERSION } from '../constants/version';
 
 export default function LoginPage() {
   const login = async () => {
@@ -78,7 +79,7 @@ export default function LoginPage() {
               justifyContent="center"
             >
               <Image
-                src="/login.png"
+                src={`/login.png?v=${APP_VERSION}`}
                 alt="Transferido Ya"
                 maxW={{ base: '120px', md: '150px' }}
                 h="auto"
