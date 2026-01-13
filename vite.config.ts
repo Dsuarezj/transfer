@@ -57,6 +57,20 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
+            urlPattern: /^https:\/\/esm\.sh\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'esm-cdn-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
             urlPattern: /^https:\/\/content\.dropboxapi\.com\/.*/i,
             handler: 'NetworkFirst',
             options: {
@@ -112,14 +126,21 @@ export default defineConfig({
   ],
   build: {
     rollupOptions: {
+      external: [
+        'react',
+        'react-dom',
+        'react/jsx-runtime',
+        '@chakra-ui/react',
+        '@emotion/react',
+        '@emotion/styled',
+        'framer-motion',
+        'date-fns'
+      ],
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (id.includes('dropbox')) {
               return 'dropbox-vendor';
-            }
-            if (id.includes('date-fns')) {
-              return 'utils-vendor';
             }
             return 'vendor';
           }
