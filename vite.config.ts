@@ -26,7 +26,10 @@ export default defineConfig({
     versionPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['favicon.png', 'icon.png'],
+      strategies: 'generateSW',
+      filename: 'sw.js',
       manifest: {
         name: 'TransferidoYa',
         short_name: 'TransferidoYa',
