@@ -11,6 +11,7 @@ const UploadFilePage = lazy(() => import('./pages/UploadFilePage'));
 const SaveTransferPage = lazy(() => import('./pages/SaveTransferPage'));
 const ReviewTransfersPage = lazy(() => import('./pages/ReviewTransfersPage'));
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 const CompanyCreatePage = lazy(() => import('./pages/CompanyCreatePage'));
 const CompanyMembersPage = lazy(() => import('./pages/CompanyMembersPage'));
 const CompanySelectPage = lazy(() => import('./pages/CompanySelectPage'));
@@ -32,6 +33,7 @@ function App() {
         <Route path="/callback" element={<CallbackPage />} />
         <Route path="/login" element={<LoginRoute />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/create-company" element={<CompanyCreatePage />} />

@@ -128,6 +128,21 @@ export default function HamburgerMenu() {
                 h="60px"
                 px={6}
                 borderRadius={0}
+                onClick={() => {
+                  onClose();
+                  navigate('/contact');
+                }}
+                _hover={{ bg: 'neutral.50' }}
+              >
+                Contacto
+              </Button>
+              <Divider />
+              <Button
+                variant="ghost"
+                justifyContent="flex-start"
+                h="60px"
+                px={6}
+                borderRadius={0}
                 colorScheme="red"
                 onClick={() => {
                   onClose();

@@ -456,14 +456,14 @@ export default function PrivacyPage() {
           <List spacing={2} color="gray.700" ml={6}>
             <ListItem>
               <Text>
-                {t.contact.email} <Link href="mailto:contact@transferidoya.com" color="blue.500">contact@transferidoya.com</Link>
+                {t.contact.email} <Link href="mailto:help@transferidoya.com" color="blue.500">help@transferidoya.com</Link>
               </Text>
             </ListItem>
             <ListItem>
               <Text>
                 {t.contact.website}{' '}
-                <Link href="https://www.transferidoya.com/contact" rel="external nofollow noopener" target="_blank" color="blue.500" isExternal>
-                  https://www.transferidoya.com/contact
+                <Link href="/contact" color="blue.500">
+                  /contact
                 </Link>
               </Text>
             </ListItem>

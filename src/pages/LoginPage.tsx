@@ -6,11 +6,15 @@ import {
   Text,
   VStack,
   Image,
+  Link,
 } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/dropbox/authService';
 import { APP_VERSION } from '../constants/version';
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+
   const login = async () => {
     const url = await authService.getAuthUrl();
     window.location.href = url;
@@ -180,6 +184,19 @@ export default function LoginPage() {
             <Text color="whiteAlpha.700" fontSize={{ base: 'xs', md: 'sm' }}>
               En segundos, para todo tu equipo
             </Text>
+            <Link
+              href="/contact"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/contact');
+              }}
+              color="whiteAlpha.800"
+              fontSize={{ base: 'xs', md: 'sm' }}
+              mt={2}
+              _hover={{ color: 'white', textDecoration: 'underline' }}
+            >
+              Contacto
+            </Link>
           </VStack>
         </VStack>
       </Container>
